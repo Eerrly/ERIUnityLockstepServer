@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
 	"net"
 
@@ -22,20 +23,30 @@ func main() {
 
 // 处理连接
 func handleConnection(conn net.Conn) {
-	fmt.Println("client connect ...")
-	buffer := make([]byte, 256)
+	fmt.Println(conn.RemoteAddr().String(), " client connect ...")
+	buffer := make([]byte, 4096)
+	lastRaw := int32(0)
 	for {
 		n, err := conn.Read(buffer)
 		if err != nil {
 			fmt.Println("conn.Read ", err)
 			return
 		}
-		fmt.Println(conn.RemoteAddr().String(), "receive data length : ", n)
 
-		_, err = conn.Write(buffer[:n])
-		if err != nil {
-			fmt.Println("conn.Write ", err)
-			return
+		playerId := int32(binary.LittleEndian.Uint32(buffer[:4]))
+		frame := int32(binary.LittleEndian.Uint32(buffer[4:8]))
+		raw := int32(binary.LittleEndian.Uint32(buffer[8:12]))
+		fmt.Println("RecvData len:", n, "playerId : ", playerId, "frame:", frame, "raw:", raw)
+
+		if lastRaw != raw {
+			lastRaw = raw
+
+			fmt.Println("SendData len:", n)
+			_, err = conn.Write(buffer[:n])
+			if err != nil {
+				fmt.Println("conn.Write ", err)
+				return
+			}
 		}
 	}
 }
