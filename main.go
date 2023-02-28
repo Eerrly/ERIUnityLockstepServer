@@ -21,6 +21,13 @@ func main() {
 	}
 }
 
+type Client struct {
+	lastRaw int32
+	conn    net.Conn
+}
+
+var clinet_arr [2]Client
+
 // 处理连接
 func handleConnection(conn net.Conn) {
 	fmt.Println(conn.RemoteAddr().String(), " client connect ...")
@@ -36,16 +43,25 @@ func handleConnection(conn net.Conn) {
 		playerId := int32(binary.LittleEndian.Uint32(buffer[:4]))
 		frame := int32(binary.LittleEndian.Uint32(buffer[4:8]))
 		raw := int32(binary.LittleEndian.Uint32(buffer[8:12]))
-		fmt.Println("RecvData len:", n, "playerId : ", playerId, "frame:", frame, "raw:", raw)
 
-		if lastRaw != raw {
-			lastRaw = raw
+		if (clinet_arr[playerId] == Client{}) {
+			clinet_arr[playerId] = Client{lastRaw: lastRaw, conn: conn}
+		} else {
+			clinet_arr[playerId].lastRaw = lastRaw
+		}
 
-			fmt.Println("SendData len:", n)
-			_, err = conn.Write(buffer[:n])
-			if err != nil {
-				fmt.Println("conn.Write ", err)
-				return
+		if clinet_arr[playerId].lastRaw != raw {
+			clinet_arr[playerId].lastRaw = raw
+			fmt.Println("RecvData len:", n, "playerId : ", playerId, "frame:", frame, "raw:", raw)
+		}
+
+		for _, client := range clinet_arr {
+			if client.conn != nil {
+				_, err = client.conn.Write(buffer[:n])
+				if err != nil {
+					fmt.Println("conn.Write ", err)
+					return
+				}
 			}
 		}
 	}
