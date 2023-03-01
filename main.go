@@ -31,7 +31,7 @@ var clinet_arr [2]Client
 // 处理连接
 func handleConnection(conn net.Conn) {
 	fmt.Println(conn.RemoteAddr().String(), " client connect ...")
-	buffer := make([]byte, 4096)
+	buffer := make([]byte, 6)
 	lastRaw := int32(0)
 	for {
 		n, err := conn.Read(buffer)
@@ -40,9 +40,9 @@ func handleConnection(conn net.Conn) {
 			return
 		}
 
-		playerId := int32(binary.LittleEndian.Uint32(buffer[:4]))
-		frame := int32(binary.LittleEndian.Uint32(buffer[4:8]))
-		raw := int32(binary.LittleEndian.Uint32(buffer[8:12]))
+		frame := int32(binary.LittleEndian.Uint32(buffer[:4]))
+		raw := int32(binary.LittleEndian.Uint16(buffer[4:6]))
+		playerId := raw & 1
 
 		if (clinet_arr[playerId] == Client{}) {
 			clinet_arr[playerId] = Client{lastRaw: lastRaw, conn: conn}
