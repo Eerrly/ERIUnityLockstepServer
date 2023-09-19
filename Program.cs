@@ -4,6 +4,7 @@ using System.Threading;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.IO;
 
 namespace ERIUnitySimpleServer
 {
@@ -93,8 +94,16 @@ namespace ERIUnitySimpleServer
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Log(LogLevel.Exception, $"【异常】 {ex.Message}");
             }
+        }
+
+        private static void InitLogger()
+        {
+            Logger.Initialize(Path.Combine(Directory.GetCurrentDirectory(), "server.log"), new Logger());
+            Logger.SetLoggerLevel((int)LogLevel.Info | (int)LogLevel.Error | (int)LogLevel.Exception);
+            Logger.log = Console.WriteLine;
+            Logger.logError = Console.WriteLine;
         }
 
         private static void SendThreadMethod()
@@ -163,7 +172,7 @@ namespace ERIUnitySimpleServer
                 }
                 catch(Exception ex)
                 {
-                    Console.WriteLine($"【异常】 {ex.Message}");
+                    Logger.Log(LogLevel.Exception, $"【异常】 {ex.Message}");
                 }
                 Thread.Sleep(1);
             }
@@ -182,7 +191,7 @@ namespace ERIUnitySimpleServer
                     {
                         case ACT.HEARTBEAT:
                             {
-                                Console.WriteLine($"【客户端】帧:{currentFrame} IP地址:{clientEndPoint} 类型:{Enum.GetName(typeof(ACT), packet.head.act)}");
+                                Logger.Log(LogLevel.Info, $"【客户端】帧:{currentFrame} IP地址:{clientEndPoint} 类型:{Enum.GetName(typeof(ACT), packet.head.act)}");
                                 frameList[clientEndPoint] = currentFrame;
                                 BufferPool.ReleaseBuff(packet.data);
                             }
@@ -191,7 +200,7 @@ namespace ERIUnitySimpleServer
                             {
                                 var message = new byte[(int)packet.head.size];
                                 Array.Copy(packet.data, Head.EndPointLength, message, 0, packet.head.size);
-                                Console.WriteLine($"【客户端】帧:{currentFrame} IP地址:{clientEndPoint} 类型:{Enum.GetName(typeof(ACT), packet.head.act)} 序号:{packet.head.index} 数据:{Encoding.UTF8.GetString(message)}");
+                                Logger.Log(LogLevel.Info, $"【客户端】帧:{currentFrame} IP地址:{clientEndPoint} 类型:{Enum.GetName(typeof(ACT), packet.head.act)} 序号:{packet.head.index} 数据:{Encoding.UTF8.GetString(message)}");
                                 lock (sendQueue)
                                 {
                                     sendQueue.Enqueue(packet);
@@ -210,7 +219,7 @@ namespace ERIUnitySimpleServer
             }
             foreach (var item in disconnectEndPoints)
             {
-                Console.WriteLine($"【客户端】 IP地址: {item} 断开连接！");
+                Logger.Log(LogLevel.Info, $"【客户端】 IP地址: {item} 断开连接！");
                 clientPointList.Remove(item);
                 frameList.Remove(item);
             }
@@ -223,6 +232,8 @@ namespace ERIUnitySimpleServer
         static void Main(string[] args)
         {
             BufferPool.InitPool(32, 1024, 5, 5);
+
+            InitLogger();
             InitUDP();
 
             Thread sendThread = new Thread(SendThreadMethod);
