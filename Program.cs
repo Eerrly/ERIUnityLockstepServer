@@ -9,9 +9,6 @@ using System.Linq;
 
 namespace ERIUnitySimpleServer
 {
-    /// <summary>
-    /// 行为
-    /// </summary>
     enum ACT
     {
         HEARTBEAT,
@@ -19,9 +16,6 @@ namespace ERIUnitySimpleServer
         JOIN,
     }
 
-    /// <summary>
-    /// 头数据
-    /// </summary>
     public struct Head
     {
         public int size;
@@ -32,9 +26,6 @@ namespace ERIUnitySimpleServer
         public static readonly int EndPointLength = 16;
     }
 
-    /// <summary>
-    /// 包体
-    /// </summary>
     public struct Packet
     {
         public Head head;
@@ -43,7 +34,7 @@ namespace ERIUnitySimpleServer
 
     class Program
     {
-        private static readonly int MaxClientCount = 2;
+        private static readonly int MaxClientCount = 1;
 
         private static Socket socket;
         private static Queue<Packet> sendQueue = new Queue<Packet>();
@@ -57,11 +48,10 @@ namespace ERIUnitySimpleServer
         private static List<EndPoint> disconnectEndPoints = new List<EndPoint>();
         private static int currentFrame = 0;
 
-        /// <summary>
-        /// EndPoint转字节数组
-        /// </summary>
-        /// <param name="clientEndPoint"></param>
-        /// <returns></returns>
+        private static readonly byte posMask = 0x01;
+        private static readonly byte yawMask = 0xF0;
+        private static readonly byte keyMask = 0x0E;
+
         private static byte[] EndPointToBytes(EndPoint clientEndPoint)
         {
             SocketAddress socketAddress = clientEndPoint.Serialize();
@@ -73,11 +63,6 @@ namespace ERIUnitySimpleServer
             return buffer;
         }
 
-        /// <summary>
-        /// 字节数组转EndPoint
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
         private static EndPoint BytesToEndPoint(byte[] data)
         {
             EndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0);
@@ -89,9 +74,6 @@ namespace ERIUnitySimpleServer
             return clientEndPoint.Create(socketAddress);
         }
 
-        /// <summary>
-        /// 初始化UDP
-        /// </summary>
         private static void InitUDP()
         {
             endPoint = new IPEndPoint(IPAddress.Parse(NetConstant.IP), NetConstant.Port);
@@ -112,9 +94,6 @@ namespace ERIUnitySimpleServer
             }
         }
 
-        /// <summary>
-        /// 初始化日志打印
-        /// </summary>
         private static void InitLogger()
         {
             Logger.Initialize(Path.Combine(Directory.GetCurrentDirectory(), "server.log"), new Logger());
@@ -123,9 +102,6 @@ namespace ERIUnitySimpleServer
             Logger.logError = Console.WriteLine;
         }
 
-        /// <summary>
-        /// 发送数据线程
-        /// </summary>
         private static void SendThreadMethod()
         {
             while (socket != null)
@@ -157,9 +133,6 @@ namespace ERIUnitySimpleServer
             }
         }
 
-        /// <summary>
-        /// 接受数据线程
-        /// </summary>
         private static void RecvThreadMethod()
         {
             while (socket != null)
@@ -201,9 +174,6 @@ namespace ERIUnitySimpleServer
             }
         }
 
-        /// <summary>
-        /// 固定帧轮询
-        /// </summary>
         private static void Update(object state)
         {
             currentFrame += 1;
@@ -216,44 +186,23 @@ namespace ERIUnitySimpleServer
                     switch ((ACT)packet.head.act)
                     {
                         case ACT.HEARTBEAT:
-                            {
-                                Logger.Log(LogLevel.Info, $"【客户端】帧:{currentFrame} IP地址:{clientEndPoint} 类型:{Enum.GetName(typeof(ACT), packet.head.act)}");
-                                frameDic[clientEndPoint] = currentFrame;
-                                BufferPool.ReleaseBuff(packet.data);
-                            }
+                            HeartBeatMethod(packet, clientEndPoint);
                             break;
                         case ACT.DATA:
-                            {
-                                var realData = BufferPool.GetBuffer(packet.head.size);
-                                Array.Copy(packet.data, Head.EndPointLength, realData, 0, packet.head.size);
-                                Logger.Log(LogLevel.Info, $"【客户端】帧:{currentFrame} IP地址:{clientEndPoint} 类型:{Enum.GetName(typeof(ACT), packet.head.act)} 序号:{packet.head.index} 数据:{Encoding.UTF8.GetString(realData)}");
-                                BufferPool.ReleaseBuff(realData);
-                                lock (sendQueue)
-                                {
-                                    sendQueue.Enqueue(packet);
-                                }
-                            }
+                            DataMethod(packet, clientEndPoint);
                             break;
                         case ACT.JOIN:
-                            {
-                                var realData = BufferPool.GetBuffer(packet.head.size);
-                                Array.Copy(packet.data, Head.EndPointLength, realData, 0, packet.head.size);
-                                var joinState = BitConverter.ToInt32(realData, 0);
-                                Logger.Log(LogLevel.Info, $"【客户端】帧:{currentFrame} IP地址:{clientEndPoint} 类型:{Enum.GetName(typeof(ACT), packet.head.act)} 准备状态:{joinState}");
-                                joinDic[clientEndPoint] = joinState;
-                                
-                                if(joinDic.Count >= MaxClientCount && !joinDic.Any((v) => { return v.Value == 0; }))
-                                {
-                                    lock (sendQueue)
-                                    {
-                                        sendQueue.Enqueue(packet);
-                                    }
-                                }
-                            }
+                            JoinMethod(packet, clientEndPoint);
                             break;
                     }
                 }
             }
+
+            LateUpdate();
+        }
+
+        private static void LateUpdate()
+        {
             foreach (var item in frameDic)
             {
                 if (currentFrame - item.Value >= NetConstant.RecvTimeOutFrame)
@@ -271,6 +220,50 @@ namespace ERIUnitySimpleServer
             if (disconnectEndPoints.Count > 0)
             {
                 disconnectEndPoints.Clear();
+            }
+        }
+
+        private static void HeartBeatMethod(Packet packet, EndPoint clientEndPoint)
+        {
+            Logger.Log(LogLevel.Info, $"\n【客户端】 IP地址: {clientEndPoint} 服务器帧:{currentFrame} 行为:{Enum.GetName(typeof(ACT), packet.head.act)}");
+
+            frameDic[clientEndPoint] = currentFrame;
+            BufferPool.ReleaseBuff(packet.data);
+        }
+
+        private static void DataMethod(Packet packet, EndPoint clientEndPoint)
+        {
+            var realData = BufferPool.GetBuffer(packet.head.size);
+            Array.Copy(packet.data, Head.EndPointLength, realData, 0, packet.head.size);
+            using (MemoryStream stream = new MemoryStream(realData))
+            {
+                BinaryReader reader = new BinaryReader(stream);
+                var raw = reader.ReadByte();
+                var frame = reader.ReadInt32();
+
+                Logger.Log(LogLevel.Info, $"\n【客户端】 IP地址: {clientEndPoint} 服务器帧:{currentFrame} 行为:{Enum.GetName(typeof(ACT), packet.head.act)} 序号:{packet.head.index} 数据:\n" +
+                    $"[Frame:{frame} Pos:{(byte)(posMask & raw)} Yaw:{(byte)((yawMask & raw) >> 4)} Key:{(byte)((keyMask & raw) >> 1)}]");
+            }
+            BufferPool.ReleaseBuff(realData);
+            lock (sendQueue)
+            {
+                sendQueue.Enqueue(packet);
+            }
+        }
+
+        private static void JoinMethod(Packet packet, EndPoint clientEndPoint)
+        {
+            var realData = BufferPool.GetBuffer(packet.head.size);
+            Array.Copy(packet.data, Head.EndPointLength, realData, 0, packet.head.size);
+            Logger.Log(LogLevel.Info, $"\n【客户端】 IP地址: {clientEndPoint} 服务器帧:{currentFrame} 行为:{Enum.GetName(typeof(ACT), packet.head.act)}");
+            joinDic[clientEndPoint] = 1;
+
+            if (joinDic.Count >= MaxClientCount && !joinDic.Any((v) => { return v.Value == 0; }))
+            {
+                lock (sendQueue)
+                {
+                    sendQueue.Enqueue(packet);
+                }
             }
         }
 
