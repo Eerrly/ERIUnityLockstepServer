@@ -47,6 +47,7 @@ namespace ERIUnitySimpleServer
         private static Dictionary<EndPoint, int> joinDic = new Dictionary<EndPoint, int>(MaxClientCount);
         private static List<EndPoint> disconnectEndPoints = new List<EndPoint>();
         private static int currentFrame = 0;
+        private static bool battleStarted = false;
 
         private static readonly byte posMask = 0x01;
         private static readonly byte yawMask = 0xF0;
@@ -176,7 +177,6 @@ namespace ERIUnitySimpleServer
 
         private static void Update(object state)
         {
-            currentFrame += 1;
             lock (recvQueue)
             {
                 while (recvQueue.Count > 0)
@@ -199,6 +199,11 @@ namespace ERIUnitySimpleServer
             }
 
             LateUpdate();
+
+            if (battleStarted)
+            {
+                currentFrame += 1;
+            }
         }
 
         private static void LateUpdate()
@@ -260,6 +265,7 @@ namespace ERIUnitySimpleServer
 
             if (joinDic.Count >= MaxClientCount && !joinDic.Any((v) => { return v.Value == 0; }))
             {
+                battleStarted = true;
                 lock (sendQueue)
                 {
                     sendQueue.Enqueue(packet);
