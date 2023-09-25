@@ -1,7 +1,9 @@
 ﻿namespace ERIUnitySimpleServer
 {
-    class NetConstant
+    public class NetConstant
     {
+        public static readonly int MaxClientCount = 1;
+
         public static readonly string IP = "127.0.0.1";
 
         public static readonly int Port = 10086;

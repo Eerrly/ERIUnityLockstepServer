@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace ERIUnitySimpleServer
 {
-    class BufferPool
+    public class BufferPool
     {
         private static object _lockObject = new object();
         private static Dictionary<int, Queue<byte[]>> _buffersCache = new Dictionary<int, Queue<byte[]>>(10);
@@ -118,7 +117,7 @@ namespace ERIUnitySimpleServer
                             }
                             else
                             {
-                                Console.WriteLine($"[异常] Buff Released! + {new System.Diagnostics.StackTrace().ToString()}");
+                                Logger.Log(LogLevel.Error, $"[异常] Buff Released! + {new System.Diagnostics.StackTrace().ToString()}");
                             }
                         }
                     }
@@ -153,7 +152,7 @@ namespace ERIUnitySimpleServer
                 }
             }
 
-            Console.WriteLine($"[打印] buffer pool : {sb.ToString()}");
+            Logger.Log(LogLevel.Info, $"[打印] buffer pool : {sb.ToString()}");
         }
     }
 }
