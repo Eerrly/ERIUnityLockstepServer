@@ -21,6 +21,7 @@ namespace ERIUnitySimpleServer
         private static Dictionary<EndPoint, int> frameDic = new Dictionary<EndPoint, int>(NetConstant.MaxClientCount);
         private static Dictionary<EndPoint, int> joinDic = new Dictionary<EndPoint, int>(NetConstant.MaxClientCount);
         private static List<EndPoint> disconnectEndPoints = new List<EndPoint>();
+        private static Dictionary<int, EndPoint> clientEndPointDic = new Dictionary<int, EndPoint>();
         private static int currentFrame = 0;
         private static bool battleStarted = false;
 
@@ -91,9 +92,9 @@ namespace ERIUnitySimpleServer
                     if (sendQueue.Count > 0)
                     {
                         var packetInfo = sendQueue.Dequeue();
-                        foreach (var pointInfo in clientPointDic)
+                        foreach (var kv in clientEndPointDic)
                         {
-                            sendBuffer = BufferPool.GetBuffer(Head.Length + Head.EndPointLength + packetInfo.head.size);
+                            sendBuffer = BufferPool.GetBuffer(Head.Length + packetInfo.head.size);
                             unsafe
                             {
                                 fixed (byte* dest = sendBuffer)
@@ -101,8 +102,8 @@ namespace ERIUnitySimpleServer
                                     *(Head*)dest = packetInfo.head;
                                 }
                             }
-                            Array.Copy(packetInfo.data, 0, sendBuffer, Head.Length, Head.EndPointLength + packetInfo.head.size);
-                            socket.SendTo(sendBuffer, 0, sendBuffer.Length, SocketFlags.None, pointInfo.Key);
+                            Array.Copy(packetInfo.data, 0, sendBuffer, Head.Length, packetInfo.head.size);
+                            socket.SendTo(sendBuffer, 0, sendBuffer.Length, SocketFlags.None, kv.Value);
 
                             BufferPool.ReleaseBuff(sendBuffer);
                         }
@@ -124,12 +125,6 @@ namespace ERIUnitySimpleServer
                     {
                         lock (recvQueue)
                         {
-                            byte[] clientEndPointBytes;
-                            if (!clientPointDic.TryGetValue(clientPoint, out clientEndPointBytes))
-                            {
-                                clientEndPointBytes = EndPointToBytes(clientPoint);
-                                clientPointDic.Add(clientPoint, clientEndPointBytes);
-                            }
                             Packet packet = new Packet();
                             unsafe
                             {
@@ -138,9 +133,15 @@ namespace ERIUnitySimpleServer
                                     packet.head = *(Head*)dest;
                                 }
                             }
-                            packet.data = BufferPool.GetBuffer(Head.EndPointLength + packet.head.size);
-                            Array.Copy(clientEndPointBytes, 0, packet.data, 0, Head.EndPointLength);
-                            Array.Copy(recvBuffer, Head.Length, packet.data, Head.EndPointLength, packet.head.size);
+                            packet.data = BufferPool.GetBuffer(packet.head.size);
+                            Array.Copy(recvBuffer, Head.Length, packet.data, 0, packet.head.size);
+
+                            using (MemoryStream stream = new MemoryStream(packet.data))
+                            {
+                                BinaryReader reader = new BinaryReader(stream);
+                                var pos = reader.ReadByte() & posMask;
+                                if (!clientEndPointDic.ContainsKey(pos)) clientEndPointDic[pos] = clientPoint;
+                            }
 
                             recvQueue.Enqueue(packet);
                         }
@@ -161,18 +162,21 @@ namespace ERIUnitySimpleServer
                 while (recvQueue.Count > 0)
                 {
                     Packet packet = recvQueue.Dequeue();
-                    var clientEndPoint = BytesToEndPoint(packet.data);
-                    switch ((ACT)packet.head.act)
+                    using(MemoryStream stream = new MemoryStream(packet.data))
                     {
-                        case ACT.HEARTBEAT:
-                            HeartBeatMethod(packet, clientEndPoint);
-                            break;
-                        case ACT.DATA:
-                            DataMethod(packet, clientEndPoint);
-                            break;
-                        case ACT.JOIN:
-                            JoinMethod(packet, clientEndPoint);
-                            break;
+                        BinaryReader reader = new BinaryReader(stream);
+                        switch ((ACT)packet.head.act)
+                        {
+                            case ACT.HEARTBEAT:
+                                HeartBeatMethod(packet, clientEndPointDic[reader.ReadByte() & posMask]);
+                                break;
+                            case ACT.DATA:
+                                DataMethod(packet, clientEndPointDic[reader.ReadByte() & posMask]);
+                                break;
+                            case ACT.JOIN:
+                                JoinMethod(packet, clientEndPointDic[reader.ReadByte() & posMask]);
+                                break;
+                        }
                     }
                 }
             }
