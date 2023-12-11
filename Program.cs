@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Net;
+using System.Threading;
 
 namespace ERIUnitySimpleServer
 {
@@ -16,8 +18,8 @@ namespace ERIUnitySimpleServer
         static void Main(string[] args)
         {
             InitLogger();
-            BufferPool.InitPool(32, 1024, 5, 5);
-            NetController.Initialize();
+            
         }
+        
     }
 }
