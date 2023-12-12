@@ -4,7 +4,7 @@
     {
         public static readonly string IP = "127.0.0.1";
 
-        public static readonly uint Port = 10086;
+        public static readonly int Port = 10086;
 
         public static readonly int FrameInterval = 33;
 
