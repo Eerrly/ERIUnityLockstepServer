@@ -75,6 +75,7 @@ public class GameManager : AManager<GameManager>
     /// </summary>
     void InitLogger()
     {
+        // Log Path -> bin\Debug\netX.X\server.log
         Logger.Initialize(Path.Combine(Directory.GetCurrentDirectory(), "server.log"), new Logger());
         Logger.SetLoggerLevel((int)LogLevel.Info | (int)LogLevel.Warning | (int)LogLevel.Error | (int)LogLevel.Exception);
         Logger.log = Console.WriteLine;
