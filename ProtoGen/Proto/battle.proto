@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+option csharp_namespace = "pb";
+
+// 消息ID
+enum BattleMsgID {
+    BATTLE_MSG_Begin       = 0;
+
+    BATTLE_MSG_Connect     = 1;        //连接
+    BATTLE_MSG_Heartbeat   = 2;        //心跳
+    
+    BATTLE_MSG_Ready       = 10;       //准备
+    BATTLE_MSG_Start       = 20;       //开始
+    BATTLE_MSG_Frame       = 30;       //帧数据
+    BATTLE_MSG_Result      = 40;       //结果
+    
+    BATTLE_MSG_Exception   = 100;      //意外错误
+}
+
+// 错误码
+enum BattleErrorCode {
+    BATTLE_ERR_Battle_Ok   = 0;    //OK
+    BATTLE_ERR_Timeout     = 1;    //超时
+    BATTLE_ERR_Data        = 2;    //数据异常
+}
+
+// 连接
+message C2S_ConnectMsg {
+    uint32 playerId    = 1;    //玩家ID
+    uint32 seasonId    = 2;    //战斗ID
+}
+
+// 连接
+message S2C_ConnectMsg {
+    BattleErrorCode errorCode = 1;   //错误码
+}
+
+// 心跳
+message C2S_HeartbeatMsg {
+    uint32 playerId     = 1;    //玩家ID
+    uint64 timeStamp    = 2;    //事件戳
+}
+
+// 心跳
+message S2C_HeartbeatMsg {
+    BattleErrorCode errorCode   = 1;   //错误码
+    uint64 timeStamp            = 2;    //事件戳
+}
+
+// 准备
+message C2S_ReadyMsg {
+    uint32 roomId       = 1;    //房间ID
+    uint32 playerId     = 2;    //玩家ID
+}
+
+// 准备
+message S2C_ReadyMsg {
+    BattleErrorCode errorCode     = 1;    //错误码
+    repeated uint32 status  = 2;    //所有玩家准备情况
+}
+
+// 开始
+message S2C_StartMsg {
+    BattleErrorCode errorCode     = 1;    //错误码
+    uint32 frame            = 2;    //帧号
+    uint64 timeStamp        = 3;    //时间戳
+}
+
+// 帧消息
+message C2S_FrameMsg {
+    uint32 frame            = 1;    //帧号
+    int32 data              = 2;    //帧数据
+}
+
+// 帧消息
+message S2C_FrameMsg {
+    BattleErrorCode errorCode       = 1;    //错误码
+    uint32 frame                    = 2;    //帧号
+    repeated int32 datum            = 3;    //所有玩家的某一帧帧数据
+}
+
+message S2C_ResultMsg {
+    BattleErrorCode errorCode    = 1;    //错误码
+    uint32 winner           = 2;    //胜利者
+}
+
+// 异常
+message S2C_BattleExceptionMsg {
+    BattleErrorCode errorCode    = 1;    //错误码
+    string reason          = 2;    //原因
+}
+

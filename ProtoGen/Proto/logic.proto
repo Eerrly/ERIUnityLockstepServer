@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+option csharp_namespace = "pb";
+
+// 消息ID
+enum LogicMsgID {
+    LOGIC_MSG_Begin       = 0;
+
+    LOGIC_MSG_Login       = 1;       //登录
+    LOGIC_MSG_CreateRoom  = 2;       //创建房间
+    LOGIC_MSG_JoinRoom    = 3;       //进入房间
+    
+    LOGIC_MSG_Exception   = 100;      //意外错误
+}
+
+// 错误码
+enum LogicErrorCode {
+    LOGIC_ERR_Ok           = 0;       //OK
+    LOGIC_ERR_Account      = 1;       //账户信息错误
+    LOGIC_ERR_NoRoom       = 2;       //没有这个房间
+    LOGIC_ERR_HasRoom      = 3;       //已存在这个房间
+}
+
+// 登录
+message C2S_LoginMsg {
+    bytes account   = 1;    //账号
+    bytes password  = 2;    //密码
+}
+
+// 登录
+message S2C_LoginMsg {
+    LogicErrorCode errorCode    = 1;    //错误码
+    uint32 playerId             = 2;    //玩家ID
+}
+
+// 创建房间
+message C2S_CreateRoomMsg {
+    uint32 playerId    = 1;    //玩家ID
+}
+
+// 创建房间
+message S2C_CreateRoomMsg {
+    LogicErrorCode errorCode     = 1;    //错误码
+    uint32 roomId           = 2;    //房间ID
+}
+
+// 加入房间
+message C2S_JoinRoomMsg {
+    uint32 roomId       = 1;    //房间ID
+    uint32 playerId     = 2;    //玩家ID
+}
+
+// 加入房间
+message S2C_JoinRoomMsg {
+    LogicErrorCode errorCode    = 1;    //错误码
+    uint32 roomId               = 2;    //房间ID
+    repeated uint32 all         = 3;    //所有玩家
+}
+
+// 异常
+message S2C_LogicExceptionMsg {
+    LogicErrorCode errorCode    = 1;    //错误码
+    string reason               = 2;    //原因
+}
