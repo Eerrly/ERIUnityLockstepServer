@@ -30,16 +30,26 @@ public class NetKcpServer : NetServer
 
     public void StartServerTick()
     {
-        _kcpServer!.Start(NetConstant.KcpPort);
+        if(_kcpServer == null || _kcpConfig == null)
+            return;
         
+        _kcpServer.Start(NetConstant.KcpPort);
         _kcpTickCancellationTokenSource = new CancellationTokenSource();
         var kcpTickCancellationToken = _kcpTickCancellationTokenSource.Token;
         _kcpTickThread = Task.Run(async () =>
         {
-            while (_kcpServer!.IsActive() && !kcpTickCancellationToken.IsCancellationRequested)
+            try
             {
-                await KcpTick(kcpTickCancellationToken);
-                await Task.Delay((int)_kcpConfig!.Interval, kcpTickCancellationToken);
+                while (_kcpServer.IsActive() && !kcpTickCancellationToken.IsCancellationRequested)
+                {
+                    await KcpTick(kcpTickCancellationToken);
+                    await Task.Delay((int)_kcpConfig.Interval, kcpTickCancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(LogLevel.Exception, ex.StackTrace);
+                _kcpTickCancellationTokenSource.Cancel();
             }
         }, kcpTickCancellationToken);
     }
@@ -56,13 +66,14 @@ public class NetKcpServer : NetServer
             return;
         _kcpTickCancellationTokenSource?.Cancel();
         _kcpTickThread?.Dispose();
-        _kcpServer?.Stop();
+        _kcpServer.Stop();
     }
     
     private void Send(int connectionId, Packet packet)
     {
         Logger.Log(LogLevel.Info, $"[KCP] Send connectionId:{connectionId} dataSize:{packet._head._length}");
-        if (!_kcpServer!.IsActive()) return;
+        if (_kcpServer == null || !_kcpServer!.IsActive()) 
+            return;
 
         var buffer = BufferPool.GetBuffer(packet._head._length + Head.HeadLength);
         try
@@ -73,12 +84,12 @@ public class NetKcpServer : NetServer
             }
 
             Array.Copy(packet._data, 0, buffer, Head.HeadLength, packet._head._length);
-            _kcpServer?.Send(connectionId, new ArraySegment<byte>(buffer), KcpChannel.Unreliable);
+            _kcpServer.Send(connectionId, new ArraySegment<byte>(buffer), KcpChannel.Unreliable);
         }
         catch (Exception ex)
         {
             Logger.Log(LogLevel.Exception, ex.Message);
-            _kcpServer?.Stop();
+            _kcpServer.Stop();
         }
         finally
         {
@@ -101,6 +112,8 @@ public class NetKcpServer : NetServer
 
     public void DisconnectClient(int connectionId)
     {
-        _kcpServer?.Disconnect(connectionId);
+        if(_kcpServer == null) 
+            return;
+        _kcpServer.Disconnect(connectionId);
     }
 }

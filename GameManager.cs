@@ -3,9 +3,9 @@
     private static GameManager _instance;
     public static GameManager Instance => _instance ?? (_instance = new GameManager());
 
-    public int RoomMaxPlayerCount = 2;
-    public uint DefaultPlayerIdBase = 10000;
-    public uint DefaultRoomIdBase = 20000;
+    public const int RoomMaxPlayerCount = 2;
+    public const uint DefaultPlayerIdBase = 10000;
+    public const uint DefaultRoomIdBase = 20000;
 
     public List<uint> PlayerIdList;
     public List<uint> RoomIdList;

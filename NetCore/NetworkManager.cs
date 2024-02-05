@@ -99,7 +99,7 @@ public class NetworkManager
         s2CMsg.Status.AddRange(GameManager.Instance.Readys);
         GameManager.Instance.ConnectionIds.ForEach(t => _netKcpServer.SendKcpMsg(t, pb.BattleMsgID.BattleMsgReady, s2CMsg));
 
-        if (GameManager.Instance.Readys.Count == GameManager.Instance.RoomMaxPlayerCount)
+        if (GameManager.Instance.Readys.Count == GameManager.RoomMaxPlayerCount)
             OnServerBattleStart();
     }
 
@@ -212,11 +212,11 @@ public class NetworkManager
         }, stream.Close);
     }
 
-    void OnTcpProcessLoginMsg(NetworkStream stream, pb.C2S_LoginMsg c2SMsg)
+    private void OnTcpProcessLoginMsg(NetworkStream stream, pb.C2S_LoginMsg c2SMsg)
     {
         Logger.Log(LogLevel.Info, $"[TCP][C2S_LoginMsg|{c2SMsg.CalculateSize()}] Account:{c2SMsg.Account.ToStringUtf8()} Password:{c2SMsg.Password.ToStringUtf8()}");
         
-        var calPlayerId = (uint)(GameManager.Instance.DefaultPlayerIdBase + GameManager.Instance.PlayerIdList.Count);
+        var calPlayerId = (uint)(GameManager.DefaultPlayerIdBase + GameManager.Instance.PlayerIdList.Count);
         _networkTcpStreams[calPlayerId] = stream;
         GameManager.Instance.PlayerIdList.Add(calPlayerId);
         _netTcpServer.SendTcpMsg(pb.LogicMsgID.LogicMsgLogin, new pb.S2C_LoginMsg()
@@ -226,11 +226,11 @@ public class NetworkManager
         }, stream);
     }
 
-    void OnTcpProcessCreateRoomMsg(NetworkStream stream, pb.C2S_CreateRoomMsg c2SMsg)
+    private void OnTcpProcessCreateRoomMsg(NetworkStream stream, pb.C2S_CreateRoomMsg c2SMsg)
     {
         Logger.Log(LogLevel.Info, $"[TCP][C2S_LoginMsg|{c2SMsg.CalculateSize()}] PlayerId:{c2SMsg.PlayerId}");
 
-        var calRoomId = (uint)(GameManager.Instance.DefaultRoomIdBase + GameManager.Instance.RoomIdList.Count);
+        var calRoomId = (uint)(GameManager.DefaultRoomIdBase + GameManager.Instance.RoomIdList.Count);
         GameManager.Instance.RoomIdList.Add(calRoomId);
         GameManager.Instance.RoomInfoDic[calRoomId] = new List<uint>();
         var s2CMsg = new pb.S2C_CreateRoomMsg()
@@ -242,7 +242,7 @@ public class NetworkManager
             _netTcpServer.SendTcpMsg(pb.LogicMsgID.LogicMsgCreateRoom, s2CMsg, streamInfo.Value);
     }
 
-    void OnTcpProcessJoinRoomMsg(NetworkStream stream, pb.C2S_JoinRoomMsg c2SMsg)
+    private void OnTcpProcessJoinRoomMsg(NetworkStream stream, pb.C2S_JoinRoomMsg c2SMsg)
     {
         Logger.Log(LogLevel.Info, $"[TCP][C2S_LoginMsg|{c2SMsg.CalculateSize()}] PlayerId:{c2SMsg.PlayerId} RoomId:{c2SMsg.RoomId}");
         
