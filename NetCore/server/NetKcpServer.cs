@@ -1,13 +1,31 @@
 ﻿using Google.Protobuf;
 using kcp2k;
 
+/// <summary>
+/// KCP服务器
+/// </summary>
 public class NetKcpServer : NetServer
 {
+    /// <summary>
+    /// KCP服务器配置数据
+    /// </summary>
     private KcpConfig? _kcpConfig;
+    /// <summary>
+    /// KCP服务器对象
+    /// </summary>
     private KcpServer? _kcpServer;
+    /// <summary>
+    /// KCP轮询线程任务
+    /// </summary>
     private Task? _kcpTickThread;
+    /// <summary>
+    /// KCP轮询线程任务取消操作句柄
+    /// </summary>
     private CancellationTokenSource? _kcpTickCancellationTokenSource;
 
+    /// <summary>
+    /// 初始化
+    /// </summary>
     public override void Initialize()
     {
         _kcpConfig = new KcpConfig(
@@ -28,6 +46,19 @@ public class NetKcpServer : NetServer
             _kcpConfig);
     }
 
+    /// <summary>
+    /// 释放
+    /// </summary>
+    public override void OnRelease()
+    {
+        if (_kcpTickCancellationTokenSource != null) _kcpTickCancellationTokenSource.Cancel();
+        if (_kcpTickThread != null) _kcpTickThread.Dispose();
+        if (_kcpServer != null) _kcpServer.Stop();
+    }
+
+    /// <summary>
+    /// 开始KCP服务器轮询
+    /// </summary>
     public void StartServerTick()
     {
         if(_kcpServer == null || _kcpConfig == null)
@@ -54,12 +85,20 @@ public class NetKcpServer : NetServer
         }, kcpTickCancellationToken);
     }
 
+    /// <summary>
+    /// KCP轮询
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     private Task KcpTick(CancellationToken cancellationToken)
     {
         _kcpServer?.Tick();
         return cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
     }
 
+    /// <summary>
+    /// 关闭KCP服务器
+    /// </summary>
     public void CloseKcpServer()
     {
         if(_kcpServer == null || !_kcpServer.IsActive()) 
@@ -69,6 +108,11 @@ public class NetKcpServer : NetServer
         _kcpServer.Stop();
     }
     
+    /// <summary>
+    /// 发送数据
+    /// </summary>
+    /// <param name="connectionId">客户端连接ID</param>
+    /// <param name="packet">数据包</param>
     private void Send(int connectionId, Packet packet)
     {
         Logger.Log(LogLevel.Info, $"[KCP] Send connectionId:{connectionId} dataSize:{packet._head._length}");
@@ -97,6 +141,12 @@ public class NetKcpServer : NetServer
         }
     }
 
+    /// <summary>
+    /// 发送KCP消息
+    /// </summary>
+    /// <param name="connectionId">客户端连接ID</param>
+    /// <param name="battleMsgId">消息ID</param>
+    /// <param name="msg">消息体</param>
     public void SendKcpMsg(int connectionId, pb.BattleMsgID battleMsgId, IMessage msg)
     {
         Send(connectionId, new Packet
@@ -110,6 +160,10 @@ public class NetKcpServer : NetServer
         });
     }
 
+    /// <summary>
+    /// 断开某个客户端的连接
+    /// </summary>
+    /// <param name="connectionId">客户端连接ID</param>
     public void DisconnectClient(int connectionId)
     {
         if(_kcpServer == null) 

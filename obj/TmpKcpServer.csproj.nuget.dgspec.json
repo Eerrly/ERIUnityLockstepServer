@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "E:\\GitProjects\\NetworkProjects\\TmpKcpServer\\TmpKcpServer.csproj": {}
+    "D:\\GitProjects\\ERIUnitySimpleServer\\TmpKcpServer.csproj": {}
   },
   "projects": {
-    "E:\\GitProjects\\NetworkProjects\\TmpKcpServer\\TmpKcpServer.csproj": {
+    "D:\\GitProjects\\ERIUnitySimpleServer\\TmpKcpServer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\GitProjects\\NetworkProjects\\TmpKcpServer\\TmpKcpServer.csproj",
+        "projectUniqueName": "D:\\GitProjects\\ERIUnitySimpleServer\\TmpKcpServer.csproj",
         "projectName": "TmpKcpServer",
-        "projectPath": "E:\\GitProjects\\NetworkProjects\\TmpKcpServer\\TmpKcpServer.csproj",
-        "packagesPath": "C:\\Users\\gy\\.nuget\\packages\\",
-        "outputPath": "E:\\GitProjects\\NetworkProjects\\TmpKcpServer\\obj\\",
+        "projectPath": "D:\\GitProjects\\ERIUnitySimpleServer\\TmpKcpServer.csproj",
+        "packagesPath": "C:\\Users\\Eri\\.nuget\\packages\\",
+        "outputPath": "D:\\GitProjects\\ERIUnitySimpleServer\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\gy\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Eri\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -55,7 +55,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.417\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.403\\RuntimeIdentifierGraph.json"
         }
       }
     }
