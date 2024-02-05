@@ -44,6 +44,7 @@ public class NetKcpServer : NetServer
             NetworkManager.Instance.OnKcpDisconnected, 
             NetworkManager.Instance.OnKcpError, 
             _kcpConfig);
+        _kcpTickCancellationTokenSource = new CancellationTokenSource();
     }
 
     /// <summary>
@@ -65,8 +66,7 @@ public class NetKcpServer : NetServer
             return;
         
         _kcpServer.Start(NetConstant.KcpPort);
-        _kcpTickCancellationTokenSource = new CancellationTokenSource();
-        var kcpTickCancellationToken = _kcpTickCancellationTokenSource.Token;
+        var kcpTickCancellationToken = _kcpTickCancellationTokenSource!.Token;
         _kcpTickThread = Task.Run(async () =>
         {
             try
@@ -88,8 +88,8 @@ public class NetKcpServer : NetServer
     /// <summary>
     /// KCP轮询
     /// </summary>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="cancellationToken">轮询取消操作句柄</param>
+    /// <returns>异步任务</returns>
     private Task KcpTick(CancellationToken cancellationToken)
     {
         _kcpServer?.Tick();

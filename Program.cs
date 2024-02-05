@@ -14,7 +14,7 @@ static void OnCancelKeyPress(object? sender, EventArgs e)
 {
     GameManager.Instance.OnRelease();
     NetworkManager.Instance.OnRelease();
-    Console.WriteLine(">>> OnProcessExit");
+    Console.WriteLine(">>> Exit");
 }
 
 Startup();

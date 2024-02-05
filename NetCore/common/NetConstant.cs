@@ -3,16 +3,15 @@
     /// <summary>
     /// KCP端口
     /// </summary>
-    public static readonly ushort KcpPort = 10086;
-    
+    public const ushort KcpPort = 10086;
+
     /// <summary>
     /// 网络IP
     /// </summary>
-    public static readonly string TcpAddress = "127.0.0.1";
-    
+    public const string TcpAddress = "127.0.0.1";
+
     /// <summary>
     /// TCP端口
     /// </summary>
-    public static readonly int TcpPort = 10085;
-    
+    public const int TcpPort = 10085;
 }

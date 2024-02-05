@@ -78,6 +78,7 @@ public class GameManager : AManager<GameManager>
         Logger.Initialize(Path.Combine(Directory.GetCurrentDirectory(), "server.log"), new Logger());
         Logger.SetLoggerLevel((int)LogLevel.Info | (int)LogLevel.Warning | (int)LogLevel.Error | (int)LogLevel.Exception);
         Logger.log = Console.WriteLine;
+        Logger.logWarning = Console.WriteLine;
         Logger.logError = Console.WriteLine;
     }
 
@@ -97,7 +98,6 @@ public class GameManager : AManager<GameManager>
     public void JoinRoom(uint roomId, uint playerId)
     {
         RoomInfoDic[roomId].Add(playerId);
-        
         if (RoomInfoDic[roomId].Count == RoomMaxPlayerCount) NetworkManager.Instance.StartKcpServer();
     }
 

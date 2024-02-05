@@ -1,4 +1,4 @@
-﻿public class AManager<T> : IManager where T:new()
+﻿public abstract class AManager<T> : IManager where T:new()
 {
     private static T _instance;
 
