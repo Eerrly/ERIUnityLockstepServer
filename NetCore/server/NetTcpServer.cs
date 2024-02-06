@@ -128,6 +128,7 @@ public class NetTcpServer : NetServer
     /// <param name="networkStream">客户端流</param>
     private async void Send(Packet packet, Stream networkStream)
     {
+        Logger.Log(LogLevel.Info, $"[TCP] Send MsgID:{Enum.GetName(typeof(pb.LogicMsgID), packet._head._cmd)} dataSize:{packet._head._length}");
         var buffer = BufferPool.GetBuffer(packet._head._length + Head.HeadLength);
         try
         {

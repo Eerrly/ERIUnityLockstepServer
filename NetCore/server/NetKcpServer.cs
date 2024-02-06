@@ -115,7 +115,7 @@ public class NetKcpServer : NetServer
     /// <param name="packet">数据包</param>
     private void Send(int connectionId, Packet packet)
     {
-        Logger.Log(LogLevel.Info, $"[KCP] Send connectionId:{connectionId} dataSize:{packet._head._length}");
+        Logger.Log(LogLevel.Info, $"[KCP] Send connectionId:{connectionId} MsgID:{Enum.GetName(typeof(pb.BattleMsgID), packet._head._cmd)} dataSize:{packet._head._length}");
         if (_kcpServer == null || !_kcpServer!.IsActive()) 
             return;
 
