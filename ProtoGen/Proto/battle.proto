@@ -55,8 +55,9 @@ message C2S_ReadyMsg {
 
 // 准备
 message S2C_ReadyMsg {
-    BattleErrorCode errorCode     = 1;    //错误码
-    repeated uint32 status  = 2;    //所有玩家准备情况
+    BattleErrorCode errorCode   = 1;    //错误码
+    uint32 roomId               = 2;    //房间ID
+    repeated uint32 status      = 3;    //所有玩家准备情况
 }
 
 // 开始

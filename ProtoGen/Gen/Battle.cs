@@ -28,24 +28,24 @@ namespace pb {
             "U19IZWFydGJlYXRNc2cSEAoIcGxheWVySWQYASABKA0SEQoJdGltZVN0YW1w",
             "GAIgASgEIkoKEFMyQ19IZWFydGJlYXRNc2cSIwoJZXJyb3JDb2RlGAEgASgO",
             "MhAuQmF0dGxlRXJyb3JDb2RlEhEKCXRpbWVTdGFtcBgCIAEoBCIwCgxDMlNf",
-            "UmVhZHlNc2cSDgoGcm9vbUlkGAEgASgNEhAKCHBsYXllcklkGAIgASgNIkMK",
+            "UmVhZHlNc2cSDgoGcm9vbUlkGAEgASgNEhAKCHBsYXllcklkGAIgASgNIlMK",
             "DFMyQ19SZWFkeU1zZxIjCgllcnJvckNvZGUYASABKA4yEC5CYXR0bGVFcnJv",
-            "ckNvZGUSDgoGc3RhdHVzGAIgAygNIlUKDFMyQ19TdGFydE1zZxIjCgllcnJv",
-            "ckNvZGUYASABKA4yEC5CYXR0bGVFcnJvckNvZGUSDQoFZnJhbWUYAiABKA0S",
-            "EQoJdGltZVN0YW1wGAMgASgEIisKDEMyU19GcmFtZU1zZxINCgVmcmFtZRgB",
-            "IAEoDRIMCgRkYXRhGAIgASgFIlEKDFMyQ19GcmFtZU1zZxIjCgllcnJvckNv",
-            "ZGUYASABKA4yEC5CYXR0bGVFcnJvckNvZGUSDQoFZnJhbWUYAiABKA0SDQoF",
-            "ZGF0dW0YAyADKAUiRAoNUzJDX1Jlc3VsdE1zZxIjCgllcnJvckNvZGUYASAB",
-            "KA4yEC5CYXR0bGVFcnJvckNvZGUSDgoGd2lubmVyGAIgASgNIk0KFlMyQ19C",
-            "YXR0bGVFeGNlcHRpb25Nc2cSIwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0dGxl",
-            "RXJyb3JDb2RlEg4KBnJlYXNvbhgCIAEoCSrIAQoLQmF0dGxlTXNnSUQSFAoQ",
-            "QkFUVExFX01TR19CZWdpbhAAEhYKEkJBVFRMRV9NU0dfQ29ubmVjdBABEhgK",
-            "FEJBVFRMRV9NU0dfSGVhcnRiZWF0EAISFAoQQkFUVExFX01TR19SZWFkeRAK",
-            "EhQKEEJBVFRMRV9NU0dfU3RhcnQQFBIUChBCQVRUTEVfTVNHX0ZyYW1lEB4S",
-            "FQoRQkFUVExFX01TR19SZXN1bHQQKBIYChRCQVRUTEVfTVNHX0V4Y2VwdGlv",
-            "bhBkKlgKD0JhdHRsZUVycm9yQ29kZRIYChRCQVRUTEVfRVJSX0JhdHRsZV9P",
-            "axAAEhYKEkJBVFRMRV9FUlJfVGltZW91dBABEhMKD0JBVFRMRV9FUlJfRGF0",
-            "YRACQgWqAgJwYmIGcHJvdG8z"));
+            "ckNvZGUSDgoGcm9vbUlkGAIgASgNEg4KBnN0YXR1cxgDIAMoDSJVCgxTMkNf",
+            "U3RhcnRNc2cSIwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0dGxlRXJyb3JDb2Rl",
+            "Eg0KBWZyYW1lGAIgASgNEhEKCXRpbWVTdGFtcBgDIAEoBCIrCgxDMlNfRnJh",
+            "bWVNc2cSDQoFZnJhbWUYASABKA0SDAoEZGF0YRgCIAEoBSJRCgxTMkNfRnJh",
+            "bWVNc2cSIwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0dGxlRXJyb3JDb2RlEg0K",
+            "BWZyYW1lGAIgASgNEg0KBWRhdHVtGAMgAygFIkQKDVMyQ19SZXN1bHRNc2cS",
+            "IwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0dGxlRXJyb3JDb2RlEg4KBndpbm5l",
+            "chgCIAEoDSJNChZTMkNfQmF0dGxlRXhjZXB0aW9uTXNnEiMKCWVycm9yQ29k",
+            "ZRgBIAEoDjIQLkJhdHRsZUVycm9yQ29kZRIOCgZyZWFzb24YAiABKAkqyAEK",
+            "C0JhdHRsZU1zZ0lEEhQKEEJBVFRMRV9NU0dfQmVnaW4QABIWChJCQVRUTEVf",
+            "TVNHX0Nvbm5lY3QQARIYChRCQVRUTEVfTVNHX0hlYXJ0YmVhdBACEhQKEEJB",
+            "VFRMRV9NU0dfUmVhZHkQChIUChBCQVRUTEVfTVNHX1N0YXJ0EBQSFAoQQkFU",
+            "VExFX01TR19GcmFtZRAeEhUKEUJBVFRMRV9NU0dfUmVzdWx0ECgSGAoUQkFU",
+            "VExFX01TR19FeGNlcHRpb24QZCpYCg9CYXR0bGVFcnJvckNvZGUSGAoUQkFU",
+            "VExFX0VSUl9CYXR0bGVfT2sQABIWChJCQVRUTEVfRVJSX1RpbWVvdXQQARIT",
+            "Cg9CQVRUTEVfRVJSX0RhdGEQAkIFqgICcGJiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::pb.BattleMsgID), typeof(global::pb.BattleErrorCode), }, new pbr::GeneratedClrTypeInfo[] {
@@ -54,7 +54,7 @@ namespace pb {
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_HeartbeatMsg), global::pb.C2S_HeartbeatMsg.Parser, new[]{ "PlayerId", "TimeStamp" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_HeartbeatMsg), global::pb.S2C_HeartbeatMsg.Parser, new[]{ "ErrorCode", "TimeStamp" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_ReadyMsg), global::pb.C2S_ReadyMsg.Parser, new[]{ "RoomId", "PlayerId" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_ReadyMsg), global::pb.S2C_ReadyMsg.Parser, new[]{ "ErrorCode", "Status" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_ReadyMsg), global::pb.S2C_ReadyMsg.Parser, new[]{ "ErrorCode", "RoomId", "Status" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_StartMsg), global::pb.S2C_StartMsg.Parser, new[]{ "ErrorCode", "Frame", "TimeStamp" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_FrameMsg), global::pb.C2S_FrameMsg.Parser, new[]{ "Frame", "Data" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_FrameMsg), global::pb.S2C_FrameMsg.Parser, new[]{ "ErrorCode", "Frame", "Datum" }, null, null, null),
@@ -889,6 +889,7 @@ namespace pb {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public S2C_ReadyMsg(S2C_ReadyMsg other) : this() {
       errorCode_ = other.errorCode_;
+      roomId_ = other.roomId_;
       status_ = other.status_.Clone();
     }
 
@@ -911,10 +912,24 @@ namespace pb {
       }
     }
 
+    /// <summary>Field number for the "roomId" field.</summary>
+    public const int RoomIdFieldNumber = 2;
+    private uint roomId_;
+    /// <summary>
+    ///房间ID
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint RoomId {
+      get { return roomId_; }
+      set {
+        roomId_ = value;
+      }
+    }
+
     /// <summary>Field number for the "status" field.</summary>
-    public const int StatusFieldNumber = 2;
+    public const int StatusFieldNumber = 3;
     private static readonly pb::FieldCodec<uint> _repeated_status_codec
-        = pb::FieldCodec.ForUInt32(18);
+        = pb::FieldCodec.ForUInt32(26);
     private readonly pbc::RepeatedField<uint> status_ = new pbc::RepeatedField<uint>();
     /// <summary>
     ///所有玩家准备情况
@@ -938,6 +953,7 @@ namespace pb {
         return true;
       }
       if (ErrorCode != other.ErrorCode) return false;
+      if (RoomId != other.RoomId) return false;
       if(!status_.Equals(other.status_)) return false;
       return true;
     }
@@ -946,6 +962,7 @@ namespace pb {
     public override int GetHashCode() {
       int hash = 1;
       if (ErrorCode != 0) hash ^= ErrorCode.GetHashCode();
+      if (RoomId != 0) hash ^= RoomId.GetHashCode();
       hash ^= status_.GetHashCode();
       return hash;
     }
@@ -961,6 +978,10 @@ namespace pb {
         output.WriteRawTag(8);
         output.WriteEnum((int) ErrorCode);
       }
+      if (RoomId != 0) {
+        output.WriteRawTag(16);
+        output.WriteUInt32(RoomId);
+      }
       status_.WriteTo(output, _repeated_status_codec);
     }
 
@@ -969,6 +990,9 @@ namespace pb {
       int size = 0;
       if (ErrorCode != 0) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) ErrorCode);
+      }
+      if (RoomId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(RoomId);
       }
       size += status_.CalculateSize(_repeated_status_codec);
       return size;
@@ -981,6 +1005,9 @@ namespace pb {
       }
       if (other.ErrorCode != 0) {
         ErrorCode = other.ErrorCode;
+      }
+      if (other.RoomId != 0) {
+        RoomId = other.RoomId;
       }
       status_.Add(other.status_);
     }
@@ -997,8 +1024,12 @@ namespace pb {
             errorCode_ = (global::pb.BattleErrorCode) input.ReadEnum();
             break;
           }
-          case 18:
           case 16: {
+            RoomId = input.ReadUInt32();
+            break;
+          }
+          case 26:
+          case 24: {
             status_.AddEntriesFrom(input, _repeated_status_codec);
             break;
           }

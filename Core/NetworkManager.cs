@@ -185,7 +185,11 @@ public class NetworkManager : AManager<NetworkManager>
         if(!GameManager.Instance.Readys.Contains(c2SMsg.PlayerId)) GameManager.Instance.Readys.Add(c2SMsg.PlayerId);
                     
         Logger.Log(LogLevel.Info, $"[KCP] BattleMsgReady -> playerId:{c2SMsg.PlayerId} roomId:{c2SMsg.RoomId}");
-        var s2CMsg = new pb.S2C_ReadyMsg() { ErrorCode = pb.BattleErrorCode.BattleErrBattleOk, };
+        var s2CMsg = new pb.S2C_ReadyMsg()
+        {
+            ErrorCode = pb.BattleErrorCode.BattleErrBattleOk,
+            RoomId = c2SMsg.RoomId,
+        };
         s2CMsg.Status.AddRange(GameManager.Instance.Readys);
         GameManager.Instance.KcpConnectionIds.ForEach(t => _netKcpServer.SendKcpMsg(t, pb.BattleMsgID.BattleMsgReady, s2CMsg));
 
