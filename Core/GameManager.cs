@@ -52,7 +52,7 @@ public class GameManager : AManager<GameManager>
         KcpConnectionIds = new List<int>(10);
         Readys = new List<uint>();
 
-        CacheFrames = new Dictionary<int, int[]>();
+        CacheFrames = new Dictionary<int, int[]>(10000);
 
         InitLogger();
     }
@@ -99,7 +99,10 @@ public class GameManager : AManager<GameManager>
     public void JoinRoom(uint roomId, uint playerId)
     {
         RoomInfoDic[roomId].Add(playerId);
-        if (RoomInfoDic[roomId].Count == RoomMaxPlayerCount) NetworkManager.Instance.StartKcpServer();
+        if (RoomInfoDic[roomId].Count == RoomMaxPlayerCount)
+        {
+            NetworkManager.Instance.StartKcpServer();
+        }
     }
 
 }

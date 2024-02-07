@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TmpKcpServer", "TmpKcpServer.csproj", "{7879BDF9-334A-4929-844B-9EA420E8D2A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ERIUnitySimpleServer", "ERIUnitySimpleServer.csproj", "{7879BDF9-334A-4929-844B-9EA420E8D2A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

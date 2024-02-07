@@ -6,7 +6,10 @@
 
     public virtual void OnRelease()
     {
-        
+    }
+
+    public virtual void StartServer()
+    {
     }
 
     public void OnData(byte[] buffer, MemoryStream stream, Action<byte> onCommand, Action onCatch)

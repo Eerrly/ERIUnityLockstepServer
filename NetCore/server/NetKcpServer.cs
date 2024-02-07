@@ -60,7 +60,7 @@ public class NetKcpServer : NetServer
     /// <summary>
     /// 开始KCP服务器轮询
     /// </summary>
-    public void StartServerTick()
+    public override void StartServer()
     {
         if(_kcpServer == null || _kcpConfig == null)
             return;

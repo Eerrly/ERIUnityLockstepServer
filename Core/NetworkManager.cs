@@ -83,7 +83,7 @@ public class NetworkManager : AManager<NetworkManager>
     /// </summary>
     public void StartKcpServer()
     {
-        _netKcpServer.StartServerTick();
+        _netKcpServer.StartServer();
     }
 
     /// <summary>
@@ -343,13 +343,13 @@ public class NetworkManager : AManager<NetworkManager>
     {
         Logger.Log(LogLevel.Info, $"[TCP][C2S_LoginMsg|{c2SMsg.CalculateSize()}] PlayerId:{c2SMsg.PlayerId}");
 
-        var calRoomId = (uint)(GameManager.DefaultRoomIdBase + GameManager.Instance.RoomIdList.Count);
-        GameManager.Instance.RoomIdList.Add(calRoomId);
-        GameManager.Instance.RoomInfoDic[calRoomId] = new List<uint>();
+        var roomId = (uint)(GameManager.DefaultRoomIdBase + GameManager.Instance.RoomIdList.Count);
+        GameManager.Instance.RoomIdList.Add(roomId);
+        GameManager.Instance.RoomInfoDic[roomId] = new List<uint>();
         var s2CMsg = new pb.S2C_CreateRoomMsg()
         {
             ErrorCode = pb.LogicErrorCode.LogicErrOk,
-            RoomId = calRoomId,
+            RoomId = roomId,
         };
         foreach (var streamInfo in _networkTcpStreams)
             _netTcpServer.SendTcpMsg(pb.LogicMsgID.LogicMsgCreateRoom, s2CMsg, streamInfo.Value);

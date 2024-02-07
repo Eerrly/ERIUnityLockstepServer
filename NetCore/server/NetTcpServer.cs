@@ -60,7 +60,7 @@ public class NetTcpServer : NetServer
     /// <summary>
     /// 开启服务器
     /// </summary>
-    public void StartServer()
+    public override void StartServer()
     {
         var ipAddress = IPAddress.Parse(NetConstant.TcpAddress);
         _tcpListener = new TcpListener(ipAddress, NetConstant.TcpPort);
