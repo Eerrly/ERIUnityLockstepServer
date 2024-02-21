@@ -3,6 +3,11 @@ using System.Net.Sockets;
 using Google.Protobuf;
 
 /// <summary>
+/// 接受到消息的回调委托
+/// </summary>
+public delegate void OnProcessTcpAcceptDataDelegate(byte[] message, int bytesRead, NetworkStream clientStream);
+
+/// <summary>
 /// TCP服务器
 /// </summary>
 public class NetTcpServer : NetServer
@@ -16,22 +21,17 @@ public class NetTcpServer : NetServer
     /// </summary>
     private TcpListener? _tcpListener;
     /// <summary>
-    /// TCP监听线程
-    /// </summary>
-    private Thread? _listenerThread;
-    /// <summary>
     /// TCP取消操作句柄
     /// </summary>
     private CancellationTokenSource? _cancellationTokenSource;
     /// <summary>
+    /// 客户端的请求Task集合
+    /// </summary>
+    private List<Task> _handleClientTasks;
+    /// <summary>
     /// 接受数据数组
     /// </summary>
     private byte[]? _acceptBuffer;
-    
-    /// <summary>
-    /// 接受到消息的回调委托
-    /// </summary>
-    public delegate void OnProcessTcpAcceptDataDelegate(byte[] message, int bytesRead, NetworkStream clientStream);
     /// <summary>
     /// 接受到消息的回调事件
     /// </summary>
@@ -43,6 +43,7 @@ public class NetTcpServer : NetServer
     public override void Initialize()
     {
         _acceptBuffer = new byte[AcceptBufferMaxLength];
+        _handleClientTasks = new List<Task>();
         _cancellationTokenSource = new CancellationTokenSource();
     }
 
@@ -51,10 +52,22 @@ public class NetTcpServer : NetServer
     /// </summary>
     public override void OnRelease()
     {
-        if (_tcpListener != null) _tcpListener.Stop();
-        if (_cancellationTokenSource!= null) _cancellationTokenSource.Cancel();
-        if (_listenerThread != null) _listenerThread.DisableComObjectEagerCleanup();
-        if (_acceptBuffer != null) Array.Clear(_acceptBuffer, 0, _acceptBuffer.Length);
+        if (_cancellationTokenSource != null)
+        {
+            _cancellationTokenSource.Cancel();
+        }
+        if (_handleClientTasks.Count > 0)
+        {
+            _handleClientTasks.Clear();
+        }
+        if (_acceptBuffer != null)
+        {
+            Array.Clear(_acceptBuffer, 0, _acceptBuffer.Length);
+        }
+        if (_tcpListener != null)
+        {
+            _tcpListener.Stop();
+        }
     }
 
     /// <summary>
@@ -65,8 +78,7 @@ public class NetTcpServer : NetServer
         var ipAddress = IPAddress.Parse(NetConstant.TcpAddress);
         _tcpListener = new TcpListener(ipAddress, NetConstant.TcpPort);
 
-        _listenerThread = new Thread(new ThreadStart(OnListenerThreadStart));
-        _listenerThread.Start();
+        ListenForClientsAsync();
 
         Logger.Log(LogLevel.Info, "[TCP] Server started on " + ipAddress + ":" + NetConstant.TcpPort);
     }
@@ -74,51 +86,64 @@ public class NetTcpServer : NetServer
     /// <summary>
     /// 开启监听客户端线程
     /// </summary>
-    private void OnListenerThreadStart()
+    private async void ListenForClientsAsync()
     {
-        _tcpListener?.Start();
-        while (true)
+        if(_tcpListener == null || _cancellationTokenSource == null) return;
+
+        var tcpListenerCancellationToken = _cancellationTokenSource.Token;
+        try
         {
-            // 等待客户端连接
-            var client = _tcpListener?.AcceptTcpClient();
-            Logger.Log(LogLevel.Info, $"[TCP] Client is connected! RemoteEndPoint:{client?.Client.RemoteEndPoint}");
-            // 创建新线程处理客户端请求
-            var clientThread = new Thread(new ParameterizedThreadStart(OnParameterizedThreadStart));
-            clientThread.Start(client);
+            _tcpListener.Start();
+            while (true)
+            {
+                var client = await _tcpListener.AcceptTcpClientAsync(tcpListenerCancellationToken);
+                Logger.Log(LogLevel.Info, $"[TCP] Client is connected! RemoteEndPoint:{client?.Client.RemoteEndPoint}");
+
+                if (client != null) _handleClientTasks.Add(Task.Run(() => HandleClientAsync(client), tcpListenerCancellationToken));
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Log(LogLevel.Exception, ex.Message + ex.StackTrace);
+        }
+        finally
+        {
+            if (_handleClientTasks.Count > 0)
+            {
+                foreach (var t in _handleClientTasks)
+                    t.Dispose();
+                _handleClientTasks.Clear();
+            }
         }
     }
 
     /// <summary>
     /// 客户端连接新线程处理
     /// </summary>
-    /// <param name="n">TCP客户端</param>
-    private async void OnParameterizedThreadStart(object? n)
+    /// <param name="client">TCP客户端</param>
+    private async Task HandleClientAsync(TcpClient client)
     {
-        if (n is not TcpClient tcpClient) return;
-
-        var clientStream = tcpClient.GetStream();
-        while (true)
+        try
         {
-            var bytesRead = 0;
-
-            try
+            var clientStream = client.GetStream();
+            while (true)
             {
-                bytesRead = await clientStream.ReadAsync(_acceptBuffer!, 0, AcceptBufferMaxLength, _cancellationTokenSource!.Token);
-            }
-            catch(Exception ex)
-            {
-                Logger.Log(LogLevel.Exception, ex.Message);
-                clientStream.Close();
-                break;
-            }
+                var bytesRead = await clientStream.ReadAsync(_acceptBuffer!, 0, AcceptBufferMaxLength, _cancellationTokenSource!.Token);
 
-            if (bytesRead == 0)
-                break;
+                if (bytesRead == 0)
+                    break;
 
-            OnProcessTcpAcceptData?.Invoke(_acceptBuffer!, bytesRead, clientStream);
+                OnProcessTcpAcceptData?.Invoke(_acceptBuffer!, bytesRead, clientStream);
+            }
         }
-
-        tcpClient.Close();
+        catch (Exception ex)
+        {
+            Logger.Log(LogLevel.Exception, ex.Message + ex.StackTrace);
+        }
+        finally
+        {
+            client.Close();
+        }
     }
     
     /// <summary>

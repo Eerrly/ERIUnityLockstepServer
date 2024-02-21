@@ -39,7 +39,7 @@ public class GameManager : AManager<GameManager>
     /// <summary>
     /// 服务器缓存的帧数据字典
     /// </summary>
-    public Dictionary<int, int[]> CacheFrames;
+    public Dictionary<int, byte[]> CacheFrames;
     
     /// <summary>
     /// 初始化
@@ -52,7 +52,7 @@ public class GameManager : AManager<GameManager>
         KcpConnectionIds = new List<int>(10);
         Readys = new List<uint>();
 
-        CacheFrames = new Dictionary<int, int[]>(10000);
+        CacheFrames = new Dictionary<int, byte[]>(10000);
 
         InitLogger();
     }

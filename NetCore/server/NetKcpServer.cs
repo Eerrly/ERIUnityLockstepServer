@@ -159,6 +159,25 @@ public class NetKcpServer : NetServer
             _data = msg.ToByteArray()
         });
     }
+    
+    /// <summary>
+    /// 发送KCP消息
+    /// </summary>
+    /// <param name="connectionId">客户端连接ID</param>
+    /// <param name="battleMsgId">消息ID</param>
+    /// <param name="data">消息数组</param>
+    public void SendKcpMsg(int connectionId, pb.BattleMsgID battleMsgId, byte[] data)
+    {
+        Send(connectionId, new Packet
+        {
+            _head = new Head
+            {
+                _cmd = (byte)battleMsgId,
+                _length = data.Length,
+            },
+            _data = data
+        });
+    }
 
     /// <summary>
     /// 断开某个客户端的连接

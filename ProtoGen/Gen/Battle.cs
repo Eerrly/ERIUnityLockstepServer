@@ -35,7 +35,7 @@ namespace pb {
             "Eg0KBWZyYW1lGAIgASgNEhEKCXRpbWVTdGFtcBgDIAEoBCIrCgxDMlNfRnJh",
             "bWVNc2cSDQoFZnJhbWUYASABKA0SDAoEZGF0YRgCIAEoBSJRCgxTMkNfRnJh",
             "bWVNc2cSIwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0dGxlRXJyb3JDb2RlEg0K",
-            "BWZyYW1lGAIgASgNEg0KBWRhdHVtGAMgAygFIkQKDVMyQ19SZXN1bHRNc2cS",
+            "BWZyYW1lGAIgASgNEg0KBWRhdHVtGAMgASgMIkQKDVMyQ19SZXN1bHRNc2cS",
             "IwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0dGxlRXJyb3JDb2RlEg4KBndpbm5l",
             "chgCIAEoDSJNChZTMkNfQmF0dGxlRXhjZXB0aW9uTXNnEiMKCWVycm9yQ29k",
             "ZRgBIAEoDjIQLkJhdHRsZUVycm9yQ29kZRIOCgZyZWFzb24YAiABKAkqyAEK",
@@ -1407,7 +1407,7 @@ namespace pb {
     public S2C_FrameMsg(S2C_FrameMsg other) : this() {
       errorCode_ = other.errorCode_;
       frame_ = other.frame_;
-      datum_ = other.datum_.Clone();
+      datum_ = other.datum_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1445,15 +1445,16 @@ namespace pb {
 
     /// <summary>Field number for the "datum" field.</summary>
     public const int DatumFieldNumber = 3;
-    private static readonly pb::FieldCodec<int> _repeated_datum_codec
-        = pb::FieldCodec.ForInt32(26);
-    private readonly pbc::RepeatedField<int> datum_ = new pbc::RepeatedField<int>();
+    private pb::ByteString datum_ = pb::ByteString.Empty;
     /// <summary>
     ///所有玩家的某一帧帧数据
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<int> Datum {
+    public pb::ByteString Datum {
       get { return datum_; }
+      set {
+        datum_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1471,7 +1472,7 @@ namespace pb {
       }
       if (ErrorCode != other.ErrorCode) return false;
       if (Frame != other.Frame) return false;
-      if(!datum_.Equals(other.datum_)) return false;
+      if (Datum != other.Datum) return false;
       return true;
     }
 
@@ -1480,7 +1481,7 @@ namespace pb {
       int hash = 1;
       if (ErrorCode != 0) hash ^= ErrorCode.GetHashCode();
       if (Frame != 0) hash ^= Frame.GetHashCode();
-      hash ^= datum_.GetHashCode();
+      if (Datum.Length != 0) hash ^= Datum.GetHashCode();
       return hash;
     }
 
@@ -1499,7 +1500,10 @@ namespace pb {
         output.WriteRawTag(16);
         output.WriteUInt32(Frame);
       }
-      datum_.WriteTo(output, _repeated_datum_codec);
+      if (Datum.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteBytes(Datum);
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1511,7 +1515,9 @@ namespace pb {
       if (Frame != 0) {
         size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Frame);
       }
-      size += datum_.CalculateSize(_repeated_datum_codec);
+      if (Datum.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(Datum);
+      }
       return size;
     }
 
@@ -1526,7 +1532,9 @@ namespace pb {
       if (other.Frame != 0) {
         Frame = other.Frame;
       }
-      datum_.Add(other.datum_);
+      if (other.Datum.Length != 0) {
+        Datum = other.Datum;
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1545,9 +1553,8 @@ namespace pb {
             Frame = input.ReadUInt32();
             break;
           }
-          case 26:
-          case 24: {
-            datum_.AddEntriesFrom(input, _repeated_datum_codec);
+          case 26: {
+            Datum = input.ReadBytes();
             break;
           }
         }

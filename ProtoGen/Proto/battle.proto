@@ -77,7 +77,7 @@ message C2S_FrameMsg {
 message S2C_FrameMsg {
     BattleErrorCode errorCode       = 1;    //错误码
     uint32 frame                    = 2;    //帧号
-    repeated int32 datum            = 3;    //所有玩家的某一帧帧数据
+    bytes datum                     = 3;    //所有玩家的某一帧帧数据
 }
 
 message S2C_ResultMsg {

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net.Sockets;
+using Google.Protobuf;
 using kcp2k;
 
 /// <summary>
@@ -40,12 +41,22 @@ public class NetworkManager : AManager<NetworkManager>
     /// </summary>
     private uint _serverAuthoritativeFrame = 0;
     
+    private byte[] _frameInputs;
+    private MemoryStream _frameMemoryStream;
+    private BinaryWriter _frameStreamWriter;
+    private BinaryReader _frameStreamReader;
+    
     /// <summary>
     /// 初始化
     /// </summary>
     public override void Initialize()
     {
+        _frameInputs = new byte[10];
+        _frameMemoryStream = new MemoryStream(_frameInputs);
+        _frameStreamWriter = new BinaryWriter(_frameMemoryStream);
+        
         _memoryStream = new MemoryStream();
+        _frameStreamReader = new BinaryReader(_memoryStream);
         _battleStopwatch = new Stopwatch();
         _networkTcpStreams = new Dictionary<uint, NetworkStream>();
         
@@ -105,6 +116,10 @@ public class NetworkManager : AManager<NetworkManager>
         lock (GameManager.Instance.KcpConnectionIds)
         {
             GameManager.Instance.KcpConnectionIds.Remove(connectionId);
+        }
+        lock (GameManager.Instance.CacheFrames)
+        {
+            GameManager.Instance.CacheFrames.Remove(connectionId);
         }
     }
 
@@ -166,7 +181,7 @@ public class NetworkManager : AManager<NetworkManager>
     private void OnKcpProcessConnectMsg(Stream stream, int connectionId)
     {
         if(!GameManager.Instance.KcpConnectionIds.Contains(connectionId)) GameManager.Instance.KcpConnectionIds.Add(connectionId);
-        GameManager.Instance.CacheFrames.TryAdd(connectionId, new int[10000]);
+        GameManager.Instance.CacheFrames.TryAdd(connectionId, new byte[10000]);
                     
         var c2SMsg = pb.C2S_ConnectMsg.Parser.ParseFrom(_memoryStream);
         Logger.Log(LogLevel.Info, $"[KCP] BattleMsgConnect -> playerId:{c2SMsg.PlayerId} seasonId:{c2SMsg.SeasonId}");
@@ -221,9 +236,10 @@ public class NetworkManager : AManager<NetworkManager>
     /// <param name="connectionId">客户端连接ID</param>
     private void OnKcpProcessFrameMsg(Stream stream, int connectionId)
     {
-        var c2SMsg = pb.C2S_FrameMsg.Parser.ParseFrom(_memoryStream);
-        Logger.Log(LogLevel.Info, $"[KCP] BattleMsgFrame -> connectionId:{connectionId} clientNextFrame:{c2SMsg.Frame} data:{c2SMsg.Data}");
-        GameManager.Instance.CacheFrames[connectionId][c2SMsg.Frame] = c2SMsg.Data;
+        var frame = _frameStreamReader.ReadInt32();
+        var data = _frameStreamReader.ReadByte();
+        Logger.Log(LogLevel.Info, $"[KCP] BattleMsgFrame -> connectionId:{connectionId} clientNextFrame:{frame} data:{data}");
+        GameManager.Instance.CacheFrames[connectionId][frame] = data;
     }
 
     /// <summary>
@@ -273,18 +289,29 @@ public class NetworkManager : AManager<NetworkManager>
         {
             lock (GameManager.Instance.KcpConnectionIds)
             {
-                s2CFrameMsg.Frame = _serverAuthoritativeFrame;
-                s2CFrameMsg.Datum.Clear();
-                GameManager.Instance.KcpConnectionIds.ForEach(t=>s2CFrameMsg.Datum.Add(GameManager.Instance.CacheFrames[t][_serverAuthoritativeFrame]));
-                GameManager.Instance.KcpConnectionIds.ForEach(t=>_netKcpServer.SendKcpMsg(t, pb.BattleMsgID.BattleMsgFrame, s2CFrameMsg));
+                Array.Clear(_frameInputs, 0, _frameInputs.Length);
+                _frameMemoryStream.Reset();;
+                _frameStreamWriter.Write(_serverAuthoritativeFrame);
+                _frameStreamWriter.Write(GameManager.Instance.CacheFrames.Count);
+                GameManager.Instance.KcpConnectionIds.ForEach(connectionId =>
+                {
+                    // 赋值ID
+                    var data = (byte)((GameManager.Instance.CacheFrames[connectionId][_serverAuthoritativeFrame] & ~0x01) | GameManager.Instance.KcpConnectionIds.IndexOf(connectionId));
+                    _frameStreamWriter.Write(data);
+                });
+                GameManager.Instance.KcpConnectionIds.ForEach(connectionId =>
+                {
+                    _netKcpServer.SendKcpMsg(connectionId, pb.BattleMsgID.BattleMsgFrame, _frameInputs);
+                });
             }
             _serverAuthoritativeFrame++;
         }
         catch (Exception e)
         {
-            Logger.Log(LogLevel.Exception, e.StackTrace);
+            Logger.Log(LogLevel.Exception, e.Message + e.StackTrace);
             _cancellationTokenSource.Cancel();
         }
+
         return cancellationToken.IsCancellationRequested ? Task.FromCanceled(cancellationToken) : Task.CompletedTask;
     }
 

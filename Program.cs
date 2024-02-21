@@ -18,3 +18,6 @@ static void OnCancelKeyPress(object? sender, EventArgs e)
 }
 
 Startup();
+
+Console.WriteLine("> Press any key to exit!");
+Console.ReadKey();
