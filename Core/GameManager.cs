@@ -1,4 +1,42 @@
-﻿/// <summary>
+﻿using System.Net.Sockets;
+
+public class GamerInfo
+{
+    public int ConnectionId;
+    public int PlayerId;
+    public int RoomId;
+    public int Pos;
+    public byte[] CacheFrames;
+    public bool Ready;
+    public NetworkStream NetworkStream;
+
+    public GamerInfo()
+    {
+        ConnectionId = -1;
+        Pos = -1;
+        RoomId = -1;
+        PlayerId = -1;
+        CacheFrames = new byte[10000];
+        NetworkStream = null;
+        Ready = false;
+    }
+}
+
+public class RoomInfo
+{
+    public int RoomId;
+    public int AuthoritativeFrame;
+    public List<GamerInfo> Gamers;
+
+    public RoomInfo()
+    {
+        RoomId = -1;
+        AuthoritativeFrame = 0;
+        Gamers = new List<GamerInfo>();
+    }
+}
+
+/// <summary>
 /// 游戏管理器
 /// </summary>
 public class GameManager : AManager<GameManager>
@@ -16,43 +54,17 @@ public class GameManager : AManager<GameManager>
     /// </summary>
     public const uint DefaultRoomIdBase = 20000;
 
-    /// <summary>
-    /// 所有的玩家ID集合
-    /// </summary>
-    public List<uint> PlayerIdList;
-    /// <summary>
-    /// 所有的房间ID集合
-    /// </summary>
-    public List<uint> RoomIdList;
-    /// <summary>
-    /// 所有的房间信息集合
-    /// </summary>
-    public Dictionary<uint, List<uint>> RoomInfoDic;
-    /// <summary>
-    /// 所有的KCP链接Id集合
-    /// </summary>
-    public List<int> KcpConnectionIds;
-    /// <summary>
-    /// 玩家准备集合
-    /// </summary>
-    public List<uint> Readys;
-    /// <summary>
-    /// 服务器缓存的帧数据字典
-    /// </summary>
-    public Dictionary<int, byte[]> CacheFrames;
+    public List<GamerInfo> Gamers;
+
+    public List<RoomInfo> Rooms;
     
     /// <summary>
     /// 初始化
     /// </summary>
     public override void Initialize()
     {
-        PlayerIdList = new List<uint>(10);
-        RoomIdList = new List<uint>(5);
-        RoomInfoDic = new Dictionary<uint, List<uint>>();
-        KcpConnectionIds = new List<int>(10);
-        Readys = new List<uint>();
-
-        CacheFrames = new Dictionary<int, byte[]>(10000);
+        Gamers = new List<GamerInfo>();
+        Rooms = new List<RoomInfo>();
 
         InitLogger();
     }
@@ -62,12 +74,8 @@ public class GameManager : AManager<GameManager>
     /// </summary>
     public override void OnRelease()
     {
-        PlayerIdList.Clear();
-        RoomIdList.Clear();
-        RoomInfoDic.Clear();
-        KcpConnectionIds.Clear();
-        Readys.Clear();
-        CacheFrames.Clear();
+        Gamers.Clear();
+        Rooms.Clear();
     }
     
     /// <summary>
@@ -96,13 +104,47 @@ public class GameManager : AManager<GameManager>
     /// </summary>
     /// <param name="roomId"></param>
     /// <param name="playerId"></param>
-    public void JoinRoom(uint roomId, uint playerId)
+    public RoomInfo? JoinRoom(uint roomId, uint playerId)
     {
-        RoomInfoDic[roomId].Add(playerId);
-        if (RoomInfoDic[roomId].Count == RoomMaxPlayerCount)
-        {
-            NetworkManager.Instance.StartKcpServer();
-        }
+        var gamer = GetGamerByPlayerId((int)playerId);
+        var room = GetRoomByRoomId((int)roomId);
+        if (gamer == null || room == null) 
+            return null;
+        
+        gamer.Pos = room.Gamers.Count;
+        gamer.RoomId = room.RoomId;
+        room.Gamers.Add(gamer);
+
+        if (room.Gamers.Count == RoomMaxPlayerCount) NetworkManager.Instance.StartKcpServer();
+        return room;
+    }
+
+    public GamerInfo? GetGamerByPlayerId(int playerId)
+    {
+        foreach (var g in Gamers.Where(g => g.PlayerId == playerId))
+            return g;
+        return null;
+    }
+    
+    public GamerInfo? GetGamerByConnectionId(int connectionId)
+    {
+        foreach (var g in Gamers.Where(g => g.ConnectionId == connectionId))
+            return g;
+        return null;
+    }
+
+    public GamerInfo? GetGamerByPos(int pos)
+    {
+        foreach (var g in Gamers.Where(g => g.Pos == pos))
+            return g;
+        return null;
+    }
+
+    public RoomInfo? GetRoomByRoomId(int roomId)
+    {
+        foreach (var r in Rooms.Where(r => r.RoomId == roomId))
+            return r;
+        return null;
     }
 
 }

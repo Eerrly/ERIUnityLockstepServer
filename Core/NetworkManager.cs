@@ -21,10 +21,6 @@ public class NetworkManager : AManager<NetworkManager>
     /// </summary>
     private NetKcpServer _netKcpServer;
     /// <summary>
-    /// TCP客户端流
-    /// </summary>
-    private Dictionary<uint, NetworkStream> _networkTcpStreams;
-    /// <summary>
     /// 战斗线程任务
     /// </summary>
     private Task _battleTask;
@@ -36,21 +32,19 @@ public class NetworkManager : AManager<NetworkManager>
     /// 取消句柄
     /// </summary>
     private CancellationTokenSource _cancellationTokenSource;
-    /// <summary>
-    /// 服务器权威帧
-    /// </summary>
-    private uint _serverAuthoritativeFrame = 0;
     
     private byte[] _frameInputs;
     private MemoryStream _frameMemoryStream;
     private BinaryWriter _frameStreamWriter;
     private BinaryReader _frameStreamReader;
+    private object frameLock;
     
     /// <summary>
     /// 初始化
     /// </summary>
     public override void Initialize()
     {
+        frameLock = new object();
         _frameInputs = new byte[10];
         _frameMemoryStream = new MemoryStream(_frameInputs);
         _frameStreamWriter = new BinaryWriter(_frameMemoryStream);
@@ -58,7 +52,6 @@ public class NetworkManager : AManager<NetworkManager>
         _memoryStream = new MemoryStream();
         _frameStreamReader = new BinaryReader(_memoryStream);
         _battleStopwatch = new Stopwatch();
-        _networkTcpStreams = new Dictionary<uint, NetworkStream>();
         
         _netTcpServer = new NetTcpServer();
         _netTcpServer.Initialize();
@@ -75,7 +68,6 @@ public class NetworkManager : AManager<NetworkManager>
     {
         _memoryStream.Close();
         _battleStopwatch.Stop();
-        _networkTcpStreams.Clear();
         _netTcpServer.OnProcessTcpAcceptData -= OnProcessNetTcpAcceptData;
         _netTcpServer.OnRelease();
         _netKcpServer.OnRelease();
@@ -113,14 +105,6 @@ public class NetworkManager : AManager<NetworkManager>
     public void OnKcpDisconnected(int connectionId)
     {
         Logger.Log(LogLevel.Info, $"[KCP] OnClientDisconnected connectionId:{connectionId}");
-        lock (GameManager.Instance.KcpConnectionIds)
-        {
-            GameManager.Instance.KcpConnectionIds.Remove(connectionId);
-        }
-        lock (GameManager.Instance.CacheFrames)
-        {
-            GameManager.Instance.CacheFrames.Remove(connectionId);
-        }
     }
 
     /// <summary>
@@ -180,11 +164,15 @@ public class NetworkManager : AManager<NetworkManager>
     /// <param name="connectionId">客户端连接ID</param>
     private void OnKcpProcessConnectMsg(Stream stream, int connectionId)
     {
-        if(!GameManager.Instance.KcpConnectionIds.Contains(connectionId)) GameManager.Instance.KcpConnectionIds.Add(connectionId);
-        GameManager.Instance.CacheFrames.TryAdd(connectionId, new byte[10000]);
-                    
         var c2SMsg = pb.C2S_ConnectMsg.Parser.ParseFrom(_memoryStream);
         Logger.Log(LogLevel.Info, $"[KCP] BattleMsgConnect -> playerId:{c2SMsg.PlayerId} seasonId:{c2SMsg.SeasonId}");
+        var gamer = GameManager.Instance.GetGamerByPlayerId((int)c2SMsg.PlayerId);
+        if (gamer == null)
+        {
+            Logger.Log(LogLevel.Error, $"[KCP] BattleMsgConnect PlayerId:{c2SMsg.PlayerId} Not Found!");
+            return;
+        }
+        gamer.ConnectionId = connectionId;
         var s2CMsg = new pb.S2C_ConnectMsg() { ErrorCode = pb.BattleErrorCode.BattleErrBattleOk };
         _netKcpServer.SendKcpMsg(connectionId, pb.BattleMsgID.BattleMsgConnect, s2CMsg);
     }
@@ -197,19 +185,39 @@ public class NetworkManager : AManager<NetworkManager>
     private void OnKcpProcessReadyMsg(Stream stream, int connectionId)
     {
         var c2SMsg = pb.C2S_ReadyMsg.Parser.ParseFrom(_memoryStream);
-        if(!GameManager.Instance.Readys.Contains(c2SMsg.PlayerId)) GameManager.Instance.Readys.Add(c2SMsg.PlayerId);
-                    
         Logger.Log(LogLevel.Info, $"[KCP] BattleMsgReady -> playerId:{c2SMsg.PlayerId} roomId:{c2SMsg.RoomId}");
+
+        var gamer = GameManager.Instance.GetGamerByConnectionId(connectionId);
+        var roomId = -1;
+        if (gamer == null)
+        {
+            Logger.Log(LogLevel.Error, $"[KCP] BattleMsgReady ConnectionId:{connectionId} Not Found!");
+            return;
+        }
+        gamer.Ready = true;
+        roomId = gamer.RoomId;
+
         var s2CMsg = new pb.S2C_ReadyMsg()
         {
             ErrorCode = pb.BattleErrorCode.BattleErrBattleOk,
             RoomId = c2SMsg.RoomId,
         };
-        s2CMsg.Status.AddRange(GameManager.Instance.Readys);
-        GameManager.Instance.KcpConnectionIds.ForEach(t => _netKcpServer.SendKcpMsg(t, pb.BattleMsgID.BattleMsgReady, s2CMsg));
+        var room = GameManager.Instance.GetRoomByRoomId(roomId);
+        if (room == null)
+        {
+            Logger.Log(LogLevel.Error, $"[KCP] BattleMsgReady RoomId:{roomId} Not Found!");
+            return;
+        }
 
-        if (GameManager.Instance.Readys.Count == GameManager.RoomMaxPlayerCount)
-            OnServerBattleStart();
+        foreach (var g in room.Gamers.Where(g => g.Ready))
+        {
+            s2CMsg.Status.Add((uint)g.PlayerId);
+        }
+        foreach (var g in room.Gamers)
+            _netKcpServer.SendKcpMsg(g.ConnectionId, pb.BattleMsgID.BattleMsgReady, s2CMsg);
+
+        if (s2CMsg.Status.Count == GameManager.RoomMaxPlayerCount)
+            OnServerBattleStart(room.RoomId);
     }
 
     /// <summary>
@@ -238,30 +246,48 @@ public class NetworkManager : AManager<NetworkManager>
     {
         var frame = _frameStreamReader.ReadInt32();
         var data = _frameStreamReader.ReadByte();
+        var pos = (byte)(0x01 & data);
+        var gamer = GameManager.Instance.GetGamerByPos(pos);
+        if (gamer == null)
+        {
+            Logger.Log(LogLevel.Error, $"[KCP] BattleMsgFrame Pos:{pos} Not Found!");
+            return;
+        }
+        lock (frameLock)
+        {
+            gamer.CacheFrames[frame] = data;
+        }
         Logger.Log(LogLevel.Info, $"[KCP] BattleMsgFrame -> connectionId:{connectionId} clientNextFrame:{frame} data:{data}");
-        GameManager.Instance.CacheFrames[connectionId][frame] = data;
     }
 
     /// <summary>
     /// 服务器战斗开始
     /// </summary>
-    private void OnServerBattleStart()
+    /// <param name="roomId"></param>
+    private void OnServerBattleStart(int roomId)
     {
         _battleStopwatch.Start();
+        var room = GameManager.Instance.GetRoomByRoomId(roomId);
+        if (room == null)
+        {
+            Logger.Log(LogLevel.Error, $"[KCP] OnServerBattleStart RoomId:{roomId} Not Found!");
+            return;
+        }
         var startS2CMsg = new pb.S2C_StartMsg()
         {
             ErrorCode = pb.BattleErrorCode.BattleErrBattleOk,
-            Frame = _serverAuthoritativeFrame,
+            Frame = (uint)room.AuthoritativeFrame,
             TimeStamp = (ulong)_battleStopwatch.ElapsedMilliseconds,
         };
-        GameManager.Instance.KcpConnectionIds.ForEach(t => _netKcpServer.SendKcpMsg(t, pb.BattleMsgID.BattleMsgStart, startS2CMsg));
-        StartBattleThread();
+        foreach (var g in room.Gamers)
+            _netKcpServer.SendKcpMsg(g.ConnectionId, pb.BattleMsgID.BattleMsgStart, startS2CMsg);
+        StartBattleThread(room);
     }
-    
+
     /// <summary>
     /// 开启战斗线程
     /// </summary>
-    private void StartBattleThread()
+    private void StartBattleThread(RoomInfo room)
     {
         _cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = _cancellationTokenSource.Token;
@@ -271,7 +297,7 @@ public class NetworkManager : AManager<NetworkManager>
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                await ProcessBattle(cancellationToken, frameS2CMsg);
+                await ProcessBattle(cancellationToken, frameS2CMsg, room);
                 await Task.Delay(30, cancellationToken);
             }            
         }, cancellationToken);
@@ -283,28 +309,27 @@ public class NetworkManager : AManager<NetworkManager>
     /// <param name="cancellationToken">取消句柄</param>
     /// <param name="s2CFrameMsg">服务器->客户端的帧消息</param>
     /// <returns>异步任务</returns>
-    private Task ProcessBattle(CancellationToken cancellationToken, pb.S2C_FrameMsg s2CFrameMsg)
+    private Task ProcessBattle(CancellationToken cancellationToken, pb.S2C_FrameMsg s2CFrameMsg, RoomInfo room)
     {
         try
         {
-            lock (GameManager.Instance.KcpConnectionIds)
+            lock (frameLock)
             {
                 Array.Clear(_frameInputs, 0, _frameInputs.Length);
                 _frameMemoryStream.Reset();;
-                _frameStreamWriter.Write(_serverAuthoritativeFrame);
-                _frameStreamWriter.Write(GameManager.Instance.CacheFrames.Count);
-                GameManager.Instance.KcpConnectionIds.ForEach(connectionId =>
+                _frameStreamWriter.Write(room.AuthoritativeFrame);
+                _frameStreamWriter.Write(GameManager.Instance.Gamers.Count);
+                foreach (var g in room.Gamers)
                 {
-                    // 赋值ID
-                    var data = (byte)((GameManager.Instance.CacheFrames[connectionId][_serverAuthoritativeFrame] & ~0x01) | GameManager.Instance.KcpConnectionIds.IndexOf(connectionId));
-                    _frameStreamWriter.Write(data);
-                });
-                GameManager.Instance.KcpConnectionIds.ForEach(connectionId =>
+                    var inputFrame = (byte)((g.CacheFrames[room.AuthoritativeFrame] & ~0x01) | (byte)g.Pos);
+                    _frameStreamWriter.Write(inputFrame);
+                }
+                foreach (var g in room.Gamers)
                 {
-                    _netKcpServer.SendKcpMsg(connectionId, pb.BattleMsgID.BattleMsgFrame, _frameInputs);
-                });
+                    _netKcpServer.SendKcpMsg(g.ConnectionId, pb.BattleMsgID.BattleMsgFrame, _frameInputs);
+                }
             }
-            _serverAuthoritativeFrame++;
+            room.AuthoritativeFrame++;
         }
         catch (Exception e)
         {
@@ -355,9 +380,13 @@ public class NetworkManager : AManager<NetworkManager>
     {
         Logger.Log(LogLevel.Info, $"[TCP][C2S_LoginMsg|{c2SMsg.CalculateSize()}] Account:{c2SMsg.Account.ToStringUtf8()} Password:{c2SMsg.Password.ToStringUtf8()}");
         
-        var calPlayerId = (uint)(GameManager.DefaultPlayerIdBase + GameManager.Instance.PlayerIdList.Count);
-        _networkTcpStreams[calPlayerId] = stream;
-        GameManager.Instance.PlayerIdList.Add(calPlayerId);
+        var calPlayerId = (uint)(GameManager.DefaultPlayerIdBase + GameManager.Instance.Gamers.Count);
+        var gamer = new GamerInfo
+        {
+            PlayerId = (int)calPlayerId,
+            NetworkStream = stream
+        };
+        GameManager.Instance.Gamers.Add(gamer);
         _netTcpServer.SendTcpMsg(pb.LogicMsgID.LogicMsgLogin, new pb.S2C_LoginMsg()
         {
             ErrorCode = pb.LogicErrorCode.LogicErrOk,
@@ -372,18 +401,21 @@ public class NetworkManager : AManager<NetworkManager>
     /// <param name="c2SMsg">客户端->服务器的数据</param>
     private void OnTcpProcessCreateRoomMsg(NetworkStream stream, pb.C2S_CreateRoomMsg c2SMsg)
     {
-        Logger.Log(LogLevel.Info, $"[TCP][C2S_LoginMsg|{c2SMsg.CalculateSize()}] PlayerId:{c2SMsg.PlayerId}");
+        Logger.Log(LogLevel.Info, $"[TCP][C2S_CreateRoomMsg|{c2SMsg.CalculateSize()}] PlayerId:{c2SMsg.PlayerId}");
 
-        var roomId = (uint)(GameManager.DefaultRoomIdBase + GameManager.Instance.RoomIdList.Count);
-        GameManager.Instance.RoomIdList.Add(roomId);
-        GameManager.Instance.RoomInfoDic[roomId] = new List<uint>();
+        var roomId = (uint)(GameManager.DefaultRoomIdBase + GameManager.Instance.Rooms.Count);
+        var room = new RoomInfo
+        {
+            RoomId = (int)roomId,
+        };
+        GameManager.Instance.Rooms.Add(room);
         var s2CMsg = new pb.S2C_CreateRoomMsg()
         {
             ErrorCode = pb.LogicErrorCode.LogicErrOk,
             RoomId = roomId,
         };
-        foreach (var streamInfo in _networkTcpStreams)
-            _netTcpServer.SendTcpMsg(pb.LogicMsgID.LogicMsgCreateRoom, s2CMsg, streamInfo.Value);
+        foreach (var g in GameManager.Instance.Gamers)
+            _netTcpServer.SendTcpMsg(pb.LogicMsgID.LogicMsgCreateRoom, s2CMsg, g.NetworkStream);
     }
 
     /// <summary>
@@ -393,16 +425,25 @@ public class NetworkManager : AManager<NetworkManager>
     /// <param name="c2SMsg">客户端->服务器的数据</param>
     private void OnTcpProcessJoinRoomMsg(NetworkStream stream, pb.C2S_JoinRoomMsg c2SMsg)
     {
-        Logger.Log(LogLevel.Info, $"[TCP][C2S_LoginMsg|{c2SMsg.CalculateSize()}] PlayerId:{c2SMsg.PlayerId} RoomId:{c2SMsg.RoomId}");
+        Logger.Log(LogLevel.Info, $"[TCP][C2S_JoinRoomMsg|{c2SMsg.CalculateSize()}] PlayerId:{c2SMsg.PlayerId} RoomId:{c2SMsg.RoomId}");
         
-        GameManager.Instance.JoinRoom(c2SMsg.RoomId, c2SMsg.PlayerId);
+        var room = GameManager.Instance.JoinRoom(c2SMsg.RoomId, c2SMsg.PlayerId);
         var s2CMsg = new pb.S2C_JoinRoomMsg
         {
             ErrorCode = pb.LogicErrorCode.LogicErrOk,
             RoomId = c2SMsg.RoomId,
         };
-        s2CMsg.All.AddRange(GameManager.Instance.RoomInfoDic[c2SMsg.RoomId]);
-        foreach (var streamInfo in _networkTcpStreams)
-            _netTcpServer.SendTcpMsg(pb.LogicMsgID.LogicMsgJoinRoom, s2CMsg, streamInfo.Value);
+        if (room == null)
+        {
+            Logger.Log(LogLevel.Error, $"[TCP][C2S_LoginMsg] RoomId:{c2SMsg.RoomId} Not Found!");
+            return;
+        }
+
+        var all = new uint[GameManager.RoomMaxPlayerCount];
+        foreach (var g in room.Gamers) all[g.Pos] = (uint)g.PlayerId;
+        s2CMsg.All.AddRange(all);
+        
+        foreach (var g in room.Gamers)
+            _netTcpServer.SendTcpMsg(pb.LogicMsgID.LogicMsgJoinRoom, s2CMsg, g.NetworkStream);
     }
 }
