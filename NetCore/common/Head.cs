@@ -5,6 +5,6 @@ public struct Head
 {
     public byte _cmd;
     public int _length;
-    
+
     public static readonly int HeadLength = 5;
 }

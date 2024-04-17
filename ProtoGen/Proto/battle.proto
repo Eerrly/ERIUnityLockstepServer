@@ -70,14 +70,15 @@ message S2C_StartMsg {
 // 帧消息
 message C2S_FrameMsg {
     uint32 frame            = 1;    //帧号
-    int32 data              = 2;    //帧数据
+    bytes datum             = 2;    //帧数据
 }
 
 // 帧消息
 message S2C_FrameMsg {
     BattleErrorCode errorCode       = 1;    //错误码
     uint32 frame                    = 2;    //帧号
-    bytes datum                     = 3;    //所有玩家的某一帧帧数据
+    uint32 playerCount              = 3;    //玩家数量
+    bytes datum                     = 4;    //玩家帧数据
 }
 
 message S2C_ResultMsg {

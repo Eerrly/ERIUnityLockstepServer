@@ -32,20 +32,21 @@ namespace pb {
             "DFMyQ19SZWFkeU1zZxIjCgllcnJvckNvZGUYASABKA4yEC5CYXR0bGVFcnJv",
             "ckNvZGUSDgoGcm9vbUlkGAIgASgNEg4KBnN0YXR1cxgDIAMoDSJVCgxTMkNf",
             "U3RhcnRNc2cSIwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0dGxlRXJyb3JDb2Rl",
-            "Eg0KBWZyYW1lGAIgASgNEhEKCXRpbWVTdGFtcBgDIAEoBCIrCgxDMlNfRnJh",
-            "bWVNc2cSDQoFZnJhbWUYASABKA0SDAoEZGF0YRgCIAEoBSJRCgxTMkNfRnJh",
-            "bWVNc2cSIwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0dGxlRXJyb3JDb2RlEg0K",
-            "BWZyYW1lGAIgASgNEg0KBWRhdHVtGAMgASgMIkQKDVMyQ19SZXN1bHRNc2cS",
-            "IwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0dGxlRXJyb3JDb2RlEg4KBndpbm5l",
-            "chgCIAEoDSJNChZTMkNfQmF0dGxlRXhjZXB0aW9uTXNnEiMKCWVycm9yQ29k",
-            "ZRgBIAEoDjIQLkJhdHRsZUVycm9yQ29kZRIOCgZyZWFzb24YAiABKAkqyAEK",
-            "C0JhdHRsZU1zZ0lEEhQKEEJBVFRMRV9NU0dfQmVnaW4QABIWChJCQVRUTEVf",
-            "TVNHX0Nvbm5lY3QQARIYChRCQVRUTEVfTVNHX0hlYXJ0YmVhdBACEhQKEEJB",
-            "VFRMRV9NU0dfUmVhZHkQChIUChBCQVRUTEVfTVNHX1N0YXJ0EBQSFAoQQkFU",
-            "VExFX01TR19GcmFtZRAeEhUKEUJBVFRMRV9NU0dfUmVzdWx0ECgSGAoUQkFU",
-            "VExFX01TR19FeGNlcHRpb24QZCpYCg9CYXR0bGVFcnJvckNvZGUSGAoUQkFU",
-            "VExFX0VSUl9CYXR0bGVfT2sQABIWChJCQVRUTEVfRVJSX1RpbWVvdXQQARIT",
-            "Cg9CQVRUTEVfRVJSX0RhdGEQAkIFqgICcGJiBnByb3RvMw=="));
+            "Eg0KBWZyYW1lGAIgASgNEhEKCXRpbWVTdGFtcBgDIAEoBCIsCgxDMlNfRnJh",
+            "bWVNc2cSDQoFZnJhbWUYASABKA0SDQoFZGF0dW0YAiABKAwiZgoMUzJDX0Zy",
+            "YW1lTXNnEiMKCWVycm9yQ29kZRgBIAEoDjIQLkJhdHRsZUVycm9yQ29kZRIN",
+            "CgVmcmFtZRgCIAEoDRITCgtwbGF5ZXJDb3VudBgDIAEoDRINCgVkYXR1bRgE",
+            "IAEoDCJECg1TMkNfUmVzdWx0TXNnEiMKCWVycm9yQ29kZRgBIAEoDjIQLkJh",
+            "dHRsZUVycm9yQ29kZRIOCgZ3aW5uZXIYAiABKA0iTQoWUzJDX0JhdHRsZUV4",
+            "Y2VwdGlvbk1zZxIjCgllcnJvckNvZGUYASABKA4yEC5CYXR0bGVFcnJvckNv",
+            "ZGUSDgoGcmVhc29uGAIgASgJKsgBCgtCYXR0bGVNc2dJRBIUChBCQVRUTEVf",
+            "TVNHX0JlZ2luEAASFgoSQkFUVExFX01TR19Db25uZWN0EAESGAoUQkFUVExF",
+            "X01TR19IZWFydGJlYXQQAhIUChBCQVRUTEVfTVNHX1JlYWR5EAoSFAoQQkFU",
+            "VExFX01TR19TdGFydBAUEhQKEEJBVFRMRV9NU0dfRnJhbWUQHhIVChFCQVRU",
+            "TEVfTVNHX1Jlc3VsdBAoEhgKFEJBVFRMRV9NU0dfRXhjZXB0aW9uEGQqWAoP",
+            "QmF0dGxlRXJyb3JDb2RlEhgKFEJBVFRMRV9FUlJfQmF0dGxlX09rEAASFgoS",
+            "QkFUVExFX0VSUl9UaW1lb3V0EAESEwoPQkFUVExFX0VSUl9EYXRhEAJCBaoC",
+            "AnBiYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::pb.BattleMsgID), typeof(global::pb.BattleErrorCode), }, new pbr::GeneratedClrTypeInfo[] {
@@ -56,8 +57,8 @@ namespace pb {
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_ReadyMsg), global::pb.C2S_ReadyMsg.Parser, new[]{ "RoomId", "PlayerId" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_ReadyMsg), global::pb.S2C_ReadyMsg.Parser, new[]{ "ErrorCode", "RoomId", "Status" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_StartMsg), global::pb.S2C_StartMsg.Parser, new[]{ "ErrorCode", "Frame", "TimeStamp" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_FrameMsg), global::pb.C2S_FrameMsg.Parser, new[]{ "Frame", "Data" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_FrameMsg), global::pb.S2C_FrameMsg.Parser, new[]{ "ErrorCode", "Frame", "Datum" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_FrameMsg), global::pb.C2S_FrameMsg.Parser, new[]{ "Frame", "Datum" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_FrameMsg), global::pb.S2C_FrameMsg.Parser, new[]{ "ErrorCode", "Frame", "PlayerCount", "Datum" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_ResultMsg), global::pb.S2C_ResultMsg.Parser, new[]{ "ErrorCode", "Winner" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_BattleExceptionMsg), global::pb.S2C_BattleExceptionMsg.Parser, new[]{ "ErrorCode", "Reason" }, null, null, null)
           }));
@@ -1252,7 +1253,7 @@ namespace pb {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public C2S_FrameMsg(C2S_FrameMsg other) : this() {
       frame_ = other.frame_;
-      data_ = other.data_;
+      datum_ = other.datum_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1274,17 +1275,17 @@ namespace pb {
       }
     }
 
-    /// <summary>Field number for the "data" field.</summary>
-    public const int DataFieldNumber = 2;
-    private int data_;
+    /// <summary>Field number for the "datum" field.</summary>
+    public const int DatumFieldNumber = 2;
+    private pb::ByteString datum_ = pb::ByteString.Empty;
     /// <summary>
     ///帧数据
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int Data {
-      get { return data_; }
+    public pb::ByteString Datum {
+      get { return datum_; }
       set {
-        data_ = value;
+        datum_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -1302,7 +1303,7 @@ namespace pb {
         return true;
       }
       if (Frame != other.Frame) return false;
-      if (Data != other.Data) return false;
+      if (Datum != other.Datum) return false;
       return true;
     }
 
@@ -1310,7 +1311,7 @@ namespace pb {
     public override int GetHashCode() {
       int hash = 1;
       if (Frame != 0) hash ^= Frame.GetHashCode();
-      if (Data != 0) hash ^= Data.GetHashCode();
+      if (Datum.Length != 0) hash ^= Datum.GetHashCode();
       return hash;
     }
 
@@ -1325,9 +1326,9 @@ namespace pb {
         output.WriteRawTag(8);
         output.WriteUInt32(Frame);
       }
-      if (Data != 0) {
-        output.WriteRawTag(16);
-        output.WriteInt32(Data);
+      if (Datum.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteBytes(Datum);
       }
     }
 
@@ -1337,8 +1338,8 @@ namespace pb {
       if (Frame != 0) {
         size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Frame);
       }
-      if (Data != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Data);
+      if (Datum.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(Datum);
       }
       return size;
     }
@@ -1351,8 +1352,8 @@ namespace pb {
       if (other.Frame != 0) {
         Frame = other.Frame;
       }
-      if (other.Data != 0) {
-        Data = other.Data;
+      if (other.Datum.Length != 0) {
+        Datum = other.Datum;
       }
     }
 
@@ -1368,8 +1369,8 @@ namespace pb {
             Frame = input.ReadUInt32();
             break;
           }
-          case 16: {
-            Data = input.ReadInt32();
+          case 18: {
+            Datum = input.ReadBytes();
             break;
           }
         }
@@ -1407,6 +1408,7 @@ namespace pb {
     public S2C_FrameMsg(S2C_FrameMsg other) : this() {
       errorCode_ = other.errorCode_;
       frame_ = other.frame_;
+      playerCount_ = other.playerCount_;
       datum_ = other.datum_;
     }
 
@@ -1443,11 +1445,25 @@ namespace pb {
       }
     }
 
+    /// <summary>Field number for the "playerCount" field.</summary>
+    public const int PlayerCountFieldNumber = 3;
+    private uint playerCount_;
+    /// <summary>
+    ///玩家数量
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint PlayerCount {
+      get { return playerCount_; }
+      set {
+        playerCount_ = value;
+      }
+    }
+
     /// <summary>Field number for the "datum" field.</summary>
-    public const int DatumFieldNumber = 3;
+    public const int DatumFieldNumber = 4;
     private pb::ByteString datum_ = pb::ByteString.Empty;
     /// <summary>
-    ///所有玩家的某一帧帧数据
+    ///玩家帧数据
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pb::ByteString Datum {
@@ -1472,6 +1488,7 @@ namespace pb {
       }
       if (ErrorCode != other.ErrorCode) return false;
       if (Frame != other.Frame) return false;
+      if (PlayerCount != other.PlayerCount) return false;
       if (Datum != other.Datum) return false;
       return true;
     }
@@ -1481,6 +1498,7 @@ namespace pb {
       int hash = 1;
       if (ErrorCode != 0) hash ^= ErrorCode.GetHashCode();
       if (Frame != 0) hash ^= Frame.GetHashCode();
+      if (PlayerCount != 0) hash ^= PlayerCount.GetHashCode();
       if (Datum.Length != 0) hash ^= Datum.GetHashCode();
       return hash;
     }
@@ -1500,8 +1518,12 @@ namespace pb {
         output.WriteRawTag(16);
         output.WriteUInt32(Frame);
       }
+      if (PlayerCount != 0) {
+        output.WriteRawTag(24);
+        output.WriteUInt32(PlayerCount);
+      }
       if (Datum.Length != 0) {
-        output.WriteRawTag(26);
+        output.WriteRawTag(34);
         output.WriteBytes(Datum);
       }
     }
@@ -1514,6 +1536,9 @@ namespace pb {
       }
       if (Frame != 0) {
         size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Frame);
+      }
+      if (PlayerCount != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(PlayerCount);
       }
       if (Datum.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeBytesSize(Datum);
@@ -1531,6 +1556,9 @@ namespace pb {
       }
       if (other.Frame != 0) {
         Frame = other.Frame;
+      }
+      if (other.PlayerCount != 0) {
+        PlayerCount = other.PlayerCount;
       }
       if (other.Datum.Length != 0) {
         Datum = other.Datum;
@@ -1553,7 +1581,11 @@ namespace pb {
             Frame = input.ReadUInt32();
             break;
           }
-          case 26: {
+          case 24: {
+            PlayerCount = input.ReadUInt32();
+            break;
+          }
+          case 34: {
             Datum = input.ReadBytes();
             break;
           }

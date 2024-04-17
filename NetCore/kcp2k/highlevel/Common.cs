@@ -18,7 +18,7 @@ namespace kcp2k
             }
             catch (SocketException exception)
             {
-                Logger.Log(LogLevel.Info, $"[KCP] Failed to resolve host: {hostname} reason: {exception}");
+                Log.Info($"[KCP] Failed to resolve host: {hostname} reason: {exception}");
                 addresses = null;
                 return false;
             }
@@ -41,11 +41,11 @@ namespace kcp2k
             }
             catch (SocketException)
             {
-                Logger.Log(LogLevel.Warning, $"[KCP] failed to set Socket RecvBufSize = {recvBufferSize} SendBufSize = {sendBufferSize}");
+                Log.Warning($"[KCP] failed to set Socket RecvBufSize = {recvBufferSize} SendBufSize = {sendBufferSize}");
             }
 
 
-            Logger.Log(LogLevel.Info, $"[KCP] RecvBuf = {initialReceive}=>{socket.ReceiveBufferSize} ({socket.ReceiveBufferSize/initialReceive}x) SendBuf = {initialSend}=>{socket.SendBufferSize} ({socket.SendBufferSize/initialSend}x)");
+            Log.Info($"[KCP] RecvBuf = {initialReceive}=>{socket.ReceiveBufferSize} ({socket.ReceiveBufferSize/initialReceive}x) SendBuf = {initialSend}=>{socket.SendBufferSize} ({socket.SendBufferSize/initialSend}x)");
         }
 
         // generate a connection hash from IP+Port.

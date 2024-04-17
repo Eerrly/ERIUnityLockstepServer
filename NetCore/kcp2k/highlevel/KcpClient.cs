@@ -65,7 +65,7 @@ namespace kcp2k
         // some callbacks need to wrapped with some extra logic
         protected override void OnAuthenticated()
         {
-            Logger.Log(LogLevel.Info, $"[KCP] Client: OnConnected");
+            Log.Info($"[KCP] Client: OnConnected");
             connected = true;
             OnConnectedCallback();
         }
@@ -78,7 +78,7 @@ namespace kcp2k
 
         protected override void OnDisconnected()
         {
-            Logger.Log(LogLevel.Info, $"[KCP] Client: OnDisconnected");
+            Log.Info($"[KCP] Client: OnDisconnected");
             connected = false;
             socket?.Close();
             socket = null;
@@ -92,7 +92,7 @@ namespace kcp2k
         {
             if (connected)
             {
-                Logger.Log(LogLevel.Warning, "[KCP] Client: already connected!");
+                Log.Warning("[KCP] Client: already connected!");
                 return;
             }
 
@@ -110,7 +110,7 @@ namespace kcp2k
             // client doesn't need secure cookie.
             Reset(config);
 
-            Logger.Log(LogLevel.Info, $"[KCP] Client: connect to {address}:{port}");
+            Log.Info($"[KCP] Client: connect to {address}:{port}");
 
             // create socket
             remoteEndPoint = new IPEndPoint(addresses[0], port);
@@ -156,7 +156,7 @@ namespace kcp2k
                 // at least log a message for easier debugging.
                 // for example, his can happen when connecting without a server.
                 // see test: ConnectWithoutServer().
-                Logger.Log(LogLevel.Info, $"[KCP] Client.RawReceive: looks like the other end has closed the connection. This is fine: {e}");
+                Log.Info($"[KCP] Client.RawReceive: looks like the other end has closed the connection. This is fine: {e}");
                 base.Disconnect();
                 return false;
             }
@@ -181,7 +181,7 @@ namespace kcp2k
                 // this is not an 'error', it's expected to happen.
                 // but connections should never just end silently.
                 // at least log a message for easier debugging.
-                Logger.Log(LogLevel.Info, $"[KCP] Client.RawSend: looks like the other end has closed the connection. This is fine: {e}");
+                Log.Info($"[KCP] Client.RawSend: looks like the other end has closed the connection. This is fine: {e}");
                 // base.Disconnect(); <- don't call this, would deadlock if SendDisconnect() already throws
 
             }
@@ -191,7 +191,7 @@ namespace kcp2k
         {
             if (!connected)
             {
-                Logger.Log(LogLevel.Warning, "[KCP] Client: can't send because not connected!");
+                Log.Warning("[KCP] Client: can't send because not connected!");
                 return;
             }
 
@@ -215,17 +215,17 @@ namespace kcp2k
             Utils.Decode32U(segment.Array, segment.Offset + 1, out uint messageCookie);
             if (messageCookie == 0)
             {
-                Logger.Log(LogLevel.Error, $"[KCP] Client: received message with cookie=0, this should never happen. Server should always include the security cookie.");
+                Log.Error($"[KCP] Client: received message with cookie=0, this should never happen. Server should always include the security cookie.");
             }
 
             if (cookie == 0)
             {
                 cookie = messageCookie;
-                Logger.Log(LogLevel.Info, $"[KCP] Client: received initial cookie: {cookie}");
+                Log.Info($"[KCP] Client: received initial cookie: {cookie}");
             }
             else if (cookie != messageCookie)
             {
-                Logger.Log(LogLevel.Warning, $"[KCP] Client: dropping message with mismatching cookie: {messageCookie} expected: {cookie}.");
+                Log.Warning($"[KCP] Client: dropping message with mismatching cookie: {messageCookie} expected: {cookie}.");
                 return;
             }
 
@@ -249,7 +249,7 @@ namespace kcp2k
                     // invalid channel indicates random internet noise.
                     // servers may receive random UDP data.
                     // just ignore it, but log for easier debugging.
-                    Logger.Log(LogLevel.Warning, $"[KCP] Client: invalid channel header: {channel}, likely internet noise");
+                    Log.Warning($"[KCP] Client: invalid channel header: {channel}, likely internet noise");
                     break;
                 }
             }

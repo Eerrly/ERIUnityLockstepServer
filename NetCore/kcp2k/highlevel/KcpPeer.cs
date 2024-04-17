@@ -153,7 +153,7 @@ namespace kcp2k
             // set the cookie after resetting state so it's not overwritten again.
             // with log message for debugging in case of cookie issues.
             this.cookie = cookie;
-            Logger.Log(LogLevel.Info, $"[KCP] {GetType()}: created with cookie={cookie}");
+            Log.Info($"[KCP] {GetType()}: created with cookie={cookie}");
 
             // create mtu sized send buffer
             rawSendBuffer = new byte[config.Mtu];
@@ -348,7 +348,7 @@ namespace kcp2k
                         // it proves that the other end speaks our protocol.
 
                         // log with previously parsed cookie
-                        Logger.Log(LogLevel.Info, $"[KCP] {GetType()}: received hello with cookie={cookie}");
+                        Log.Info($"[KCP] {GetType()}: received hello with cookie={cookie}");
                         state = KcpState.Authenticated;
                         OnAuthenticated();
                         break;
@@ -389,7 +389,7 @@ namespace kcp2k
                     {
                         // should never receive another hello after auth
                         // GetType() shows Server/ClientConn instead of just Connection.
-                        Logger.Log(LogLevel.Warning, $"{GetType()}: received invalid header {header} while Authenticated. Disconnecting the connection.");
+                        Log.Warning($"{GetType()}: received invalid header {header} while Authenticated. Disconnecting the connection.");
                         Disconnect();
                         break;
                     }
@@ -528,7 +528,7 @@ namespace kcp2k
             if (input != 0)
             {
                 // GetType() shows Server/ClientConn instead of just Connection.
-                Logger.Log(LogLevel.Warning, $"[KCP] {GetType()}: Input failed with error={input} for buffer with length={message.Count - 1}");
+                Log.Warning($"[KCP] {GetType()}: Input failed with error={input} for buffer with length={message.Count - 1}");
             }
         }
 
@@ -606,7 +606,7 @@ namespace kcp2k
                 case KcpHeaderUnreliable.Disconnect:
                 {
                     // GetType() shows Server/ClientConn instead of just Connection.
-                    Logger.Log(LogLevel.Info, $"[KCP] {GetType()}: received disconnect message");
+                    Log.Info($"[KCP] {GetType()}: received disconnect message");
                     Disconnect();
                     break;
                 }
@@ -667,7 +667,7 @@ namespace kcp2k
             {
                 // otherwise content is larger than MaxMessageSize. let user know!
                 // GetType() shows Server/ClientConn instead of just Connection.
-                Logger.Log(LogLevel.Error, $"[KCP] {GetType()}: Failed to send unreliable message of size {content.Count} because it's larger than UnreliableMaxMessageSize={unreliableMax}");
+                Log.Error($"[KCP] {GetType()}: Failed to send unreliable message of size {content.Count} because it's larger than UnreliableMaxMessageSize={unreliableMax}");
                 return;
             }
 
@@ -704,7 +704,7 @@ namespace kcp2k
             // cookie is automatically included in all messages.
 
             // GetType() shows Server/ClientConn instead of just Connection.
-            Logger.Log(LogLevel.Info, $"[KCP] {GetType()}: sending handshake to other end with cookie={cookie}");
+            Log.Info($"[KCP] {GetType()}: sending handshake to other end with cookie={cookie}");
             SendReliable(KcpHeaderReliable.Hello, default);
         }
 
@@ -783,7 +783,7 @@ namespace kcp2k
 
             // set as Disconnected, call event
             // GetType() shows Server/ClientConn instead of just Connection.
-            Logger.Log(LogLevel.Info, $"[KCP] {GetType()}: Disconnected.");
+            Log.Info($"[KCP] {GetType()}: Disconnected.");
             state = KcpState.Disconnected;
             OnDisconnected();
         }

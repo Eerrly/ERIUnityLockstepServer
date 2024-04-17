@@ -1,23 +1,8 @@
-﻿Console.CancelKeyPress += OnCancelKeyPress;
+﻿// See https://aka.ms/new-console-template for more information
 
-// 启动函数
-static void Startup()
-{
-    GameManager.Instance.Initialize();
-    NetworkManager.Instance.Initialize();
-    
-    GameManager.Instance.StartServer();
-}
+GameManager.Instance.Initialize();
+NetworkManager.Instance.Initialize();
+NetworkManager.Instance.TcpStart();
 
-// 按下停止运行时调用
-static void OnCancelKeyPress(object? sender, EventArgs e)
-{
-    GameManager.Instance.OnRelease();
-    NetworkManager.Instance.OnRelease();
-    Console.WriteLine(">>> Exit");
-}
-
-Startup();
-
-Console.WriteLine("> Press any key to exit!");
-Console.ReadKey();
+System.Console.WriteLine($"[{TimeUtil.DateTimeNowToString()}] ServerUri: {NetworkManager.Instance.KcpUri}");
+Console.ReadLine();
