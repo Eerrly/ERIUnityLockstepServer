@@ -10,7 +10,7 @@ public class RoomInfo
 
     public RoomInfo()
     {
-        AuthoritativeFrame = 0;
+        AuthoritativeFrame = -1;
         Readies = new List<uint>();
         Gamers = new List<uint>();
         BattleStopwatch = new Stopwatch();

@@ -246,15 +246,18 @@ public class NetworkManager : AManager<NetworkManager>
                 try
                 {
                     System.Console.WriteLine($"OnServerBattleStart AuthoritativeFrame -> {room.AuthoritativeFrame}");
-                    for (var i = 0; i < room.Gamers.Count; i++)
+                    if (room.AuthoritativeFrame >= 0)
                     {
-                        var gamer = GameManager.Instance.GetGamerById(room.Gamers[i]);
-                        byteArray[i] = (byte)((gamer.BattleData.Frames[room.AuthoritativeFrame] & ~0x01) | (byte)gamer.BattleData.Pos);
-                    }
-                    for (var i = 0; i < room.Gamers.Count; i++)
-                    {
-                        var gamer = GameManager.Instance.GetGamerById(room.Gamers[i]);
-                        SendBattleFrameMessage(gamer.BattleData.ConnectionId, pb.BattleErrorCode.BattleErrBattleOk, (uint)room.AuthoritativeFrame, (uint)room.Gamers.Count, byteArray);
+                        for (var i = 0; i < room.Gamers.Count; i++)
+                        {
+                            var gamer = GameManager.Instance.GetGamerById(room.Gamers[i]);
+                            byteArray[i] = (byte)((gamer.BattleData.Frames[room.AuthoritativeFrame] & ~0x01) | (byte)gamer.BattleData.Pos);
+                        }
+                        for (var i = 0; i < room.Gamers.Count; i++)
+                        {
+                            var gamer = GameManager.Instance.GetGamerById(room.Gamers[i]);
+                            SendBattleFrameMessage(gamer.BattleData.ConnectionId, pb.BattleErrorCode.BattleErrBattleOk, (uint)room.AuthoritativeFrame, (uint)room.Gamers.Count, byteArray);
+                        }
                     }
                     room.AuthoritativeFrame ++;
                 }
