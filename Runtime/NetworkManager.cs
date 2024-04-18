@@ -14,8 +14,6 @@ public class NetworkManager : AManager<NetworkManager>
     public Uri KcpUri => kcpServerTransport.Uri();
     public Uri TcpUri => tcpServerTransport.Uri();
 
-    List<uint> readies = new List<uint>();
-
     public override void Initialize()
     {
         memoryStream = new MemoryStream();
