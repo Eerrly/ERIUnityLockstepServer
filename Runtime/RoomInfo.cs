@@ -14,7 +14,7 @@ public class RoomInfo
         AuthoritativeFrame = -1;
         Readies = new List<uint>();
         Gamers = new List<uint>();
-        InputCounts = new byte[10000];
+        InputCounts = new byte[BattleSetting.MaxFrameCount];
         BattleStopwatch = new Stopwatch();
     }
 }
