@@ -6,6 +6,7 @@ public class RoomInfo
     public int AuthoritativeFrame;
     public List<uint> Readies;
     public List<uint> Gamers;
+    public byte[] InputCounts;
     public Stopwatch BattleStopwatch;
 
     public RoomInfo()
@@ -13,6 +14,7 @@ public class RoomInfo
         AuthoritativeFrame = -1;
         Readies = new List<uint>();
         Gamers = new List<uint>();
+        InputCounts = new byte[10000];
         BattleStopwatch = new Stopwatch();
     }
 }
