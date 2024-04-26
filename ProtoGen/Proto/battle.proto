@@ -78,7 +78,8 @@ message S2C_FrameMsg {
     BattleErrorCode errorCode       = 1;    //错误码
     uint32 frame                    = 2;    //帧号
     uint32 playerCount              = 3;    //玩家数量
-    bytes datum                     = 4;    //玩家帧数据
+    uint32 inputCount               = 4;    //操作数量
+    bytes datum                     = 5;    //玩家帧数据
 }
 
 message S2C_ResultMsg {

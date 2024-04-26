@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net.Sockets;
+using System.Threading.Channels;
 using Google.Protobuf;
 
 public class NetworkManager : AManager<NetworkManager>
@@ -57,10 +58,10 @@ public class NetworkManager : AManager<NetworkManager>
                     System.Console.WriteLine($"[KCP] BattleMsgReady -> roomId:{c2SMessage.RoomId} playerId:{c2SMessage.PlayerId}");
 
                     var room = GameManager.Instance.GetRoom(c2SMessage.RoomId);
-                    if (room == null) break;
                     if (!room.Readies.Contains(c2SMessage.PlayerId)) room.Readies.Add(c2SMessage.PlayerId);
-                    for (var i = 0; i < room.Readies.Count; i++){
-                        var gamer = GameManager.Instance.GetGamerById(room.Readies[i]);
+                    foreach (var playerId in room.Readies)
+                    {
+                        var gamer = GameManager.Instance.GetGamerById(playerId);
                         gamer.BattleData.Pos = (int)(gamer.LogicData.ID - GameSetting.DefaultPlayerIdBase - 1);
                         SendBattleReadyMessage(gamer.BattleData.ConnectionId, pb.BattleErrorCode.BattleErrBattleOk, room.RoomId, room.Readies);
                     }
@@ -79,20 +80,16 @@ public class NetworkManager : AManager<NetworkManager>
                 case (byte)pb.BattleMsgID.BattleMsgFrame:
                 {
                     var c2SMessage = pb.C2S_FrameMsg.Parser.ParseFrom(memoryStream);
-                    System.Console.WriteLine($"[KCP] BattleMsgFrame -> connectionId:{connectionId} frame:{c2SMessage.Frame} Datum:{c2SMessage.Datum.ToByteArray()[0]}");
 
-                    var data = c2SMessage.Datum.ToByteArray()[0];
-                    var pos = (byte)(data & 0x01);
+                    var dataFrame = c2SMessage.Datum.ToByteArray()[0];
+                    var pos = (byte)(dataFrame & 0x01);
                     var gamer = GameManager.Instance.GetGamerByPos(pos);
-                    if (gamer == null) {
-                        System.Console.WriteLine($"[KCP] BattleMsgFrame -> Pos:{pos} Not Found!");
-                        break;
-                    }
                     var room = GameManager.Instance.GetRoom(gamer.LogicData.RoomId);
-                    System.Console.WriteLine($"[KCP] BattleMsgFrame -> connectionId:{connectionId} gameId:{gamer.LogicData.ID} clientFrame:{c2SMessage.Frame} data:{data} serverFrame:{room.AuthoritativeFrame}");
-                    
+                    System.Console.WriteLine($"[KCP] BattleMsgFrame -> connectionId:{connectionId} gameId:{gamer.LogicData.ID} clientFrame:{c2SMessage.Frame} data:{dataFrame} serverFrame:{room.AuthoritativeFrame}");
+
+                    room.InputCounts[c2SMessage.Frame] |= (byte)(1 << pos);
                     gamer.BattleData.LastSentFrame = c2SMessage.Frame;
-                    gamer.BattleData.Frames[c2SMessage.Frame] = data;
+                    gamer.BattleData.Frames[c2SMessage.Frame] = dataFrame;
                     break;
                 }
             }
@@ -149,9 +146,9 @@ public class NetworkManager : AManager<NetworkManager>
         kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgHeartbeat, s2CMessage, connectionId);
     }
 
-    public void SendBattleFrameMessage(int connectionId, pb.BattleErrorCode errorCode, uint frame, uint playerCount, byte[] datum)
+    public void SendBattleFrameMessage(int connectionId, pb.BattleErrorCode errorCode, uint frame, uint playerCount, uint inputCount, byte[] datum)
     {
-        var s2CMessage = new pb.S2C_FrameMsg() { ErrorCode = errorCode, Frame = frame, PlayerCount = playerCount, Datum = ByteString.CopyFrom(datum) };
+        var s2CMessage = new pb.S2C_FrameMsg() { ErrorCode = errorCode, Frame = frame, PlayerCount = playerCount, InputCount = inputCount, Datum = ByteString.CopyFrom(datum) };
         kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgFrame, s2CMessage, connectionId);
     }
 
@@ -186,7 +183,6 @@ public class NetworkManager : AManager<NetworkManager>
                     
                     var room = GameManager.Instance.GetRoom(c2SMessage.RoomId);
                     var gamer = GameManager.Instance.GetGamerById(c2SMessage.PlayerId);
-                    if (room == null || gamer == null) break;
                     gamer.LogicData.RoomId = c2SMessage.RoomId;
                     if(!room.Gamers.Contains(gamer.LogicData.ID)) room.Gamers.Add(gamer.LogicData.ID);
 
@@ -236,8 +232,9 @@ public class NetworkManager : AManager<NetworkManager>
     private void OnServerBattleStart(RoomInfo room)
     {
         room.BattleStopwatch.Start();
-        for (var i = 0; i < room.Gamers.Count; i++){
-            var gamer = GameManager.Instance.GetGamerById(room.Gamers[i]);
+        foreach (var playerId in room.Gamers)
+        {
+            var gamer = GameManager.Instance.GetGamerById(playerId);
             SendBattleStartMessage(gamer.BattleData.ConnectionId, pb.BattleErrorCode.BattleErrBattleOk, (uint)room.AuthoritativeFrame, (ulong)room.BattleStopwatch.ElapsedMilliseconds);
         }
         var byteArray = new byte[room.Gamers.Count];
@@ -245,18 +242,18 @@ public class NetworkManager : AManager<NetworkManager>
             while (true) {
                 try
                 {
-                    System.Console.WriteLine($"OnServerBattleStart AuthoritativeFrame -> {room.AuthoritativeFrame}");
                     if (room.AuthoritativeFrame >= 0)
                     {
+                        if (room.AuthoritativeFrame == 0) room.InputCounts[(uint)room.AuthoritativeFrame] = 0x3;
                         for (var i = 0; i < room.Gamers.Count; i++)
                         {
                             var gamer = GameManager.Instance.GetGamerById(room.Gamers[i]);
-                            byteArray[i] = (byte)((gamer.BattleData.Frames[room.AuthoritativeFrame] & ~0x01) | (byte)gamer.BattleData.Pos);
+                            byteArray[gamer.BattleData.Pos] = (byte)((gamer.BattleData.Frames[room.AuthoritativeFrame] & ~0x01) | (byte)gamer.BattleData.Pos);
                         }
                         for (var i = 0; i < room.Gamers.Count; i++)
                         {
                             var gamer = GameManager.Instance.GetGamerById(room.Gamers[i]);
-                            SendBattleFrameMessage(gamer.BattleData.ConnectionId, pb.BattleErrorCode.BattleErrBattleOk, (uint)room.AuthoritativeFrame, (uint)room.Gamers.Count, byteArray);
+                            SendBattleFrameMessage(gamer.BattleData.ConnectionId, pb.BattleErrorCode.BattleErrBattleOk, (uint)room.AuthoritativeFrame, (uint)room.Gamers.Count, room.InputCounts[(uint)room.AuthoritativeFrame], byteArray);
                         }
                     }
                     room.AuthoritativeFrame ++;

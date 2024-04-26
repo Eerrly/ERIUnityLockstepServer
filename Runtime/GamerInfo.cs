@@ -25,6 +25,6 @@ public class GamerInfo
     public GamerInfo()
     {
         LogicData = new LogicData();
-        BattleData = new BattleData() { Frames = new byte[10000] };
+        BattleData = new BattleData() { Frames = new byte[BattleSetting.MaxFrameCount] };
     }
 }
