@@ -26,7 +26,7 @@ public class TcpServerTransport : ServerTransport
 
     public override Uri Uri()
     {
-        UriBuilder builder = new UriBuilder();
+        var builder = new UriBuilder();
         builder.Scheme = nameof(KcpServerTransport);
         builder.Host = System.Net.Dns.GetHostName();
         builder.Port = port;
@@ -122,10 +122,11 @@ public class TcpServerTransport : ServerTransport
         }
     }
 
-    public void SendMessage(pb.LogicMsgID logicMsgID, IMessage message, NetworkStream stream)
+    public void SendMessage<T>(pb.LogicMsgID logicMsgId, T message, NetworkStream stream) where T: IMessage
     {
-        var head = new Head(){ _cmd = (byte)logicMsgID, _length = message.CalculateSize() };
+        var head = new Head(){ _cmd = (byte)logicMsgId, _length = message.CalculateSize() };
         var packet = new Packet() { _data = message.ToByteArray(), _head = head };
+        MsgPoolManager.Instance.Release(message);
         Send(packet, stream);
     }
 

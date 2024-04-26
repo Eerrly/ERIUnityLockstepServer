@@ -44,7 +44,7 @@ public class KcpServerTransport : ServerTransport
 
     public override Uri Uri()
     {
-        UriBuilder builder = new UriBuilder();
+        var builder = new UriBuilder();
         builder.Scheme = nameof(KcpServerTransport);
         builder.Host = System.Net.Dns.GetHostName();
         builder.Port = port;
@@ -108,10 +108,11 @@ public class KcpServerTransport : ServerTransport
         }
     }
 
-    public void SendMessage(pb.BattleMsgID battleMsgID, IMessage message, int connectionId)
+    public void SendMessage<T>(pb.BattleMsgID battleMsgId, T message, int connectionId) where T : IMessage
     {
-        var head = new Head(){ _cmd = (byte)battleMsgID, _length = message.CalculateSize() };
+        var head = new Head(){ _cmd = (byte)battleMsgId, _length = message.CalculateSize() };
         var packet = new Packet(){ _data = message.ToByteArray(), _head = head };
+        MsgPoolManager.Instance.Release(message);
         Send(packet, connectionId);
     }
 

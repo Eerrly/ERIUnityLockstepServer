@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using System.Net.Sockets;
-using System.Threading.Channels;
 using Google.Protobuf;
 
 public class NetworkManager : AManager<NetworkManager>
@@ -18,13 +16,17 @@ public class NetworkManager : AManager<NetworkManager>
     public override void Initialize()
     {
         memoryStream = new MemoryStream();
-        kcpServerTransport = new KcpServerTransport(KcpUtil.defaultConfig, NetSetting.KcpPort);
-        kcpServerTransport.onConnected = OnKcpConnected;
-        kcpServerTransport.onDataReceived = OnKcpDataReceived;
-        kcpServerTransport.onDisconnected = OnkcpDisconnected;
-        kcpServerTransport.onError = OnKcpError;
-        tcpServerTransport = new TcpServerTransport(NetSetting.NetAddress, NetSetting.TcpPort);
-        tcpServerTransport.onDataReceived = OnTcpDataReceived;
+        kcpServerTransport = new KcpServerTransport(KcpUtil.defaultConfig, NetSetting.KcpPort)
+        {
+            onConnected = OnKcpConnected,
+            onDataReceived = OnKcpDataReceived,
+            onDisconnected = OnKcpDisconnected,
+            onError = OnKcpError
+        };
+        tcpServerTransport = new TcpServerTransport(NetSetting.NetAddress, NetSetting.TcpPort)
+        {
+            onDataReceived = OnTcpDataReceived
+        };
     }
 
     private void OnKcpConnected(int connectionId)
@@ -96,7 +98,7 @@ public class NetworkManager : AManager<NetworkManager>
         }, kcpServerTransport.Shutdown);
     }
 
-    private void OnkcpDisconnected(int connectionId)
+    private void OnKcpDisconnected(int connectionId)
     {
         System.Console.WriteLine($"onDisconnected connectionId: {connectionId}");
     }
@@ -121,34 +123,48 @@ public class NetworkManager : AManager<NetworkManager>
         kcpServerTransport.Shutdown();
     }
 
-    public void SendBattleConnectMessage(int connectionId, pb.BattleErrorCode errorCode)
+    private void SendBattleConnectMessage(int connectionId, pb.BattleErrorCode errorCode)
     {
-        var s2CMessage = new pb.S2C_ConnectMsg() { ErrorCode = errorCode };
+        var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_ConnectMsg>();
+        s2CMessage.ErrorCode = errorCode;
         kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgConnect, s2CMessage, connectionId);
     }
 
-    public void SendBattleReadyMessage(int connectionId, pb.BattleErrorCode errorCode, uint roomId, List<uint> readies)
+    private void SendBattleReadyMessage(int connectionId, pb.BattleErrorCode errorCode, uint roomId, List<uint> readies)
     {
-        var s2CMessage = new pb.S2C_ReadyMsg() { ErrorCode = errorCode, RoomId = roomId };
+        var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_ReadyMsg>();
+        s2CMessage.ErrorCode = errorCode;
+        s2CMessage.RoomId = roomId;
+        s2CMessage.Status.Clear();
         s2CMessage.Status.AddRange(readies);
         kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgReady, s2CMessage, connectionId);
     }
 
-    public void SendBattleStartMessage(int connectionId, pb.BattleErrorCode errorCode, uint frame, ulong timestamp)
+    private void SendBattleStartMessage(int connectionId, pb.BattleErrorCode errorCode, uint frame, ulong timestamp)
     {
-        var s2CMessage = new pb.S2C_StartMsg() { ErrorCode = errorCode, Frame = frame, TimeStamp = timestamp };
+        var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_StartMsg>();
+        s2CMessage.ErrorCode = errorCode;
+        s2CMessage.Frame = frame;
+        s2CMessage.TimeStamp = timestamp;
         kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgStart, s2CMessage, connectionId);
     }
 
-    public void SendBattleHeartbeatMessage(int connectionId, pb.BattleErrorCode errorCode, ulong timestamp)
+    private void SendBattleHeartbeatMessage(int connectionId, pb.BattleErrorCode errorCode, ulong timestamp)
     {
-        var s2CMessage = new pb.S2C_HeartbeatMsg() { ErrorCode = errorCode, TimeStamp = timestamp };
+        var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_HeartbeatMsg>();
+        s2CMessage.ErrorCode = errorCode;
+        s2CMessage.TimeStamp = timestamp;
         kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgHeartbeat, s2CMessage, connectionId);
     }
 
-    public void SendBattleFrameMessage(int connectionId, pb.BattleErrorCode errorCode, uint frame, uint playerCount, uint inputCount, byte[] datum)
+    private void SendBattleFrameMessage(int connectionId, pb.BattleErrorCode errorCode, uint frame, uint playerCount, uint inputCount, byte[] datum)
     {
-        var s2CMessage = new pb.S2C_FrameMsg() { ErrorCode = errorCode, Frame = frame, PlayerCount = playerCount, InputCount = inputCount, Datum = ByteString.CopyFrom(datum) };
+        var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_FrameMsg>();
+        s2CMessage.ErrorCode = errorCode;
+        s2CMessage.Frame = frame;
+        s2CMessage.PlayerCount = playerCount;
+        s2CMessage.InputCount = inputCount;
+        s2CMessage.Datum = ByteString.CopyFrom(datum);
         kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgFrame, s2CMessage, connectionId);
     }
 
@@ -210,21 +226,28 @@ public class NetworkManager : AManager<NetworkManager>
         tcpServerTransport.Shutdown();
     }
 
-    public void SendLogicLoginMessage(NetworkStream stream, pb.LogicErrorCode errorCode, uint playerId)
+    private void SendLogicLoginMessage(NetworkStream stream, pb.LogicErrorCode errorCode, uint playerId)
     {
-        var s2CMessage = new pb.S2C_LoginMsg() { ErrorCode = errorCode, PlayerId = playerId };
+        var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_LoginMsg>();
+        s2CMessage.ErrorCode = errorCode;
+        s2CMessage.PlayerId = playerId;
         tcpServerTransport.SendMessage(pb.LogicMsgID.LogicMsgLogin, s2CMessage, stream);
     }
 
-    public void SendLogicCreateRoomMessage(NetworkStream stream, pb.LogicErrorCode errorCode, uint roomId)
+    private void SendLogicCreateRoomMessage(NetworkStream stream, pb.LogicErrorCode errorCode, uint roomId)
     {
-        var s2CMessage = new pb.S2C_CreateRoomMsg() { ErrorCode = errorCode, RoomId = roomId };
+        var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_CreateRoomMsg>();
+        s2CMessage.ErrorCode = errorCode;
+        s2CMessage.RoomId = roomId;
         tcpServerTransport.SendMessage(pb.LogicMsgID.LogicMsgCreateRoom, s2CMessage, stream);
     }
 
-    public void SendLogicJoinRoomMessage(NetworkStream stream, pb.LogicErrorCode errorCode, uint roomId, List<uint> all)
+    private void SendLogicJoinRoomMessage(NetworkStream stream, pb.LogicErrorCode errorCode, uint roomId, List<uint> all)
     {
-        var s2CMessage = new pb.S2C_JoinRoomMsg() { ErrorCode = errorCode, RoomId = roomId };
+        var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_JoinRoomMsg>();
+        s2CMessage.ErrorCode = errorCode;
+        s2CMessage.RoomId = roomId;
+        s2CMessage.All.Clear();
         s2CMessage.All.AddRange(all);
         tcpServerTransport.SendMessage(pb.LogicMsgID.LogicMsgJoinRoom, s2CMessage, stream);
     }
@@ -232,9 +255,9 @@ public class NetworkManager : AManager<NetworkManager>
     private void OnServerBattleStart(RoomInfo room)
     {
         room.BattleStopwatch.Start();
-        foreach (var playerId in room.Gamers)
+        for (var i = 0; i < room.Gamers.Count; i++)
         {
-            var gamer = GameManager.Instance.GetGamerById(playerId);
+            var gamer = GameManager.Instance.GetGamerById(room.Gamers[i]);
             SendBattleStartMessage(gamer.BattleData.ConnectionId, pb.BattleErrorCode.BattleErrBattleOk, (uint)room.AuthoritativeFrame, (ulong)room.BattleStopwatch.ElapsedMilliseconds);
         }
         var byteArray = new byte[room.Gamers.Count];
