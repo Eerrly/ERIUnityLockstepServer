@@ -1,33 +1,14 @@
-﻿/// <summary>
-/// 字节数组池
-/// </summary>
-public static class BufferPool
+﻿public static class BufferPool
 {
     private static object _lockObject = new object();
-    /// <summary>
-    /// 对应长度字节数组缓存池
-    /// </summary>
     private static Dictionary<int, Queue<byte[]>> _buffersCache = new Dictionary<int, Queue<byte[]>>(10);
-    /// <summary>
-    /// 最小长度
-    /// </summary>
     private static int _min;
-    /// <summary>
-    /// 最大长度
-    /// </summary>
     private static int _max;
     /// <summary>
     /// 以多少长度为一节
     /// </summary>
     private static int _step;
 
-    /// <summary>
-    /// 初始化池子
-    /// </summary>
-    /// <param name="min">最小数组长度</param>
-    /// <param name="max">最大数组长度</param>
-    /// <param name="step">以多少长度为一节</param>
-    /// <param name="count">最大缓存队列长度</param>
     public static void InitPool(int min, int max, int step, int count)
     {
         _buffersCache.Clear();
@@ -49,11 +30,6 @@ public static class BufferPool
         }
     }
 
-    /// <summary>
-    /// 获取最近的2^n大值
-    /// </summary>
-    /// <param name="size">长度</param>
-    /// <returns>最近的2^n大值</returns>
     private static int GetLevel(int size)
     {
         if (size <= 0)
@@ -72,6 +48,7 @@ public static class BufferPool
         }
         else
         {
+            // 获取最近的大的那一边的2^n值
             var level = (int)(((size + (1 << _step) - 1) >> _step) << _step);
             return level;
         }
@@ -79,11 +56,6 @@ public static class BufferPool
         return -1;
     }
 
-    /// <summary>
-    /// 获取字节数组
-    /// </summary>
-    /// <param name="size">长度</param>
-    /// <returns>字节数组</returns>
     public static byte[] GetBuffer(int size)
     {
         if (size <= 0)
@@ -94,7 +66,6 @@ public static class BufferPool
         int level = GetLevel(size);
         if (level < 0)
         {
-            // Logger.Log(LogLevel.Info, "new buffer " + size);
             return new byte[size];
         }
 
@@ -109,15 +80,10 @@ public static class BufferPool
                 }
             }
 
-            // Logger.Log(LogLevel.Info,"new buffer " + size);
             return new byte[level];
         }
     }
 
-    /// <summary>
-    /// 回收字节数组
-    /// </summary>
-    /// <param name="buff">字节数组</param>
     public static void ReleaseBuff(byte[] buff)
     {
         if (null == buff)
@@ -165,9 +131,6 @@ public static class BufferPool
         }
     }
 
-    /// <summary>
-    /// 释放
-    /// </summary>
     public static void ReleaseAll()
     {
         lock (_lockObject)
@@ -182,9 +145,6 @@ public static class BufferPool
         }
     }
 
-    /// <summary>
-    /// 打印
-    /// </summary>
     public static void Print()
     {
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
