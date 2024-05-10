@@ -109,7 +109,7 @@ public class TcpServerTransport : ServerTransport
             await stream.WriteAsync(buffer.AsMemory(0, buffer.Length));
 
             BufferPool.ReleaseBuff(buffer);
-            System.Console.WriteLine($"[KCP] Send -> MsgID:{Enum.GetName(typeof(pb.LogicMsgID), packet._head._cmd)} dataSize:{packet._head._length}");
+            System.Console.WriteLine($"[TCP] Send -> MsgID:{Enum.GetName(typeof(pb.LogicMsgID), packet._head._cmd)} dataSize:{packet._head._length}");
             onDataSent?.Invoke(stream, packet);
         }
         catch (Exception ex)
