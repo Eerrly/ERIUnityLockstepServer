@@ -14,12 +14,15 @@ public class RoomInfo
     
     public Stopwatch BattleStopwatch;
 
+    public Dictionary<int, List<int>> BattleCheckMap;
+
     public RoomInfo()
     {
         AuthoritativeFrame = -1;
         Readies = new List<uint>();
         Gamers = new List<uint>();
         InputCounts = new byte[BattleSetting.MaxFrameCount];
+        BattleCheckMap = new Dictionary<int, List<int>>();
         BattleStopwatch = new Stopwatch();
     }
 }

@@ -95,6 +95,28 @@ public class NetworkManager : AManager<NetworkManager>
                     gamer.BattleData.Frames[c2SMessage.Frame] = dataFrame;
                     break;
                 }
+                case (byte)pb.BattleMsgID.BattleMsgCheck:
+                {
+                    var c2SMessage = pb.C2S_CheckMsg.Parser.ParseFrom(memoryStream);
+                    System.Console.WriteLine($"[KCP] BattleMsgCheck -> frame:{c2SMessage.Frame} pos:{c2SMessage.Pos} md5:{c2SMessage.Md5}");
+                    
+                    var gamer = GameManager.Instance.GetGamerByPos(c2SMessage.Pos);
+                    var room = GameManager.Instance.GetRoom(gamer.LogicData.RoomId);
+                    if (!room.BattleCheckMap.ContainsKey(c2SMessage.Frame))
+                        room.BattleCheckMap[c2SMessage.Frame] = new List<int>(GameSetting.RoomMaxPlayerCount);
+                    room.BattleCheckMap[c2SMessage.Frame].Add(c2SMessage.Md5);
+
+                    if (room.BattleCheckMap[c2SMessage.Frame].Count() == GameSetting.RoomMaxPlayerCount)
+                    {
+                        var errorCode = room.BattleCheckMap[c2SMessage.Frame].Distinct().Count() == 1 ? pb.BattleErrorCode.BattleErrBattleOk : pb.BattleErrorCode.BattleErrDiff;
+                        foreach (var gamerId in room.Gamers)
+                        {
+                            gamer = GameManager.Instance.GetGamerById(gamerId);
+                            SendBattleCheckMessage(gamer.BattleData.ConnectionId, errorCode);
+                        }
+                    }
+                    break;
+                }
             }
         }, kcpServerTransport.Shutdown);
     }
@@ -167,6 +189,13 @@ public class NetworkManager : AManager<NetworkManager>
         s2CMessage.InputCount = inputCount;
         s2CMessage.Datum = ByteString.CopyFrom(datum);
         kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgFrame, s2CMessage, connectionId);
+    }
+
+    private void SendBattleCheckMessage(int connectionId, pb.BattleErrorCode errorCode)
+    {
+        var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_CheckMsg>();
+        s2CMessage.ErrorCode = errorCode;
+        kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgCheck, s2CMessage, connectionId);
     }
 
     private void OnTcpDataReceived(byte[] data, int read, NetworkStream stream)
