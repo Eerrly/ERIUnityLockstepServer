@@ -36,6 +36,11 @@ public class NetworkManager : AManager<NetworkManager>
 
     private void OnKcpDataReceived(int connectionId, ArraySegment<byte> data, kcp2k.KcpChannel channel)
     {
+        if (!KcpActive)
+        {
+            System.Console.WriteLine($"[KCP] Kcp Not Active!");
+            return;
+        }
         System.Console.WriteLine($"[KCP] OnKcpDataReceived connectionId: {connectionId} data.len: {data.Count} channel: {channel}");
         if (data.Array == null) {
             System.Console.WriteLine($"[KCP] OnKcpDataReceived data.Array == null");
@@ -200,6 +205,11 @@ public class NetworkManager : AManager<NetworkManager>
 
     private void OnTcpDataReceived(byte[] data, int read, NetworkStream stream)
     {
+        if (!TcpActive)
+        {
+            System.Console.WriteLine($"[TCP] Tcp Not Active!");
+            return;
+        }
         _tcpServerTransport.OnMessageProcess(data, _memoryStream, cmd => {
             System.Console.WriteLine($"[TCP] OnTcpDataReceived data.len:{data.Length} read:{read}");
             switch (cmd)
@@ -208,7 +218,7 @@ public class NetworkManager : AManager<NetworkManager>
                 {
                     var c2SMessage = pb.C2S_LoginMsg.Parser.ParseFrom(_memoryStream);
                     System.Console.WriteLine($"[TCP] LogicMsgLogin -> account:{c2SMessage.Account.ToStringUtf8()} password:{c2SMessage.Password.ToStringUtf8()}");
-                    var gamer = GameManager.Instance.CreateGamer(c2SMessage.Account.ToStringUtf8(), c2SMessage.Password.ToStringUtf8());
+                    var gamer = GameManager.Instance.GetOrCreateGamer(c2SMessage.Account.ToStringUtf8(), c2SMessage.Password.ToStringUtf8());
                     gamer.LogicData.NetworkStream = stream;
                     SendLogicLoginMessage(stream, pb.LogicErrorCode.LogicErrOk, gamer.LogicData.ID);
                     break;

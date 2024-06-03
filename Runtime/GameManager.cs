@@ -4,12 +4,14 @@ public class GameManager : AManager<GameManager>
 
     private Dictionary<uint, GamerInfo> _gamerInfoDic;
     private Dictionary<int, GamerInfo> _gamerInfoByPosDic;
+    private Dictionary<string, GamerInfo> _gamerInfoByAccountPassword;
     private Dictionary<uint, RoomInfo> _roomInfoDic;
 
     public override void Initialize()
     {
         _gamerInfoDic = new Dictionary<uint, GamerInfo>();
         _gamerInfoByPosDic = new Dictionary<int, GamerInfo>();
+        _gamerInfoByAccountPassword = new Dictionary<string, GamerInfo>();
         _roomInfoDic = new Dictionary<uint, RoomInfo>();
     }
 
@@ -17,14 +19,17 @@ public class GameManager : AManager<GameManager>
     {
         _gamerInfoDic.Clear();
         _gamerInfoByPosDic.Clear();
+        _gamerInfoByAccountPassword.Clear();
         _roomInfoDic.Clear();
     }
 
-    public GamerInfo CreateGamer(string account, string password)
+    public GamerInfo GetOrCreateGamer(string account, string password)
     {
-        var gamer = new GamerInfo(){ Account = account, Password = password };
+        if (_gamerInfoByAccountPassword.TryGetValue(account + password, out var gamer)) return gamer;
+        gamer = new GamerInfo(){ Account = account, Password = password };
         gamer.LogicData.ID = GameSetting.DefaultPlayerIdBase + (uint)_gamerInfoDic.Count + 1;
         _gamerInfoDic[gamer.LogicData.ID] = gamer;
+        _gamerInfoByAccountPassword[account + password] = gamer;
         return gamer;
     }
 

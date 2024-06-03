@@ -125,6 +125,7 @@ public class TcpServerTransport : ServerTransport
 
     public void SendMessage<T>(pb.LogicMsgID logicMsgId, T message, NetworkStream stream) where T: IMessage
     {
+        if (!Active()) return;
         var head = new Head(){ _cmd = (byte)logicMsgId, _length = message.CalculateSize() };
         var packet = new Packet() { _data = message.ToByteArray(), _head = head };
         MsgPoolManager.Instance.Release(message);

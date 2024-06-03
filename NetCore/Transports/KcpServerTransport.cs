@@ -106,6 +106,7 @@ public class KcpServerTransport : ServerTransport
 
     public void SendMessage<T>(pb.BattleMsgID battleMsgId, T message, int connectionId) where T : IMessage
     {
+        if (!Active()) return;
         var head = new Head(){ _cmd = (byte)battleMsgId, _length = message.CalculateSize() };
         var packet = new Packet(){ _data = message.ToByteArray(), _head = head };
         MsgPoolManager.Instance.Release(message);
