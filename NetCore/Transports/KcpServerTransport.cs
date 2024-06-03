@@ -1,11 +1,7 @@
-
 using System.Net;
 using Google.Protobuf;
 using kcp2k;
 
-/// <summary>
-/// KCP消息信息包
-/// </summary>
 public struct PacketInfo
 {
     public int ConnectionId;
@@ -13,14 +9,13 @@ public struct PacketInfo
     public Packet Packet;
 }
 
-/// <summary>
-/// KCP服务器支持类
-/// </summary>
 public class KcpServerTransport : ServerTransport
 {
-    public ushort port {get; private set;}
-    public readonly KcpConfig _config;
-    public KcpServer _server;
+    private readonly KcpServer _server;
+    private readonly ushort _port;
+    private readonly KcpConfig _config;
+    private readonly Queue<PacketInfo> _packetInfos;
+    
     public int ConnectionCount => _server.connections.Count;
     public Action<int> OnConnected;
     public Action<int, ArraySegment<byte>, KcpChannel> OnDataReceived;
@@ -28,14 +23,11 @@ public class KcpServerTransport : ServerTransport
     public Action<int, ErrorCode, string> OnError;
     public Action<int, Packet> OnDataSent;
     
-    private object _lock = new object();
-    private Queue<PacketInfo> packetInfos;
-
     public KcpServerTransport(KcpConfig config, ushort port)
     {
-        packetInfos = new Queue<PacketInfo>();
+        _packetInfos = new Queue<PacketInfo>();
 
-        this.port = port;
+        this._port = port;
         this._config = config;
         _server = new KcpServer(
             (connectionId) => OnConnected?.Invoke(connectionId),
@@ -51,13 +43,13 @@ public class KcpServerTransport : ServerTransport
         var builder = new UriBuilder();
         builder.Scheme = nameof(KcpServerTransport);
         builder.Host = System.Net.Dns.GetHostName();
-        builder.Port = port;
+        builder.Port = _port;
         return builder.Uri;
     }
 
     public override bool Active() => _server.IsActive();
 
-    public override void Start() => _server.Start(port);
+    public override void Start() => _server.Start(_port);
 
     public override void Update()
     {
@@ -72,9 +64,9 @@ public class KcpServerTransport : ServerTransport
 
     private void UpdatePacketInfosSent()
     {
-        if(packetInfos.Count <= 0) return;
+        if(_packetInfos.Count <= 0) return;
         
-        var packetInfo = packetInfos.Dequeue();
+        var packetInfo = _packetInfos.Dequeue();
         var buffer = BufferPool.GetBuffer(packetInfo.Packet._head._length + Head.HeadLength);
         try
         {
@@ -104,7 +96,7 @@ public class KcpServerTransport : ServerTransport
     {
         try
         {
-            packetInfos.Enqueue(new PacketInfo(){ ConnectionId = (int)param, Packet = packet });
+            _packetInfos.Enqueue(new PacketInfo(){ ConnectionId = (int)param, Packet = packet });
         }
         catch (Exception ex)
         {

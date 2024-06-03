@@ -3,7 +3,7 @@ using kcp2k;
 public static class KcpUtil 
 {
 
-    public static readonly KcpConfig defaultConfig = new KcpConfig(
+    public static readonly KcpConfig DefaultConfig = new KcpConfig(
         DualMode: true,
         NoDelay: true,
         Interval: 1,
