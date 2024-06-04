@@ -12,7 +12,8 @@ enum BattleMsgID {
     BATTLE_MSG_Ready       = 10;       //准备
     BATTLE_MSG_Start       = 20;       //开始
     BATTLE_MSG_Frame       = 30;       //帧数据
-    BATTLE_MSG_Result      = 40;       //结果
+    BATTLE_MSG_Check       = 40;       //检测
+    BATTLE_MSG_Result      = 50;       //结果
     
     BATTLE_MSG_Exception   = 100;      //意外错误
 }
@@ -22,6 +23,7 @@ enum BattleErrorCode {
     BATTLE_ERR_Battle_Ok   = 0;    //OK
     BATTLE_ERR_Timeout     = 1;    //超时
     BATTLE_ERR_Data        = 2;    //数据异常
+    BATTLE_ERR_Diff        = 3;    //不同步
 }
 
 // 连接
@@ -82,14 +84,25 @@ message S2C_FrameMsg {
     bytes datum                     = 5;    //玩家帧数据
 }
 
+// 检测
+message C2S_CheckMsg {
+    int32 frame               = 1;    //帧号
+    int32 pos                 = 2;    //位置
+    int32 md5                 = 3;    //Md5
+}
+
+message S2C_CheckMsg {
+    BattleErrorCode errorCode       = 1;    //错误码
+}
+
 message S2C_ResultMsg {
     BattleErrorCode errorCode    = 1;    //错误码
-    uint32 winner           = 2;    //胜利者
+    uint32 winner                = 2;    //胜利者
 }
 
 // 异常
 message S2C_BattleExceptionMsg {
     BattleErrorCode errorCode    = 1;    //错误码
-    string reason          = 2;    //原因
+    string reason                = 2;    //原因
 }
 

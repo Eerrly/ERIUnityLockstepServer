@@ -1,23 +1,21 @@
-using kcp2k;
-
 public abstract class ServerTransport
 {
     public virtual Uri Uri(){ return null; }
-
+    
     public virtual bool Active() { return false; }
-
+    
     public virtual void Start() { }
-
+    
     public virtual void Update() { }
-
+    
     public virtual void Send(Packet packet, object param) { }
-
+    
     public virtual void Disconnect(int connectionId) { }
-
+    
     public virtual string GetClientAddress(int connectionId) { return string.Empty; }
-
+    
     public virtual void Shutdown() { }
-
+    
     public void OnMessageProcess(byte[] buffer, MemoryStream stream, Action<byte> onCommand, Action? onCatch = null, Action? onFinally = null)
     { 
         var packet = new Packet();

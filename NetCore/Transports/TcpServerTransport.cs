@@ -4,41 +4,42 @@ using Google.Protobuf;
 
 public class TcpServerTransport : ServerTransport
 {
-    public string address {get; private set;}
-    public ushort port {get; private set;}
-    public Action<byte[], int, NetworkStream> onDataReceived;
-    public Action<NetworkStream, Packet> onDataSent;
+    private TcpListener _tcpListener;
 
-    private List<Task> handleClientTasks;
-    private TcpListener tcpListener;
-    private int acceptBufferMaxLength;
-    private byte[] acceptBuffer;
+    private readonly string _address;
+    private readonly ushort _port;
+    private readonly List<Task> _handleClientTasks;
+    private readonly int _acceptBufferMaxLength;
+    private readonly byte[] _acceptBuffer;
+    
+    public Action<byte[], int, NetworkStream> OnDataReceived;
+    public Action<NetworkStream, Packet> OnDataSent;
 
     public TcpServerTransport(string address, ushort port, int acceptBufferMaxLength = 1024)
     {
-        this.address = address;
-        this.port = port;
-        this.acceptBufferMaxLength = acceptBufferMaxLength;
-        this.acceptBuffer = new byte[this.acceptBufferMaxLength];
+        this._address = address;
+        this._port = port;
+        this._acceptBufferMaxLength = acceptBufferMaxLength;
+        this._acceptBuffer = new byte[this._acceptBufferMaxLength];
 
-        handleClientTasks = new List<Task>();
+        _handleClientTasks = new List<Task>();
     }
 
     public override Uri Uri()
     {
-        UriBuilder builder = new UriBuilder();
+        var builder = new UriBuilder();
         builder.Scheme = nameof(KcpServerTransport);
         builder.Host = System.Net.Dns.GetHostName();
-        builder.Port = port;
+        builder.Port = _port;
         return builder.Uri;
     }
 
-    public override bool Active() => tcpListener.Server.IsBound;
+    public override bool Active() => _tcpListener.Server.IsBound;
 
     public override void Start()
     {
-        var ipAddress = IPAddress.Parse(address);
-        tcpListener = new TcpListener(ipAddress, port);
+        var ipAddress = IPAddress.Parse(_address);
+        _tcpListener = new TcpListener(ipAddress, _port);
         ListenForClientsAsync();
     }
 
@@ -46,12 +47,12 @@ public class TcpServerTransport : ServerTransport
     {
         try
         {
-            tcpListener.Start();
+            _tcpListener.Start();
             while (true)
             {
-                var client = await tcpListener.AcceptTcpClientAsync();
+                var client = await _tcpListener.AcceptTcpClientAsync();
                 System.Console.WriteLine($"[TCP] AcceptTcpClientAsync -> RemoteEndPoint: {client.Client.RemoteEndPoint}");
-                handleClientTasks.Add(Task.Run(()=>HandleClientAsync(client)));
+                _handleClientTasks.Add(Task.Run(()=>HandleClientAsync(client)));
             }
         }
         catch (Exception ex)
@@ -60,12 +61,12 @@ public class TcpServerTransport : ServerTransport
         }
         finally
         {
-            if(handleClientTasks.Count > 0)
+            if(_handleClientTasks.Count > 0)
             {
-                foreach(var task in handleClientTasks) task.Dispose();
-                handleClientTasks.Clear();
+                foreach(var task in _handleClientTasks) task.Dispose();
+                _handleClientTasks.Clear();
             }
-            tcpListener.Stop();
+            _tcpListener.Stop();
         }
     }
 
@@ -76,9 +77,9 @@ public class TcpServerTransport : ServerTransport
             var stream = client.GetStream();
             while (true)
             {
-                var read = await stream.ReadAsync(acceptBuffer!, 0, acceptBufferMaxLength);
+                var read = await stream.ReadAsync(_acceptBuffer!, 0, _acceptBufferMaxLength);
                 if (read == 0) break;
-                onDataReceived?.Invoke(acceptBuffer, read, stream);
+                OnDataReceived?.Invoke(_acceptBuffer, read, stream);
             }
         }
         catch (Exception ex)
@@ -109,8 +110,8 @@ public class TcpServerTransport : ServerTransport
             await stream.WriteAsync(buffer.AsMemory(0, buffer.Length));
 
             BufferPool.ReleaseBuff(buffer);
-            System.Console.WriteLine($"[KCP] Send -> MsgID:{Enum.GetName(typeof(pb.LogicMsgID), packet._head._cmd)} dataSize:{packet._head._length}");
-            onDataSent?.Invoke(stream, packet);
+            System.Console.WriteLine($"[TCP] Send -> MsgID:{Enum.GetName(typeof(pb.LogicMsgID), packet._head._cmd)} dataSize:{packet._head._length}");
+            OnDataSent?.Invoke(stream, packet);
         }
         catch (Exception ex)
         {
@@ -122,10 +123,12 @@ public class TcpServerTransport : ServerTransport
         }
     }
 
-    public void SendMessage(pb.LogicMsgID logicMsgID, IMessage message, NetworkStream stream)
+    public void SendMessage<T>(pb.LogicMsgID logicMsgId, T message, NetworkStream stream) where T: IMessage
     {
-        var head = new Head(){ _cmd = (byte)logicMsgID, _length = message.CalculateSize() };
+        if (!Active()) return;
+        var head = new Head(){ _cmd = (byte)logicMsgId, _length = message.CalculateSize() };
         var packet = new Packet() { _data = message.ToByteArray(), _head = head };
+        MsgPoolManager.Instance.Release(message);
         Send(packet, stream);
     }
 

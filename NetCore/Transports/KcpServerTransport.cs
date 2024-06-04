@@ -1,4 +1,3 @@
-
 using System.Net;
 using Google.Protobuf;
 using kcp2k;
@@ -12,48 +11,45 @@ public struct PacketInfo
 
 public class KcpServerTransport : ServerTransport
 {
-    public ushort port {get; private set;}
-    public readonly KcpConfig _config;
-
-    public KcpServer _server;
+    private readonly KcpServer _server;
+    private readonly ushort _port;
+    private readonly KcpConfig _config;
+    private readonly Queue<PacketInfo> _packetInfos;
+    
     public int ConnectionCount => _server.connections.Count;
-
-    public Action<int> onConnected;
-    public Action<int, ArraySegment<byte>, KcpChannel> onDataReceived;
-    public Action<int> onDisconnected;
-    public Action<int, ErrorCode, string> onError;
-    public Action<int, Packet> onDataSent;
-
-    private object _lock = new object();
-    private Queue<PacketInfo> packetInfos;
-
+    public Action<int> OnConnected;
+    public Action<int, ArraySegment<byte>, KcpChannel> OnDataReceived;
+    public Action<int> OnDisconnected;
+    public Action<int, ErrorCode, string> OnError;
+    public Action<int, Packet> OnDataSent;
+    
     public KcpServerTransport(KcpConfig config, ushort port)
     {
-        packetInfos = new Queue<PacketInfo>();
+        _packetInfos = new Queue<PacketInfo>();
 
-        this.port = port;
+        this._port = port;
         this._config = config;
         _server = new KcpServer(
-            (connectionId) => onConnected?.Invoke(connectionId),
-            (connectionId, data, channel) => onDataReceived?.Invoke(connectionId, data, channel),
-            (connectionId) => onDisconnected?.Invoke(connectionId),
-            (connectionId, errorCode, error) => onError?.Invoke(connectionId, errorCode, error),
+            (connectionId) => OnConnected?.Invoke(connectionId),
+            (connectionId, data, channel) => OnDataReceived?.Invoke(connectionId, data, channel),
+            (connectionId) => OnDisconnected?.Invoke(connectionId),
+            (connectionId, errorCode, error) => OnError?.Invoke(connectionId, errorCode, error),
             this._config
         );
     }
 
     public override Uri Uri()
     {
-        UriBuilder builder = new UriBuilder();
+        var builder = new UriBuilder();
         builder.Scheme = nameof(KcpServerTransport);
         builder.Host = System.Net.Dns.GetHostName();
-        builder.Port = port;
+        builder.Port = _port;
         return builder.Uri;
     }
 
     public override bool Active() => _server.IsActive();
 
-    public override void Start() => _server.Start(port);
+    public override void Start() => _server.Start(_port);
 
     public override void Update()
     {
@@ -68,9 +64,9 @@ public class KcpServerTransport : ServerTransport
 
     private void UpdatePacketInfosSent()
     {
-        if(packetInfos.Count <= 0) return;
+        if(_packetInfos.Count <= 0) return;
         
-        var packetInfo = packetInfos.Dequeue();
+        var packetInfo = _packetInfos.Dequeue();
         var buffer = BufferPool.GetBuffer(packetInfo.Packet._head._length + Head.HeadLength);
         try
         {
@@ -83,7 +79,7 @@ public class KcpServerTransport : ServerTransport
 
             BufferPool.ReleaseBuff(buffer);
             System.Console.WriteLine($"[KCP] Send -> connectionId:{packetInfo.ConnectionId} MsgID:{Enum.GetName(typeof(pb.BattleMsgID), packetInfo.Packet._head._cmd)} dataSize:{packetInfo.Packet._head._length}");
-            onDataSent?.Invoke(packetInfo.ConnectionId, packetInfo.Packet);
+            OnDataSent?.Invoke(packetInfo.ConnectionId, packetInfo.Packet);
         }
         catch(Exception ex)
         {
@@ -100,7 +96,7 @@ public class KcpServerTransport : ServerTransport
     {
         try
         {
-            packetInfos.Enqueue(new PacketInfo(){ ConnectionId = (int)param, Packet = packet });
+            _packetInfos.Enqueue(new PacketInfo(){ ConnectionId = (int)param, Packet = packet });
         }
         catch (Exception ex)
         {
@@ -108,10 +104,12 @@ public class KcpServerTransport : ServerTransport
         }
     }
 
-    public void SendMessage(pb.BattleMsgID battleMsgID, IMessage message, int connectionId)
+    public void SendMessage<T>(pb.BattleMsgID battleMsgId, T message, int connectionId) where T : IMessage
     {
-        var head = new Head(){ _cmd = (byte)battleMsgID, _length = message.CalculateSize() };
+        if (!Active()) return;
+        var head = new Head(){ _cmd = (byte)battleMsgId, _length = message.CalculateSize() };
         var packet = new Packet(){ _data = message.ToByteArray(), _head = head };
+        MsgPoolManager.Instance.Release(message);
         Send(packet, connectionId);
     }
 

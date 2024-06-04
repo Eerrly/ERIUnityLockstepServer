@@ -1,8 +1,8 @@
-﻿// See https://aka.ms/new-console-template for more information
-
+﻿// 总入口
 GameManager.Instance.Initialize();
+MsgPoolManager.Instance.Initialize();
 NetworkManager.Instance.Initialize();
 NetworkManager.Instance.TcpStart();
 
-System.Console.WriteLine($"[{TimeUtil.DateTimeNowToString()}] ServerUri: {NetworkManager.Instance.KcpUri}");
+System.Console.WriteLine($"ServerTcpUri: {NetworkManager.Instance.TcpUri} ServerKcpUri: {NetworkManager.Instance.KcpUri}");
 Console.ReadLine();
