@@ -5,6 +5,7 @@ public class GameManager : AManager<GameManager>
     private Dictionary<uint, GamerInfo> _gamerInfoDic;
     private Dictionary<int, GamerInfo> _gamerInfoByPosDic;
     private Dictionary<string, GamerInfo> _gamerInfoByAccountPassword;
+    private Dictionary<int, GamerInfo> _gamerInfoByConnectionId;
     private Dictionary<uint, RoomInfo> _roomInfoDic;
 
     public override void Initialize()
@@ -12,6 +13,7 @@ public class GameManager : AManager<GameManager>
         _gamerInfoDic = new Dictionary<uint, GamerInfo>();
         _gamerInfoByPosDic = new Dictionary<int, GamerInfo>();
         _gamerInfoByAccountPassword = new Dictionary<string, GamerInfo>();
+        _gamerInfoByConnectionId = new Dictionary<int, GamerInfo>();
         _roomInfoDic = new Dictionary<uint, RoomInfo>();
     }
 
@@ -20,6 +22,7 @@ public class GameManager : AManager<GameManager>
         _gamerInfoDic.Clear();
         _gamerInfoByPosDic.Clear();
         _gamerInfoByAccountPassword.Clear();
+        _gamerInfoByConnectionId.Clear();
         _roomInfoDic.Clear();
     }
 
@@ -39,6 +42,12 @@ public class GameManager : AManager<GameManager>
         _gamerInfoByPosDic[pos] = _gamerInfoDic[playerId];
     }
 
+    public void UpdateGamerConnectionId(uint playerId, int connectionId)
+    {
+        _gamerInfoDic[playerId].BattleData.ConnectionId = connectionId;
+        _gamerInfoByConnectionId[connectionId] = _gamerInfoDic[playerId];
+    }
+
     public GamerInfo GetGamerById(uint playerId)
     {
         return _gamerInfoDic[playerId];
@@ -47,6 +56,11 @@ public class GameManager : AManager<GameManager>
     public GamerInfo GetGamerByPos(int pos)
     {
         return _gamerInfoByPosDic[pos];
+    }
+
+    public GamerInfo GetGamerByConnectionId(int connectionId)
+    {
+        return _gamerInfoByConnectionId[connectionId];
     }
 
     public RoomInfo CreateRoom()

@@ -56,7 +56,7 @@ public class NetworkManager : AManager<NetworkManager>
                     System.Console.WriteLine($"[KCP] BattleMsgConnect -> playerId:{c2SMessage.PlayerId} seasonId:{c2SMessage.SeasonId}");
 
                     foreach (var kv in GameManager.Instance.GamerInfoDic) 
-                        if(kv.Value.LogicData.ID == c2SMessage.PlayerId) kv.Value.BattleData.ConnectionId = connectionId;
+                        if(kv.Value.LogicData.ID == c2SMessage.PlayerId) GameManager.Instance.UpdateGamerConnectionId(c2SMessage.PlayerId, connectionId);
                     SendBattleConnectMessage(connectionId, pb.BattleErrorCode.BattleErrBattleOk);
                     break;
                 }
@@ -129,6 +129,9 @@ public class NetworkManager : AManager<NetworkManager>
     private void OnKcpDisconnected(int connectionId)
     {
         System.Console.WriteLine($"OnKcpDisconnected connectionId: {connectionId}");
+        var gamer = GameManager.Instance.GetGamerByConnectionId(connectionId);
+        var room = GameManager.Instance.GetRoom(gamer.LogicData.RoomId);
+        room.Readies.Remove(gamer.LogicData.ID);
     }
 
     private void OnKcpError(int connectionId, kcp2k.ErrorCode errorCode, string error)
@@ -316,6 +319,7 @@ public class NetworkManager : AManager<NetworkManager>
                         for (var i = 0; i < room.Gamers.Count; i++)
                         {
                             var gamer = GameManager.Instance.GetGamerById(room.Gamers[i]);
+                            if (!room.Readies.Contains(gamer.LogicData.ID)) continue;
                             SendBattleFrameMessage(gamer.BattleData.ConnectionId, pb.BattleErrorCode.BattleErrBattleOk, (uint)room.AuthoritativeFrame, (uint)room.Gamers.Count, room.InputCounts[(uint)room.AuthoritativeFrame], byteArray);
                         }
                     }
