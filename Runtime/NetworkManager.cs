@@ -117,7 +117,7 @@ public class NetworkManager : AManager<NetworkManager>
                         foreach (var gamerId in room.Gamers)
                         {
                             gamer = GameManager.Instance.GetGamerById(gamerId);
-                            SendBattleCheckMessage(gamer.BattleData.ConnectionId, errorCode);
+                            SendBattleCheckMessage(gamer.BattleData.ConnectionId, errorCode, c2SMessage.Frame);
                         }
                     }
                     break;
@@ -199,10 +199,11 @@ public class NetworkManager : AManager<NetworkManager>
         _kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgFrame, s2CMessage, connectionId);
     }
 
-    private void SendBattleCheckMessage(int connectionId, pb.BattleErrorCode errorCode)
+    private void SendBattleCheckMessage(int connectionId, pb.BattleErrorCode errorCode, int frame)
     {
         var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_CheckMsg>();
         s2CMessage.ErrorCode = errorCode;
+        s2CMessage.Frame = frame;
         _kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgCheck, s2CMessage, connectionId);
     }
 
