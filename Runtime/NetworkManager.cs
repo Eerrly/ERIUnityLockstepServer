@@ -190,7 +190,7 @@ public class NetworkManager : AManager<NetworkManager>
 
     private void SendBattleFrameMessage(int connectionId, pb.BattleErrorCode errorCode, uint frame, uint playerCount, uint inputCount, byte[] datum)
     {
-        var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_FrameMsg>();
+        var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_FrameMsg>(true);
         s2CMessage.ErrorCode = errorCode;
         s2CMessage.Frame = frame;
         s2CMessage.PlayerCount = playerCount;
