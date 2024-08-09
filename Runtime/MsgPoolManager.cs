@@ -32,7 +32,6 @@ public class MsgPoolManager : AManager<MsgPoolManager>
         {
             for (var i = 0; i < (usePreCacheMore ? PreCacheCount : 1); i++)
                 _cacheMsgDic[hash].Enqueue(new T());
-            Console.WriteLine($"NewMessageQueue Name:{typeof(T).Name} Count:{_cacheMsgDic[hash].Count}");
         }
         var msg = (T)_cacheMsgDic[hash].Dequeue();
         return msg;
