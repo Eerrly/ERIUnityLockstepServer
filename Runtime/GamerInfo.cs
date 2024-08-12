@@ -6,6 +6,9 @@ public class LogicData
     
     public uint RoomId;
 
+    /// <summary>
+    /// 客户端TCP流
+    /// </summary>
     public NetworkStream NetworkStream;
 }
 
@@ -13,6 +16,9 @@ public class BattleData
 {
     public int Pos;
 
+    /// <summary>
+    /// 客户端KCP连接ID
+    /// </summary>
     public int ConnectionId;
 
     public byte[] Frames;
