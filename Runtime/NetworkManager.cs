@@ -91,7 +91,6 @@ public class NetworkManager : AManager<NetworkManager>
                 {
                     var c2SMessage = pb.C2S_ConnectMsg.Parser.ParseFrom(_memoryStream);
                     System.Console.WriteLine($"[KCP] BattleMsgConnect -> playerId:{c2SMessage.PlayerId} seasonId:{c2SMessage.SeasonId}");
-                    // 更新赋值客户端的KCP连接ID
                     foreach (var kv in GameManager.Instance.GamerInfoDic) 
                         if(kv.Value.LogicData.ID == c2SMessage.PlayerId) GameManager.Instance.UpdateGamerConnectionId(c2SMessage.PlayerId, connectionId);
                     SendBattleConnectMessage(connectionId, pb.BattleErrorCode.BattleErrBattleOk);
@@ -133,7 +132,7 @@ public class NetworkManager : AManager<NetworkManager>
                     var gamer = GameManager.Instance.GetGamerByPos(pos);
                     var room = GameManager.Instance.GetRoom(gamer.LogicData.RoomId);
                     System.Console.WriteLine($"[KCP] BattleMsgFrame -> connectionId:{connectionId} gameId:{gamer.LogicData.ID} clientFrame:{c2SMessage.Frame} data:{dataFrame} serverFrame:{room.AuthoritativeFrame}");
-                    // 如果有发帧数据下来，说明是操作了的
+                    // [0 0] 2bit，索引分别代表玩家0玩家1，0:未操作 1:操作
                     room.InputCounts[c2SMessage.Frame] |= (byte)(1 << pos);
                     gamer.BattleData.Frames[c2SMessage.Frame] = dataFrame;
                     break;
@@ -152,7 +151,6 @@ public class NetworkManager : AManager<NetworkManager>
                     // 当校验数据收集全后，广播给所有玩家
                     if (room.BattleCheckMap[c2SMessage.Frame].Count() == GameSetting.RoomMaxPlayerCount)
                     {
-                        // Distinct: 去掉重复对象
                         var errorCode = room.BattleCheckMap[c2SMessage.Frame].Distinct().Count() == 1 ? pb.BattleErrorCode.BattleErrBattleOk : pb.BattleErrorCode.BattleErrDiff;
                         foreach (var gamerId in room.Gamers)
                         {
@@ -288,6 +286,7 @@ public class NetworkManager : AManager<NetworkManager>
         s2CMessage.Frame = frame;
         s2CMessage.PlayerCount = playerCount;
         s2CMessage.InputCount = inputCount;
+        // .proto bytes类型 的必要转换
         s2CMessage.Datum = ByteString.CopyFrom(datum);
         _kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgFrame, s2CMessage, connectionId);
     }

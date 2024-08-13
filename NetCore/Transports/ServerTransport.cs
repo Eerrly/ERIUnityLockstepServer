@@ -1,3 +1,6 @@
+/// <summary>
+/// 服务器基类
+/// </summary>
 public abstract class ServerTransport
 {
     /// <summary>
