@@ -49,18 +49,20 @@ public class MsgPoolManager : AManager<MsgPoolManager>
     /// <param name="usePreCacheMore">是否预缓存更多</param>
     /// <typeparam name="T">消息类型</typeparam>
     /// <returns>消息对象</returns>
-    public T Require<T>(bool usePreCacheMore = false) where T : IMessage, new()
+    public T Require<T>(bool usePreCacheMore = false) where T : IMessage
     {
         var hash = typeof(T).GetHashCode();
-        if (!_cacheMsgDic.ContainsKey(hash))
-            _cacheMsgDic[hash] = new Queue<IMessage>();
-        if (_cacheMsgDic[hash].Count <= 0)
+        if (!_cacheMsgDic.TryGetValue(hash, out var queue))
+        {
+            queue = new Queue<IMessage>();
+            _cacheMsgDic[hash] = queue;
+        }
+        if (queue.Count <= 0)
         {
             for (var i = 0; i < (usePreCacheMore ? PreCacheCount : 1); i++)
-                _cacheMsgDic[hash].Enqueue(new T());
+                _cacheMsgDic[hash].Enqueue(System.Activator.CreateInstance<T>());
         }
-        var msg = (T)_cacheMsgDic[hash].Dequeue();
-        return msg;
+        return (T)_cacheMsgDic[hash].Dequeue();
     }
 
     /// <summary>
