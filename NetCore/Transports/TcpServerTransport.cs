@@ -59,7 +59,7 @@ public class TcpServerTransport : ServerTransport
     public override Uri Uri()
     {
         var builder = new UriBuilder();
-        builder.Scheme = nameof(KcpServerTransport);
+        builder.Scheme = nameof(TcpServerTransport);
         builder.Host = System.Net.Dns.GetHostName();
         builder.Port = _port;
         return builder.Uri;
@@ -92,13 +92,13 @@ public class TcpServerTransport : ServerTransport
             while (true)
             {
                 var client = await _tcpListener.AcceptTcpClientAsync();
-                System.Console.WriteLine($"[TCP] AcceptTcpClientAsync -> RemoteEndPoint: {client.Client.RemoteEndPoint}");
+                LogManager.Instance.Log(LogTag.Info,$"AcceptTcpClientAsync -> RemoteEndPoint: {client.Client.RemoteEndPoint}");
                 _handleClientTasks.Add(Task.Run(()=>HandleClientAsync(client)));
             }
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine($"[TCP] Exception ->\n{ex.Message}\n{ex.StackTrace}");
+            LogManager.Instance.Log(LogTag.Exception,$"{ex.Message}\n{ex.StackTrace}");
         }
         finally
         {
@@ -129,7 +129,7 @@ public class TcpServerTransport : ServerTransport
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine($"[TCP] Exception ->\n{ex.Message}\n{ex.StackTrace}");
+            LogManager.Instance.Log(LogTag.Exception,$"{ex.Message}\n{ex.StackTrace}");
         }
         finally
         {
@@ -165,12 +165,12 @@ public class TcpServerTransport : ServerTransport
             await stream.WriteAsync(buffer.AsMemory(0, buffer.Length));
 
             BufferPool.ReleaseBuff(buffer);
-            System.Console.WriteLine($"[TCP] Send -> MsgID:{Enum.GetName(typeof(pb.LogicMsgID), packet._head._cmd)} dataSize:{packet._head._length}");
+            LogManager.Instance.Log(LogTag.Info,$"TcpSend -> MsgID:{Enum.GetName(typeof(pb.LogicMsgID), packet._head._cmd)} dataSize:{packet._head._length}");
             OnDataSent?.Invoke(stream, packet);
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine($"[TCP] Exception ->\n{ex.Message}\n{ex.StackTrace}");
+            LogManager.Instance.Log(LogTag.Exception,$"{ex.Message}\n{ex.StackTrace}");
         }
         finally
         {

@@ -137,12 +137,12 @@ public class KcpServerTransport : ServerTransport
             _server.Send(packetInfo.ConnectionId, new ArraySegment<byte>(buffer), KcpChannel.Unreliable);
 
             BufferPool.ReleaseBuff(buffer);
-            System.Console.WriteLine($"[KCP] Send -> connectionId:{packetInfo.ConnectionId} MsgID:{Enum.GetName(typeof(pb.BattleMsgID), packetInfo.Packet._head._cmd)} dataSize:{packetInfo.Packet._head._length}");
+            LogManager.Instance.Log(LogTag.Info,$"KcpSend -> connectionId:{packetInfo.ConnectionId} MsgID:{Enum.GetName(typeof(pb.BattleMsgID), packetInfo.Packet._head._cmd)} dataSize:{packetInfo.Packet._head._length}");
             OnDataSent?.Invoke(packetInfo.ConnectionId, packetInfo.Packet);
         }
         catch(Exception ex)
         {
-            System.Console.WriteLine($"[KCP] Exception ->\n{ex.Message}\n{ex.StackTrace}");
+            LogManager.Instance.Log(LogTag.Exception,$"{ex.Message}\n{ex.StackTrace}");
             Shutdown();
         }
         finally
@@ -164,7 +164,7 @@ public class KcpServerTransport : ServerTransport
         }
         catch (Exception ex)
         {
-            System.Console.WriteLine($"[KCP] Exception ->\n{ex.Message}\n{ex.StackTrace}");
+            LogManager.Instance.Log(LogTag.Exception,$"{ex.Message}\n{ex.StackTrace}");
         }
     }
 
