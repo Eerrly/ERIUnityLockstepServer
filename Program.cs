@@ -2,11 +2,9 @@
 GameManager.Instance.Initialize();
 MsgPoolManager.Instance.Initialize();
 NetworkManager.Instance.Initialize();
-
-LogManager.Instance.LogFilePath = "E:\\GitProjects\\ERIUnitySimpleServer\\server_log.txt";
-LogManager.Instance.Initialize();
+LogManager.Instance.Initialize("E:\\GitProjects\\ERIUnitySimpleServer\\server_log.txt");
 
 NetworkManager.Instance.TcpStart();
 
-LogManager.Instance.Log(LogTag.Info,$"{NetworkManager.Instance.TcpUri} {NetworkManager.Instance.KcpUri}");
+LogManager.Instance.Log(LogType.Info,$"{NetworkManager.Instance.TcpUri} {NetworkManager.Instance.KcpUri}");
 Console.ReadLine();

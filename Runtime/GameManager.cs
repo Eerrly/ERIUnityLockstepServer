@@ -29,7 +29,7 @@ public class GameManager : AManager<GameManager>
     /// <summary>
     /// 初始化
     /// </summary>
-    public override void Initialize()
+    public override void Initialize(params object[] objs)
     {
         _gamerInfoDic = new Dictionary<uint, GamerInfo>();
         _gamerInfoByPosDic = new Dictionary<int, GamerInfo>();

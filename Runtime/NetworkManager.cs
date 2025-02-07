@@ -40,7 +40,7 @@ public class NetworkManager : AManager<NetworkManager>
     /// <summary>
     /// 服务器初始化
     /// </summary>
-    public override void Initialize()
+    public override void Initialize(params object[] objs)
     {
         _memoryStream = new MemoryStream();
         _kcpServerTransport = new KcpServerTransport(KcpUtil.DefaultConfig, NetSetting.KcpPort)
@@ -62,7 +62,7 @@ public class NetworkManager : AManager<NetworkManager>
     /// <param name="connectionId">客户端KCP连接ID</param>
     private void OnKcpConnected(int connectionId)
     {
-        LogManager.Instance.Log(LogTag.Info,$"OnKcpConnected connectionId: {connectionId}");
+        LogManager.Instance.Log(LogType.Info,$"OnKcpConnected connectionId: {connectionId}");
     }
 
     /// <summary>
@@ -75,24 +75,24 @@ public class NetworkManager : AManager<NetworkManager>
     {
         if (!KcpActive)
         {
-            LogManager.Instance.Log(LogTag.Warning,$"Kcp Not Active!");
+            LogManager.Instance.Log(LogType.Warning,$"Kcp Not Active!");
             return;
         }
-        LogManager.Instance.Log(LogTag.Info,$"OnKcpDataReceived connectionId: {connectionId} data.len: {data.Count} channel: {channel}");
+        LogManager.Instance.Log(LogType.Info,$"OnKcpDataReceived connectionId: {connectionId} data.len: {data.Count} channel: {channel}");
         if (data.Array == null) {
-            LogManager.Instance.Log(LogTag.Warning,$"OnKcpDataReceived data.Array == null");
+            LogManager.Instance.Log(LogType.Warning,$"OnKcpDataReceived data.Array == null");
             return;
         }
 
         var gameManager = GameManager.Instance;
         _kcpServerTransport.OnMessageProcess(data.ToArray(), _memoryStream, cmd => {
-            LogManager.Instance.Log(LogTag.Info,$"KCP OnMessageProcess -> Cmd:{cmd} Length:{data.Count} Channel:{Enum.GetName(typeof(kcp2k.KcpChannel), channel)}");
+            LogManager.Instance.Log(LogType.Info,$"KCP OnMessageProcess -> Cmd:{cmd} Length:{data.Count} Channel:{Enum.GetName(typeof(kcp2k.KcpChannel), channel)}");
             switch (cmd) 
             {
                 case (byte)pb.BattleMsgID.BattleMsgConnect:
                 {
                     var c2SMessage = pb.C2S_ConnectMsg.Parser.ParseFrom(_memoryStream);
-                    LogManager.Instance.Log(LogTag.Info,$"BattleMsgConnect -> playerId:{c2SMessage.PlayerId} seasonId:{c2SMessage.SeasonId}");
+                    LogManager.Instance.Log(LogType.Info,$"BattleMsgConnect -> playerId:{c2SMessage.PlayerId} seasonId:{c2SMessage.SeasonId}");
                     foreach (var kv in gameManager.GamerInfoDic) 
                         if(kv.Value.LogicData.ID == c2SMessage.PlayerId) gameManager.UpdateGamerConnectionId(c2SMessage.PlayerId, connectionId);
                     SendBattleConnectMessage(connectionId, pb.BattleErrorCode.BattleErrBattleOk);
@@ -101,7 +101,7 @@ public class NetworkManager : AManager<NetworkManager>
                 case (byte)pb.BattleMsgID.BattleMsgReady:
                 {
                     var c2SMessage = pb.C2S_ReadyMsg.Parser.ParseFrom(_memoryStream);
-                    LogManager.Instance.Log(LogTag.Info,$"BattleMsgReady -> roomId:{c2SMessage.RoomId} playerId:{c2SMessage.PlayerId}");
+                    LogManager.Instance.Log(LogType.Info,$"BattleMsgReady -> roomId:{c2SMessage.RoomId} playerId:{c2SMessage.PlayerId}");
 
                     var room = gameManager.GetRoom(c2SMessage.RoomId);
                     if (!room.Readies.Contains(c2SMessage.PlayerId)) room.Readies.Add(c2SMessage.PlayerId);
@@ -120,7 +120,7 @@ public class NetworkManager : AManager<NetworkManager>
                 case (byte)pb.BattleMsgID.BattleMsgHeartbeat:
                 {
                     var c2SMessage = pb.C2S_HeartbeatMsg.Parser.ParseFrom(_memoryStream);
-                    LogManager.Instance.Log(LogTag.Info,$"BattleMsgHeartbeat -> playerId:{c2SMessage.PlayerId} timestamp:{c2SMessage.TimeStamp}");
+                    LogManager.Instance.Log(LogType.Info,$"BattleMsgHeartbeat -> playerId:{c2SMessage.PlayerId} timestamp:{c2SMessage.TimeStamp}");
 
                     SendBattleHeartbeatMessage(connectionId, pb.BattleErrorCode.BattleErrBattleOk, c2SMessage.TimeStamp);
                     break;
@@ -135,7 +135,7 @@ public class NetworkManager : AManager<NetworkManager>
                     
                     var gamer = gameManager.GetGamerByPos(pos);
                     var room = gameManager.GetRoom(gamer.LogicData.RoomId);
-                    LogManager.Instance.Log(LogTag.Info,$"BattleMsgFrame -> connectionId:{connectionId} gameId:{gamer.LogicData.ID} clientFrame:{c2SMessage.Frame} data:{dataFrame} serverFrame:{room.AuthoritativeFrame}");
+                    LogManager.Instance.Log(LogType.Info,$"BattleMsgFrame -> connectionId:{connectionId} gameId:{gamer.LogicData.ID} clientFrame:{c2SMessage.Frame} data:{dataFrame} serverFrame:{room.AuthoritativeFrame}");
                     
                     // 使用位运算更新房间的输入计数 [0 0] 2bit，索引分别代表玩家0玩家1，0:未操作 1:操作
                     room.InputCounts[c2SMessage.Frame] |= (byte)(1 << pos);
@@ -145,7 +145,7 @@ public class NetworkManager : AManager<NetworkManager>
                 case (byte)pb.BattleMsgID.BattleMsgCheck:
                 {
                     var c2SMessage = pb.C2S_CheckMsg.Parser.ParseFrom(_memoryStream);
-                    LogManager.Instance.Log(LogTag.Info,$"BattleMsgCheck -> frame:{c2SMessage.Frame} pos:{c2SMessage.Pos} md5:{c2SMessage.Md5}");
+                    LogManager.Instance.Log(LogType.Info,$"BattleMsgCheck -> frame:{c2SMessage.Frame} pos:{c2SMessage.Pos} md5:{c2SMessage.Md5}");
                     
                     var gamer = gameManager.GetGamerByPos(c2SMessage.Pos);
                     var room = gameManager.GetRoom(gamer.LogicData.RoomId);
@@ -175,7 +175,7 @@ public class NetworkManager : AManager<NetworkManager>
     /// <param name="connectionId">客户端KCP连接ID</param>
     private void OnKcpDisconnected(int connectionId)
     {
-        LogManager.Instance.Log(LogTag.Error,$"OnKcpDisconnected connectionId: {connectionId}");
+        LogManager.Instance.Log(LogType.Error,$"OnKcpDisconnected connectionId: {connectionId}");
         var gamer = GameManager.Instance.GetGamerByConnectionId(connectionId);
         var room = GameManager.Instance.GetRoom(gamer.LogicData.RoomId);
         room.Readies.Remove(gamer.LogicData.ID);
@@ -189,7 +189,7 @@ public class NetworkManager : AManager<NetworkManager>
     /// <param name="error">错误原因</param>
     private void OnKcpError(int connectionId, kcp2k.ErrorCode errorCode, string error)
     {
-        LogManager.Instance.Log(LogTag.Error, $"OnKcpError connectionId: {connectionId} errorCode: {errorCode} error: {error}");
+        LogManager.Instance.Log(LogType.Error, $"OnKcpError connectionId: {connectionId} errorCode: {errorCode} error: {error}");
     }
 
     /// <summary>
@@ -320,19 +320,19 @@ public class NetworkManager : AManager<NetworkManager>
     {
         if (!TcpActive)
         {
-            LogManager.Instance.Log(LogTag.Warning, $"Tcp Not Active!");
+            LogManager.Instance.Log(LogType.Warning, $"Tcp Not Active!");
             return;
         }
 
         var gameManager = GameManager.Instance;
         _tcpServerTransport.OnMessageProcess(data, _memoryStream, cmd => {
-            LogManager.Instance.Log(LogTag.Info, $"OnTcpDataReceived data.len:{data.Length} read:{read}");
+            LogManager.Instance.Log(LogType.Info, $"OnTcpDataReceived data.len:{data.Length} read:{read}");
             switch (cmd)
             {
                 case (byte)pb.LogicMsgID.LogicMsgLogin:
                 {
                     var c2SMessage = pb.C2S_LoginMsg.Parser.ParseFrom(_memoryStream);
-                    LogManager.Instance.Log(LogTag.Info, $"LogicMsgLogin -> account:{c2SMessage.Account.ToStringUtf8()} password:{c2SMessage.Password.ToStringUtf8()}");
+                    LogManager.Instance.Log(LogType.Info, $"LogicMsgLogin -> account:{c2SMessage.Account.ToStringUtf8()} password:{c2SMessage.Password.ToStringUtf8()}");
                     var gamer = gameManager.GetOrCreateGamer(c2SMessage.Account.ToStringUtf8(), c2SMessage.Password.ToStringUtf8());
                     gamer.LogicData.NetworkStream = stream;
                     SendLogicLoginMessage(stream, pb.LogicErrorCode.LogicErrOk, gamer.LogicData.ID);
@@ -341,7 +341,7 @@ public class NetworkManager : AManager<NetworkManager>
                 case (byte)pb.LogicMsgID.LogicMsgCreateRoom:
                 {
                     var c2SMessage = pb.C2S_CreateRoomMsg.Parser.ParseFrom(_memoryStream);
-                    LogManager.Instance.Log(LogTag.Info,$"LogicMsgCreateRoom -> playerId:{c2SMessage.PlayerId}");
+                    LogManager.Instance.Log(LogType.Info,$"LogicMsgCreateRoom -> playerId:{c2SMessage.PlayerId}");
                     var room = gameManager.CreateRoom();
                     // 某一个客户端创建房间时，广播给每一个客户端
                     foreach (var kv in gameManager.GamerInfoDic)
@@ -351,7 +351,7 @@ public class NetworkManager : AManager<NetworkManager>
                 case (byte)pb.LogicMsgID.LogicMsgJoinRoom:
                 {
                     var c2SMessage = pb.C2S_JoinRoomMsg.Parser.ParseFrom(_memoryStream);
-                    LogManager.Instance.Log(LogTag.Info,$"LogicMsgJoinRoom -> roomId:{c2SMessage.RoomId} playerId:{c2SMessage.PlayerId}");
+                    LogManager.Instance.Log(LogType.Info,$"LogicMsgJoinRoom -> roomId:{c2SMessage.RoomId} playerId:{c2SMessage.PlayerId}");
                     
                     var room = gameManager.GetRoom(c2SMessage.RoomId);
                     var gamer = gameManager.GetGamerById(c2SMessage.PlayerId);
@@ -474,7 +474,7 @@ public class NetworkManager : AManager<NetworkManager>
                 }
                 catch (Exception ex)
                 {
-                    LogManager.Instance.Log(LogTag.Exception, $"OnServerBattleStart BattleServerUpdate Exception ->\n{ex.Message}\n{ex.StackTrace}");
+                    LogManager.Instance.Log(LogType.Exception, $"OnServerBattleStart BattleServerUpdate Exception ->\n{ex.Message}\n{ex.StackTrace}");
                 }
                 await Task.Delay(BattleSetting.BattleInterval);
             }

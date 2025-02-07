@@ -6,7 +6,7 @@ public interface IManager
     /// <summary>
     /// 初始化
     /// </summary>
-    void Initialize();
+    void Initialize(params object[] objs);
 
     /// <summary>
     /// 释放

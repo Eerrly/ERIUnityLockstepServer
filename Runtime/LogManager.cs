@@ -1,7 +1,9 @@
-﻿
-using System.Text;
+﻿using System.Text;
 
-public static class LogTag
+/// <summary>
+/// 日志类型
+/// </summary>
+public static class LogType
 {
     public const string Info = "Info";
     public const string Warning = "Warning";
@@ -9,21 +11,23 @@ public static class LogTag
     public const string Exception = "Exception";
 }
 
+/// <summary>
+/// 日志管理器
+/// </summary>
 public class LogManager : AManager<LogManager>
 {
-    public string LogFilePath;
-    
     private static readonly object _lock = new object();
     private Thread _loggingThread;
     private StringBuilder _logBuffer;
     private bool _isRunning;
+    private string _logFilePath;
     
-    public override void Initialize()
+    public override void Initialize(params object[] objs)
     {
-        File.WriteAllText(LogFilePath, "");
-        
+        _logFilePath = (string)objs[0];
         _logBuffer = new StringBuilder();
         _isRunning = true;
+        File.WriteAllText(_logFilePath, "");
         _loggingThread = new Thread(new ThreadStart(WriteLogsToFile))
         {
             IsBackground = true
@@ -31,6 +35,11 @@ public class LogManager : AManager<LogManager>
         _loggingThread.Start();
     }
 
+    /// <summary>
+    /// 日志输入
+    /// </summary>
+    /// <param name="tag">日志类型</param>
+    /// <param name="msg">日志</param>
     public void Log(string tag, string msg)
     {
         var message = $"{DateTime.Now} [{tag}]: {msg}";
@@ -41,6 +50,9 @@ public class LogManager : AManager<LogManager>
         Console.WriteLine(message);
     }
 
+    /// <summary>
+    /// 将日志输入写到文本中
+    /// </summary>
     private void WriteLogsToFile()
     {
         while (_isRunning)
@@ -49,7 +61,7 @@ public class LogManager : AManager<LogManager>
             {
                 if (_logBuffer.Length > 0)
                 {
-                    File.AppendAllText(LogFilePath, _logBuffer.ToString());
+                    File.AppendAllText(_logFilePath, _logBuffer.ToString());
                     _logBuffer.Clear();
                 }
             }
@@ -61,7 +73,7 @@ public class LogManager : AManager<LogManager>
         {
             if (_logBuffer.Length > 0)
             {
-                File.AppendAllText(LogFilePath, _logBuffer.ToString());
+                File.AppendAllText(_logFilePath, _logBuffer.ToString());
                 _logBuffer.Clear();
             }
         }

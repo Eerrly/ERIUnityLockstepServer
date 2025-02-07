@@ -24,7 +24,7 @@ public abstract class AManager<T> : IManager where T:new()
     /// <summary>
     /// 管理器初始化
     /// </summary>
-    public virtual void Initialize() { }
+    public virtual void Initialize(params object[] objs) { }
     
     /// <summary>
     /// 管理器释放

@@ -75,7 +75,7 @@ public abstract class ServerTransport
         }
         catch (Exception ex)
         {
-            LogManager.Instance.Log(LogTag.Exception,$"{ex.Message}\n{ex.StackTrace}");
+            LogManager.Instance.Log(LogType.Exception,$"{ex.Message}\n{ex.StackTrace}");
             onCatch?.Invoke();
         }
         finally
