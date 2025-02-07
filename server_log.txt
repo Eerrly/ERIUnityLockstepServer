@@ -1,0 +1,5 @@
+2025/2/7 11:27:16 [Info]: tcpservertransport://pc-546:10085/ kcpservertransport://pc-546:10086/
+2025/2/7 11:27:37 [Info]: AcceptTcpClientAsync -> RemoteEndPoint: 127.0.0.1:53190
+2025/2/7 11:27:38 [Info]: OnTcpDataReceived data.len:1024 read:11
+2025/2/7 11:27:38 [Info]: LogicMsgLogin -> account:1 password:1
+2025/2/7 11:27:38 [Info]: TcpSend -> MsgID:LogicMsgLogin dataSize:2

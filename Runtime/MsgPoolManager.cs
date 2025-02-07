@@ -17,7 +17,7 @@ public class MsgPoolManager : AManager<MsgPoolManager>
     /// <summary>
     /// 初始化
     /// </summary>
-    public override void Initialize()
+    public override void Initialize(params object[] objs)
     {
         _cacheMsgDic = new Dictionary<int, Queue<IMessage>>();
     }
