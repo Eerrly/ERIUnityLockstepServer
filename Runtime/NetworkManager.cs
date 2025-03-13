@@ -466,7 +466,8 @@ public class NetworkManager : AManager<NetworkManager>
                         for (var i = 0; i < room.Gamers.Count; i++)
                         {
                             var gamer = gameManager.GetGamerById(room.Gamers[i]);
-                            if (!room.Readies.Contains(gamer.LogicData.ID)) continue;
+                            if (!room.Readies.Contains(gamer.LogicData.ID)) 
+                                continue;
                             SendBattleFrameMessage(gamer.BattleData.ConnectionId, pb.BattleErrorCode.BattleErrBattleOk, (uint)room.AuthoritativeFrame, (uint)room.Gamers.Count, room.InputCounts[(uint)room.AuthoritativeFrame], byteArray);
                         }
                     }

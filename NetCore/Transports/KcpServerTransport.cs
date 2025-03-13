@@ -39,7 +39,6 @@ public class KcpServerTransport : ServerTransport
     /// 需要发送的消息包队列
     /// </summary>
     private readonly Queue<PacketInfo> _packetInfos;
-    
     /// <summary>
     /// 已连接的客户端数量
     /// </summary>
