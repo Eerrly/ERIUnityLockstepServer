@@ -164,7 +164,6 @@ public class TcpServerTransport : ServerTransport
             Array.Copy(packet._data, 0, buffer, Head.HeadLength, packet._head._length);
             await stream.WriteAsync(buffer.AsMemory(0, buffer.Length));
 
-            BufferPool.ReleaseBuff(buffer);
             LogManager.Instance.Log(LogType.Info,$"TcpSend -> MsgID:{Enum.GetName(typeof(pb.LogicMsgID), packet._head._cmd)} dataSize:{packet._head._length}");
             OnDataSent?.Invoke(stream, packet);
         }

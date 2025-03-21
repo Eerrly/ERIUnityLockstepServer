@@ -135,7 +135,6 @@ public class KcpServerTransport : ServerTransport
             Array.Copy(packetInfo.Packet._data, 0, buffer, Head.HeadLength, packetInfo.Packet._head._length);
             _server.Send(packetInfo.ConnectionId, new ArraySegment<byte>(buffer), KcpChannel.Unreliable);
 
-            BufferPool.ReleaseBuff(buffer);
             LogManager.Instance.Log(LogType.Info,$"KcpSend -> connectionId:{packetInfo.ConnectionId} MsgID:{Enum.GetName(typeof(pb.BattleMsgID), packetInfo.Packet._head._cmd)} dataSize:{packetInfo.Packet._head._length}");
             OnDataSent?.Invoke(packetInfo.ConnectionId, packetInfo.Packet);
         }
