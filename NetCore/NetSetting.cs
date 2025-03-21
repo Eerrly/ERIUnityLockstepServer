@@ -1,5 +1,6 @@
 /// <summary>
 /// 网络常量设置
+/// Update: 2024-10-12
 /// </summary>
 public class NetSetting
 {
