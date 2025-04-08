@@ -472,6 +472,9 @@ public class NetworkManager : AManager<NetworkManager>
                         }
                     }
                     room.AuthoritativeFrame ++;
+                    // 当达到最大帧时，停止轮询
+                    if (room.AuthoritativeFrame >= BattleSetting.MaxFrameCount)
+                        throw new Exception($"AuthoritativeFrame: {room.AuthoritativeFrame} >= MaxFrameCount: {BattleSetting.MaxFrameCount}");
                 }
                 catch (Exception ex)
                 {

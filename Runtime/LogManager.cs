@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿// #define DEBUG_MODEL
+
+using System.Text;
 
 /// <summary>
 /// 日志类型
@@ -47,6 +49,10 @@ public class LogManager : AManager<LogManager>
         {
             _logBuffer.AppendLine(message);
         }
+#if !DEBUG_MODEL
+        if (tag.Equals(LogType.Info) || tag.Equals(LogType.Warning))
+            return;
+#endif
         Console.WriteLine(message);
     }
 

@@ -7,7 +7,6 @@ public class GameManager : AManager<GameManager>
     /// 所有玩家信息的字典 key:玩家ID
     /// </summary>
     public Dictionary<uint, GamerInfo> GamerInfoDic => _gamerInfoDic;
-
     private Dictionary<uint, GamerInfo> _gamerInfoDic;
     /// <summary>
     /// 所有玩家信息的字典 key:玩家POS
