@@ -1,4 +1,7 @@
-﻿public static class BufferPool
+﻿/// <summary>
+/// 字节数组池子
+/// </summary>
+public static class BufferPool
 {
     private static object _lockObject = new object();
     private static Dictionary<int, Queue<byte[]>> _buffersCache = new Dictionary<int, Queue<byte[]>>(10);

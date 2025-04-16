@@ -1,5 +1,20 @@
-# ERIUnitySimpleServer
-***一个简单的使用Protobuf的 TCP、基于[kcp2k](https://github.com/MirrorNetworking/kcp2k)的KCP 帧同步C#控制台服务器DEMO***
+# ERIUnityLockstepServer
+***帧同步C#控制台服务器DEMO***
 
-### 使用
+### 介绍
++ 登录、房间等业务逻辑，使用TCP通信
++ 战斗、校验等战斗逻辑，使用基于kcp2k的KCP通信[^kcp2k]
++ 通讯数据使用Google的ProtoBuf[^google.protobuf]
+
+### 设置
++ 端口号设置在 `NetCore/NetSetting.cs`
++ 最大帧缓存数量、一帧的毫秒数在 `Battle/BattleSetting.cs`
++ ProtoBuf生成工具在 `ProtoGen/protogen.bat` 双击运行
++ 主入口 `Program.cs`
+
+### 运行
 `dotnet run`
+
+### 引用
+[^kcp2k]:kcp2k - <https://github.com/MirrorNetworking/kcp2k>
+[^google.protobuf]:google.protobuf - <https://github.com/google/protobuf>

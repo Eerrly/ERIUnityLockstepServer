@@ -2,7 +2,9 @@
 GameManager.Instance.Initialize();
 MsgPoolManager.Instance.Initialize();
 NetworkManager.Instance.Initialize();
+LogManager.Instance.Initialize("E:\\GitProjects\\ERIUnitySimpleServer\\server_log.txt");
+
 NetworkManager.Instance.TcpStart();
 
-System.Console.WriteLine($"ServerTcpUri: {NetworkManager.Instance.TcpUri} ServerKcpUri: {NetworkManager.Instance.KcpUri}");
+LogManager.Instance.Log(LogType.Info,$"{NetworkManager.Instance.TcpUri} {NetworkManager.Instance.KcpUri}");
 Console.ReadLine();

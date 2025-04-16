@@ -39,6 +39,9 @@ namespace kcp2k
         // Unity's time.deltaTime over long periods.
         readonly Stopwatch watch = new Stopwatch();
 
+        // current time property for convenience. uint is easy to serialize across platforms.
+        public uint time => (uint)watch.ElapsedMilliseconds;
+
         // buffer to receive kcp's processed messages (avoids allocations).
         // IMPORTANT: this is for KCP messages. so it needs to be of size:
         //            1 byte header + MaxMessageSize content
@@ -59,6 +62,7 @@ namespace kcp2k
         // same goes for slow paced card games etc.
         public const int PING_INTERVAL = 1000;
         uint lastPingTime;
+        uint lastPongTime;
 
         // if we send more than kcp can handle, we will get ever growing
         // send/recv buffers and queues and minutes of latency.
@@ -83,7 +87,8 @@ namespace kcp2k
         // we also need to tell kcp to use MTU-1 to leave space for the byte.
         public const int CHANNEL_HEADER_SIZE = 1;
         public const int COOKIE_HEADER_SIZE = 4;
-        public const int METADATA_SIZE = CHANNEL_HEADER_SIZE + COOKIE_HEADER_SIZE;
+        public const int METADATA_SIZE_RELIABLE = CHANNEL_HEADER_SIZE + COOKIE_HEADER_SIZE;
+        public const int METADATA_SIZE_UNRELIABLE = CHANNEL_HEADER_SIZE + COOKIE_HEADER_SIZE;
 
         // reliable channel (= kcp) MaxMessageSize so the outside knows largest
         // allowed message to send. the calculation in Send() is not obvious at
@@ -108,7 +113,7 @@ namespace kcp2k
         //            => sending UNRELIABLE max message size most of the time is
         //               best for performance (use that one for batching!)
         static int ReliableMaxMessageSize_Unconstrained(int mtu, uint rcv_wnd) =>
-            (mtu - Kcp.OVERHEAD - METADATA_SIZE) * ((int)rcv_wnd - 1) - 1;
+            (mtu - Kcp.OVERHEAD - METADATA_SIZE_RELIABLE) * ((int)rcv_wnd - 1) - 1;
 
         // kcp encodes 'frg' as 1 byte.
         // max message size can only ever allow up to 255 fragments.
@@ -120,7 +125,7 @@ namespace kcp2k
 
         // unreliable max message size is simply MTU - channel header - kcp header
         public static int UnreliableMaxMessageSize(int mtu) =>
-            mtu - METADATA_SIZE - 1;
+            mtu - METADATA_SIZE_UNRELIABLE - 1;
 
         // maximum send rate per second can be calculated from kcp parameters
         // source: https://translate.google.com/translate?sl=auto&tl=en&u=https://wetest.qq.com/lab/view/391.html
@@ -139,6 +144,10 @@ namespace kcp2k
         // calculate max message sizes based on mtu and wnd only once
         public readonly int unreliableMax;
         public readonly int reliableMax;
+
+        // round trip time (RTT) for convenience.
+        // this is the time that it takes for a reliable message to travel to remote and back.
+        public uint rttInMilliseconds { get; private set; }
 
         // SetupKcp creates and configures a new KCP instance.
         // => useful to start from a fresh state every time the client connects
@@ -191,7 +200,7 @@ namespace kcp2k
             // message. so while Kcp.MTU_DEF is perfect, we actually need to
             // tell kcp to use MTU-1 so we can still put the header into the
             // message afterwards.
-            kcp.SetMtu((uint)config.Mtu - METADATA_SIZE);
+            kcp.SetMtu((uint)config.Mtu - METADATA_SIZE_RELIABLE);
 
             // set maximum retransmits (aka dead_link)
             kcp.dead_link = config.MaxRetransmits;
@@ -324,7 +333,7 @@ namespace kcp2k
 
             // extract content without header
             message = new ArraySegment<byte>(kcpMessageBuffer, 1, msgSize - 1);
-            lastReceiveTime = (uint)watch.ElapsedMilliseconds;
+            lastReceiveTime = time;
             return true;
         }
 
@@ -356,6 +365,13 @@ namespace kcp2k
                     case KcpHeaderReliable.Ping:
                     {
                         // ping keeps kcp from timing out. do nothing.
+                        // safety: don't reply with pong message before authenticated.
+                        break;
+                    }
+                    case KcpHeaderReliable.Pong:
+                    {
+                        // ping keeps kcp from timing out. do nothing.
+                        // safety: don't handle pong message before authenticated.
                         break;
                     }
                     case KcpHeaderReliable.Data:
@@ -413,7 +429,34 @@ namespace kcp2k
                     }
                     case KcpHeaderReliable.Ping:
                     {
-                        // ping keeps kcp from timing out. do nothing.
+                        // ping includes the sender's local time for RTT calculation.
+                        // simply send it back to the sender.
+                        // for safety, we only reply every PING_INTERVAL at max.
+                        // so attackers can't force us to reply a PONG every time.
+                        if (message.Count == 4)
+                        {
+                            if (time >= lastPongTime + PING_INTERVAL)
+                            {
+                                Utils.Decode32U(message.Array, message.Offset, out uint pingTimestamp);
+                                SendPong(pingTimestamp);
+                                lastPongTime = time;
+                            }
+                        }
+                        break;
+                    }
+                    // ping keeps kcp from timing out, and is used for RTT calcualtion
+                    case KcpHeaderReliable.Pong:
+                    {
+                        if (message.Count == 4)
+                        {
+                            Utils.Decode32U(message.Array, message.Offset, out uint originalTimestamp);
+                            if (time >= originalTimestamp)
+                            {
+                                rttInMilliseconds = time - originalTimestamp;
+                                // Log.Info($"[KCP] {GetType()}: RTT={rttInMilliseconds}ms");
+                            }
+                        }
+
                         break;
                     }
                 }
@@ -422,8 +465,6 @@ namespace kcp2k
 
         public virtual void TickIncoming()
         {
-            uint time = (uint)watch.ElapsedMilliseconds;
-
             try
             {
                 switch (state)
@@ -474,8 +515,6 @@ namespace kcp2k
 
         public virtual void TickOutgoing()
         {
-            uint time = (uint)watch.ElapsedMilliseconds;
-
             try
             {
                 switch (state)
@@ -585,7 +624,7 @@ namespace kcp2k
                         //    otherwise a connection might time out even
                         //    though unreliable were received, but no
                         //    reliable was received.
-                        lastReceiveTime = (uint)watch.ElapsedMilliseconds;
+                        lastReceiveTime = time;
                     }
                     else
                     {
@@ -736,7 +775,22 @@ namespace kcp2k
 
         // ping goes through kcp to keep it from timing out, so it goes over the
         // reliable channel.
-        void SendPing() => SendReliable(KcpHeaderReliable.Ping, default);
+        readonly byte[] pingData = new byte[4]; // 4 bytes timestamp
+        void SendPing()
+        {
+            // when sending ping, include the local timestamp so we can
+            // calculate RTT from the pong.
+            Utils.Encode32U(pingData, 0, time);
+            SendReliable(KcpHeaderReliable.Ping, pingData);
+        }
+
+        void SendPong(uint pingTimestamp)
+        {
+            // when sending ping, include the local timestamp so we can
+            // calculate RTT from the pong.
+            Utils.Encode32U(pingData, 0, pingTimestamp);
+            SendReliable(KcpHeaderReliable.Pong, pingData);
+        }
 
         // send disconnect message
         void SendDisconnect()

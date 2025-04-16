@@ -93,6 +93,7 @@ message C2S_CheckMsg {
 
 message S2C_CheckMsg {
     BattleErrorCode errorCode       = 1;    //错误码
+    int32 frame                     = 2;    //帧号
 }
 
 message S2C_ResultMsg {

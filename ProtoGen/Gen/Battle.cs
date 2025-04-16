@@ -37,20 +37,20 @@ namespace pb {
             "YW1lTXNnEiMKCWVycm9yQ29kZRgBIAEoDjIQLkJhdHRsZUVycm9yQ29kZRIN",
             "CgVmcmFtZRgCIAEoDRITCgtwbGF5ZXJDb3VudBgDIAEoDRISCgppbnB1dENv",
             "dW50GAQgASgNEg0KBWRhdHVtGAUgASgMIjcKDEMyU19DaGVja01zZxINCgVm",
-            "cmFtZRgBIAEoBRILCgNwb3MYAiABKAUSCwoDbWQ1GAMgASgFIjMKDFMyQ19D",
-            "aGVja01zZxIjCgllcnJvckNvZGUYASABKA4yEC5CYXR0bGVFcnJvckNvZGUi",
-            "RAoNUzJDX1Jlc3VsdE1zZxIjCgllcnJvckNvZGUYASABKA4yEC5CYXR0bGVF",
-            "cnJvckNvZGUSDgoGd2lubmVyGAIgASgNIk0KFlMyQ19CYXR0bGVFeGNlcHRp",
-            "b25Nc2cSIwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0dGxlRXJyb3JDb2RlEg4K",
-            "BnJlYXNvbhgCIAEoCSreAQoLQmF0dGxlTXNnSUQSFAoQQkFUVExFX01TR19C",
-            "ZWdpbhAAEhYKEkJBVFRMRV9NU0dfQ29ubmVjdBABEhgKFEJBVFRMRV9NU0df",
-            "SGVhcnRiZWF0EAISFAoQQkFUVExFX01TR19SZWFkeRAKEhQKEEJBVFRMRV9N",
-            "U0dfU3RhcnQQFBIUChBCQVRUTEVfTVNHX0ZyYW1lEB4SFAoQQkFUVExFX01T",
-            "R19DaGVjaxAoEhUKEUJBVFRMRV9NU0dfUmVzdWx0EDISGAoUQkFUVExFX01T",
-            "R19FeGNlcHRpb24QZCptCg9CYXR0bGVFcnJvckNvZGUSGAoUQkFUVExFX0VS",
-            "Ul9CYXR0bGVfT2sQABIWChJCQVRUTEVfRVJSX1RpbWVvdXQQARITCg9CQVRU",
-            "TEVfRVJSX0RhdGEQAhITCg9CQVRUTEVfRVJSX0RpZmYQA0IFqgICcGJiBnBy",
-            "b3RvMw=="));
+            "cmFtZRgBIAEoBRILCgNwb3MYAiABKAUSCwoDbWQ1GAMgASgFIkIKDFMyQ19D",
+            "aGVja01zZxIjCgllcnJvckNvZGUYASABKA4yEC5CYXR0bGVFcnJvckNvZGUS",
+            "DQoFZnJhbWUYAiABKAUiRAoNUzJDX1Jlc3VsdE1zZxIjCgllcnJvckNvZGUY",
+            "ASABKA4yEC5CYXR0bGVFcnJvckNvZGUSDgoGd2lubmVyGAIgASgNIk0KFlMy",
+            "Q19CYXR0bGVFeGNlcHRpb25Nc2cSIwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0",
+            "dGxlRXJyb3JDb2RlEg4KBnJlYXNvbhgCIAEoCSreAQoLQmF0dGxlTXNnSUQS",
+            "FAoQQkFUVExFX01TR19CZWdpbhAAEhYKEkJBVFRMRV9NU0dfQ29ubmVjdBAB",
+            "EhgKFEJBVFRMRV9NU0dfSGVhcnRiZWF0EAISFAoQQkFUVExFX01TR19SZWFk",
+            "eRAKEhQKEEJBVFRMRV9NU0dfU3RhcnQQFBIUChBCQVRUTEVfTVNHX0ZyYW1l",
+            "EB4SFAoQQkFUVExFX01TR19DaGVjaxAoEhUKEUJBVFRMRV9NU0dfUmVzdWx0",
+            "EDISGAoUQkFUVExFX01TR19FeGNlcHRpb24QZCptCg9CYXR0bGVFcnJvckNv",
+            "ZGUSGAoUQkFUVExFX0VSUl9CYXR0bGVfT2sQABIWChJCQVRUTEVfRVJSX1Rp",
+            "bWVvdXQQARITCg9CQVRUTEVfRVJSX0RhdGEQAhITCg9CQVRUTEVfRVJSX0Rp",
+            "ZmYQA0IFqgICcGJiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::pb.BattleMsgID), typeof(global::pb.BattleErrorCode), }, new pbr::GeneratedClrTypeInfo[] {
@@ -64,7 +64,7 @@ namespace pb {
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_FrameMsg), global::pb.C2S_FrameMsg.Parser, new[]{ "Frame", "Datum" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_FrameMsg), global::pb.S2C_FrameMsg.Parser, new[]{ "ErrorCode", "Frame", "PlayerCount", "InputCount", "Datum" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_CheckMsg), global::pb.C2S_CheckMsg.Parser, new[]{ "Frame", "Pos", "Md5" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_CheckMsg), global::pb.S2C_CheckMsg.Parser, new[]{ "ErrorCode" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_CheckMsg), global::pb.S2C_CheckMsg.Parser, new[]{ "ErrorCode", "Frame" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_ResultMsg), global::pb.S2C_ResultMsg.Parser, new[]{ "ErrorCode", "Winner" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_BattleExceptionMsg), global::pb.S2C_BattleExceptionMsg.Parser, new[]{ "ErrorCode", "Reason" }, null, null, null)
           }));
@@ -1850,6 +1850,7 @@ namespace pb {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public S2C_CheckMsg(S2C_CheckMsg other) : this() {
       errorCode_ = other.errorCode_;
+      frame_ = other.frame_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1871,6 +1872,20 @@ namespace pb {
       }
     }
 
+    /// <summary>Field number for the "frame" field.</summary>
+    public const int FrameFieldNumber = 2;
+    private int frame_;
+    /// <summary>
+    ///帧号
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int Frame {
+      get { return frame_; }
+      set {
+        frame_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as S2C_CheckMsg);
@@ -1885,6 +1900,7 @@ namespace pb {
         return true;
       }
       if (ErrorCode != other.ErrorCode) return false;
+      if (Frame != other.Frame) return false;
       return true;
     }
 
@@ -1892,6 +1908,7 @@ namespace pb {
     public override int GetHashCode() {
       int hash = 1;
       if (ErrorCode != 0) hash ^= ErrorCode.GetHashCode();
+      if (Frame != 0) hash ^= Frame.GetHashCode();
       return hash;
     }
 
@@ -1906,6 +1923,10 @@ namespace pb {
         output.WriteRawTag(8);
         output.WriteEnum((int) ErrorCode);
       }
+      if (Frame != 0) {
+        output.WriteRawTag(16);
+        output.WriteInt32(Frame);
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1913,6 +1934,9 @@ namespace pb {
       int size = 0;
       if (ErrorCode != 0) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) ErrorCode);
+      }
+      if (Frame != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Frame);
       }
       return size;
     }
@@ -1924,6 +1948,9 @@ namespace pb {
       }
       if (other.ErrorCode != 0) {
         ErrorCode = other.ErrorCode;
+      }
+      if (other.Frame != 0) {
+        Frame = other.Frame;
       }
     }
 
@@ -1937,6 +1964,10 @@ namespace pb {
             break;
           case 8: {
             errorCode_ = (global::pb.BattleErrorCode) input.ReadEnum();
+            break;
+          }
+          case 16: {
+            Frame = input.ReadInt32();
             break;
           }
         }
