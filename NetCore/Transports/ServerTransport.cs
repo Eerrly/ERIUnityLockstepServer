@@ -4,6 +4,11 @@
 public abstract class ServerTransport
 {
     /// <summary>
+    /// 取消Token
+    /// </summary>
+    protected readonly CancellationTokenSource TokenSource = new CancellationTokenSource();
+    
+    /// <summary>
     /// 服务器的地址信息
     /// </summary>
     /// <returns></returns>
@@ -37,6 +42,15 @@ public abstract class ServerTransport
     /// </summary>
     /// <param name="connectionId">客户端KCP连接ID</param>
     public virtual void Disconnect(int connectionId) { }
+
+    /// <summary>
+    /// 断开服务器
+    /// </summary>
+    protected virtual void Disconnect()
+    {
+        TokenSource.Cancel();
+        TokenSource.Dispose();
+    }
     
     /// <summary>
     /// 获取客户端地址
