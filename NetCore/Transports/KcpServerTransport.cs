@@ -38,7 +38,7 @@ public class KcpServerTransport : ServerTransport
     /// <summary>
     /// 需要发送的消息包队列
     /// </summary>
-    private readonly Queue<PacketInfo> _packetInfos;
+    private readonly RingBuffer<PacketInfo> _packetInfos;
     /// <summary>
     /// 已连接的客户端数量
     /// </summary>
@@ -66,7 +66,7 @@ public class KcpServerTransport : ServerTransport
     
     public KcpServerTransport(KcpConfig config, ushort port)
     {
-        _packetInfos = new Queue<PacketInfo>();
+        _packetInfos = new RingBuffer<PacketInfo>(1024);
 
         this._port = port;
         this._config = config;
@@ -104,17 +104,26 @@ public class KcpServerTransport : ServerTransport
     public override void Start() => _server.Start(_port);
 
     /// <summary>
+    /// 断开服务器
+    /// </summary>
+    protected override void Disconnect()
+    {
+        base.Disconnect();
+        _server.Stop();
+    }
+
+    /// <summary>
     /// KCP服务器轮询
     /// </summary>
     public override void Update()
     {
         Task.Run(async () => {
-            while(true){
+            while(!TokenSource.Token.IsCancellationRequested){
                 UpdatePacketInfosSent();
                 _server.Tick();
-                await Task.Delay(TimeSpan.FromMilliseconds(_config.Interval));
+                await Task.Delay(TimeSpan.FromMilliseconds(_config.Interval), TokenSource.Token);
             }
-        });
+        }, TokenSource.Token);
     }
 
     /// <summary>
@@ -122,9 +131,12 @@ public class KcpServerTransport : ServerTransport
     /// </summary>
     private void UpdatePacketInfosSent()
     {
-        if(_packetInfos.Count <= 0) return;
+        if(_packetInfos.Count <= 0) 
+            return;
         
-        var packetInfo = _packetInfos.Dequeue();
+        if (!_packetInfos.TryDequeue(out var packetInfo)) 
+            return;
+        
         var buffer = BufferPool.GetBuffer(packetInfo.Packet._head._length + Head.HeadLength);
         try
         {
@@ -195,20 +207,13 @@ public class KcpServerTransport : ServerTransport
     /// <returns>地址信息</returns>
     public override string GetClientAddress(int connectionId)
     {
-        IPEndPoint endPoint = _server.GetClientEndPoint(connectionId);
-        if(endPoint != null)
-        {
-            if(endPoint.Address.IsIPv4MappedToIPv6){
-                return endPoint.Address.MapToIPv4().ToString();
-            }
-            return endPoint.Address.ToString();
-        }
-        return "";
+        var endPoint = _server.GetClientEndPoint(connectionId);
+        return endPoint.Address.IsIPv4MappedToIPv6 ? endPoint.Address.MapToIPv4().ToString() : endPoint.Address.ToString();
     }
 
     /// <summary>
     /// 关闭KCP服务器
     /// </summary>
-    public override void Shutdown() => _server.Stop();
+    public override void Shutdown() => Disconnect();
 
 }

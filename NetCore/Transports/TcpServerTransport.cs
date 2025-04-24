@@ -82,6 +82,15 @@ public class TcpServerTransport : ServerTransport
     }
 
     /// <summary>
+    /// 断开服务器
+    /// </summary>
+    protected override void Disconnect()
+    {
+        base.Disconnect();
+        _tcpListener.Stop();
+    }
+
+    /// <summary>
     /// 监听客户端连接
     /// </summary>
     private async void ListenForClientsAsync()
@@ -89,7 +98,7 @@ public class TcpServerTransport : ServerTransport
         try
         {
             _tcpListener.Start();
-            while (true)
+            while (!TokenSource.Token.IsCancellationRequested)
             {
                 var client = await _tcpListener.AcceptTcpClientAsync();
                 LogManager.Instance.Log(LogType.Info,$"AcceptTcpClientAsync -> RemoteEndPoint: {client.Client.RemoteEndPoint}");
@@ -107,7 +116,7 @@ public class TcpServerTransport : ServerTransport
                 foreach(var task in _handleClientTasks) task.Dispose();
                 _handleClientTasks.Clear();
             }
-            _tcpListener.Stop();
+            Disconnect();
         }
     }
 
@@ -193,4 +202,8 @@ public class TcpServerTransport : ServerTransport
         Send(packet, stream);
     }
 
+    /// <summary>
+    /// 断开TCP服务器
+    /// </summary>
+    public override void Shutdown() => Disconnect();
 }
