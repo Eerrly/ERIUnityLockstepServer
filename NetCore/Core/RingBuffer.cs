@@ -3,13 +3,14 @@ using System.Runtime.InteropServices;
 using System.Threading;
 
 /// <summary>
-/// Implementation of the Disruptor pattern
+/// 高性能、低延迟的无锁环形缓冲数据队列
 /// </summary>
 /// <typeparam name="T">the type of item to be stored</typeparam>
 public class RingBuffer<T>
 {
     private readonly T[] _entries;
     private readonly int _modMask;
+    // 游标
     private Volatile.PaddedLong _consumerCursor = new Volatile.PaddedLong();
     private Volatile.PaddedLong _producerCursor = new Volatile.PaddedLong();
 
@@ -33,6 +34,10 @@ public class RingBuffer<T>
         get { return _entries.Length; }
     }
 
+    /// <summary>
+    /// 环形队列
+    /// </summary>
+    /// <param name="index"></param>
     public T this[long index]
     {
         get
@@ -126,6 +131,9 @@ public class RingBuffer<T>
     }
 }
 
+/// <summary>
+/// 无锁并发策略
+/// </summary>
 public static class Volatile
 {
     private const int CacheLineSize = 64;
