@@ -131,9 +131,6 @@ public class KcpServerTransport : ServerTransport
     /// </summary>
     private void UpdatePacketInfosSent()
     {
-        if(_packetInfos.Count <= 0) 
-            return;
-        
         if (!_packetInfos.TryDequeue(out var packetInfo)) 
             return;
         
