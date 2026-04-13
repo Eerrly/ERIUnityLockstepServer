@@ -332,8 +332,14 @@ public class NetworkManager : AManager<NetworkManager>
                 case (byte)pb.LogicMsgID.LogicMsgLogin:
                 {
                     var c2SMessage = pb.C2S_LoginMsg.Parser.ParseFrom(_memoryStream);
-                    LogManager.Instance.Log(LogType.Info, $"LogicMsgLogin -> account:{c2SMessage.Account.ToStringUtf8()} password:{c2SMessage.Password.ToStringUtf8()}");
-                    var gamer = gameManager.GetOrCreateGamer(c2SMessage.Account.ToStringUtf8(), c2SMessage.Password.ToStringUtf8());
+                    var account = c2SMessage.Account.ToStringUtf8();
+                    var password = c2SMessage.Password.ToStringUtf8();
+                    LogManager.Instance.Log(LogType.Info, $"LogicMsgLogin -> account:{account}");
+                    if (!gameManager.TryLoginOrCreateGamer(account, password, out var gamer))
+                    {
+                        SendLogicLoginMessage(stream, pb.LogicErrorCode.LogicErrAccount, 0);
+                        break;
+                    }
                     gamer.LogicData.NetworkStream = stream;
                     SendLogicLoginMessage(stream, pb.LogicErrorCode.LogicErrOk, gamer.LogicData.ID);
                     break;

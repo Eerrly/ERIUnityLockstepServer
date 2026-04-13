@@ -28,7 +28,9 @@ public class GamerInfo
 {
     public string Account;
     
-    public string Password;
+    public byte[] PasswordHash;
+    
+    public byte[] PasswordSalt;
     
     public LogicData LogicData;
     
