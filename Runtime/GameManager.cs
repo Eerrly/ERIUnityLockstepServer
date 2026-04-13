@@ -57,12 +57,18 @@ public class GameManager : AManager<GameManager>
     /// <returns>玩家对象</returns>
     public GamerInfo GetOrCreateGamer(string account, string password)
     {
-        if (_gamerInfoByAccountPassword.TryGetValue(account + password, out var gamer)) return gamer;
+        var credentialKey = BuildCredentialKey(account, password);
+        if (_gamerInfoByAccountPassword.TryGetValue(credentialKey, out var gamer)) return gamer;
         gamer = new GamerInfo(){ Account = account, Password = password };
         gamer.LogicData.ID = GameSetting.DefaultPlayerIdBase + (uint)_gamerInfoDic.Count + 1;
         _gamerInfoDic[gamer.LogicData.ID] = gamer;
-        _gamerInfoByAccountPassword[account + password] = gamer;
+        _gamerInfoByAccountPassword[credentialKey] = gamer;
         return gamer;
+    }
+
+    private static string BuildCredentialKey(string account, string password)
+    {
+        return $"{account}\u001F{password}";
     }
 
     /// <summary>

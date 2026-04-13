@@ -1,8 +1,10 @@
 ﻿// 总入口
+var logPath = Path.Combine(AppContext.BaseDirectory, "server_log.txt");
+
 GameManager.Instance.Initialize();
 MsgPoolManager.Instance.Initialize();
 NetworkManager.Instance.Initialize();
-LogManager.Instance.Initialize("E:\\GitProjects\\ERIUnitySimpleServer\\server_log.txt");
+LogManager.Instance.Initialize(logPath);
 
 NetworkManager.Instance.TcpStart();
 
