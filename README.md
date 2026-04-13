@@ -1,21 +1,68 @@
-# ERIUnityLockstepServer
-***帧同步C#控制台服务器DEMO***
+# ERIUnitySimpleServer
 
-### 介绍
-+ 登录、房间等业务逻辑，使用TCP通信
-+ 战斗、校验等战斗逻辑，使用基于kcp2k的KCP通信[^kcp2k]
-+ 通讯数据使用Google的ProtoBuf[^google.protobuf]
+这是一个基于 C# / .NET 6 的轻量级联机服务端示例，面向 Unity 对战场景，采用 `TCP + KCP + Protobuf` 的双通道通信方案：
 
-### 设置
-+ IP、端口号设置在 `NetCore/NetSetting.cs`
-+ 最大帧缓存数量、一帧的毫秒数在 `Battle/BattleSetting.cs`
-+ ProtoBuf生成工具在 `ProtoGen/protogen.bat` 双击运行
-+ 日志打印在 `Runtime/LogManager.cs` 最上面，把宏开启就可以得到全量打印
-+ 主入口 `Program.cs`
+- `TCP` 负责登录、大厅、创建房间、加入房间等逻辑层消息。
+- `KCP` 负责战斗连接、准备、心跳、帧同步、校验等实时对战消息。
+- `Protobuf` 负责逻辑协议和战斗协议的消息定义与序列化。
 
-### 运行
-`dotnet run`
+## 技术栈
 
-### 引用
-[^kcp2k]:kcp2k - <https://github.com/MirrorNetworking/kcp2k>
-[^google.protobuf]:google.protobuf - <https://github.com/google/protobuf>
+### 运行时与语言
+
+- `C#`
+- `.NET 6` 控制台程序
+- `async/await + Task` 用于战斗帧循环
+
+### 网络通信
+
+- `TCP`
+  用于登录、创建房间、加入房间等大厅逻辑
+- `KCP`
+  用于战斗连接、心跳、准备、帧同步、校验
+- 自定义传输层封装
+  位于 `NetCore/Transports`
+
+### 协议与序列化
+
+- `Google.Protobuf`
+- `.proto` 协议文件位于 `ProtoGen/Proto`
+- 生成代码位于 `ProtoGen/Gen`
+
+### 项目结构
+
+- `Program.cs`
+  服务端入口，负责初始化管理器、启动 TCP 服务、输出日志
+- `Runtime/`
+  业务管理层，包括玩家、房间、消息池、日志、网络调度
+- `NetCore/`
+  网络基础设施，包括 TCP/KCP 传输、KCP 工具、缓冲区与包处理
+- `ProtoGen/`
+  协议定义与 Protobuf 代码生成
+- `Battle/`
+  战斗侧配置，例如帧间隔和最大帧数
+- `Google.Protobuf/`
+  Protobuf 运行时代码
+
+
+## 核心流程
+
+1. 服务启动后初始化 `GameManager`、`MsgPoolManager`、`NetworkManager`、`LogManager`。
+2. 客户端通过 `TCP` 发起登录。
+3. 客户端通过 `TCP` 创建房间或加入房间。
+4. 房间人数满足条件后启动 `KCP` 服务。
+5. 客户端通过 `KCP` 建立战斗连接并发送准备消息。
+6. 所有玩家准备完成后，服务端启动帧同步循环。
+7. 服务端按固定间隔广播权威帧，并处理校验消息。
+
+
+## 架构设计图
+
+![ERIUnitySimpleServer 架构设计技术栈图](./architecture-tech-stack.svg)
+
+## 适用场景
+
+- Unity 联机原型验证
+- 帧同步对战 Demo
+- TCP 大厅 + KCP 战斗 的服务端拆分示例
+- Protobuf 协议驱动的轻量服务端样例
