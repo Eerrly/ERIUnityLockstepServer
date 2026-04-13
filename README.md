@@ -1,6 +1,6 @@
 # ERIUnitySimpleServer
 
-这是一个基于 C# / .NET 6 的轻量级联机服务端示例，面向 Unity 对战场景，采用 `TCP + KCP + Protobuf` 的双通道通信方案：
+这是一个基于 C# / .NET 6 的轻量级联机服务端示例，面向 Unity 对战场景，采用 `TCP + KCP + Protobuf` 的双通道通信方案
 
 - `TCP` 负责登录、大厅、创建房间、加入房间等逻辑层消息。
 - `KCP` 负责战斗连接、准备、心跳、帧同步、校验等实时对战消息。
