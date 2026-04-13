@@ -1,4 +1,4 @@
-﻿// #define DEBUG_MODEL
+﻿#define DEBUG_MODEL
 
 using System.Text;
 
