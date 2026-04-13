@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 /// <summary>
 /// 游戏管理器
 /// </summary>
@@ -13,9 +15,9 @@ public class GameManager : AManager<GameManager>
     /// </summary>
     private Dictionary<int, GamerInfo> _gamerInfoByPosDic;
     /// <summary>
-    /// 所有玩家信息的字典 key:玩家账号密码
+    /// 所有玩家信息的字典 key:玩家账号
     /// </summary>
-    private Dictionary<string, GamerInfo> _gamerInfoByAccountPassword;
+    private Dictionary<string, GamerInfo> _gamerInfoByAccount;
     /// <summary>
     /// 所有玩家信息的字典 key:玩家KCP连接ID
     /// </summary>
@@ -32,7 +34,7 @@ public class GameManager : AManager<GameManager>
     {
         _gamerInfoDic = new Dictionary<uint, GamerInfo>();
         _gamerInfoByPosDic = new Dictionary<int, GamerInfo>();
-        _gamerInfoByAccountPassword = new Dictionary<string, GamerInfo>();
+        _gamerInfoByAccount = new Dictionary<string, GamerInfo>();
         _gamerInfoByConnectionId = new Dictionary<int, GamerInfo>();
         _roomInfoDic = new Dictionary<uint, RoomInfo>();
     }
@@ -44,7 +46,7 @@ public class GameManager : AManager<GameManager>
     {
         _gamerInfoDic.Clear();
         _gamerInfoByPosDic.Clear();
-        _gamerInfoByAccountPassword.Clear();
+        _gamerInfoByAccount.Clear();
         _gamerInfoByConnectionId.Clear();
         _roomInfoDic.Clear();
     }
@@ -55,20 +57,39 @@ public class GameManager : AManager<GameManager>
     /// <param name="account">账号</param>
     /// <param name="password">密码</param>
     /// <returns>玩家对象</returns>
-    public GamerInfo GetOrCreateGamer(string account, string password)
+    public bool TryLoginOrCreateGamer(string account, string password, out GamerInfo gamer)
     {
-        var credentialKey = BuildCredentialKey(account, password);
-        if (_gamerInfoByAccountPassword.TryGetValue(credentialKey, out var gamer)) return gamer;
-        gamer = new GamerInfo(){ Account = account, Password = password };
+        gamer = null;
+        if (string.IsNullOrWhiteSpace(account) || string.IsNullOrEmpty(password)) return false;
+
+        if (_gamerInfoByAccount.TryGetValue(account, out gamer))
+        {
+            return VerifyPassword(gamer.PasswordHash, gamer.PasswordSalt, password);
+        }
+
+        var salt = new byte[16];
+        RandomNumberGenerator.Fill(salt);
+        gamer = new GamerInfo() { Account = account, PasswordSalt = salt, PasswordHash = HashPassword(salt, password) };
         gamer.LogicData.ID = GameSetting.DefaultPlayerIdBase + (uint)_gamerInfoDic.Count + 1;
         _gamerInfoDic[gamer.LogicData.ID] = gamer;
-        _gamerInfoByAccountPassword[credentialKey] = gamer;
-        return gamer;
+        _gamerInfoByAccount[account] = gamer;
+        return true;
     }
 
-    private static string BuildCredentialKey(string account, string password)
+    private static byte[] HashPassword(byte[] salt, string password)
     {
-        return $"{account}\u001F{password}";
+        var passwordBytes = System.Text.Encoding.UTF8.GetBytes(password);
+        var allBytes = new byte[salt.Length + passwordBytes.Length];
+        Buffer.BlockCopy(salt, 0, allBytes, 0, salt.Length);
+        Buffer.BlockCopy(passwordBytes, 0, allBytes, salt.Length, passwordBytes.Length);
+        return SHA256.HashData(allBytes);
+    }
+
+    private static bool VerifyPassword(byte[] expectedHash, byte[] salt, string password)
+    {
+        if (expectedHash == null || salt == null) return false;
+        var actualHash = HashPassword(salt, password);
+        return CryptographicOperations.FixedTimeEquals(expectedHash, actualHash);
     }
 
     /// <summary>
