@@ -72,16 +72,31 @@ public abstract class ServerTransport
     /// <param name="onCommand">处理数据流的回调</param>
     /// <param name="onCatch">发生异常的回调</param>
     /// <param name="onFinally">发生异常的最终处理回调</param>
-    public void OnMessageProcess(byte[] buffer, MemoryStream stream, Action<byte> onCommand, Action? onCatch = null, Action? onFinally = null)
-    { 
-        var packet = new Packet();
-        unsafe
-        {
-            // 通过指针来获取头数据，以此获取出数据本身字节长度
-            fixed (byte* src = buffer) packet._head = *((Head*)src);
-        }
+    /// <param name="messageLength">实际接收到的字节长度</param>
+    public void OnMessageProcess(byte[] buffer, MemoryStream stream, Action<byte> onCommand, Action? onCatch = null, Action? onFinally = null, int messageLength = -1)
+    {
         try
         {
+            var receivedLength = messageLength < 0 ? buffer.Length : messageLength;
+            if (receivedLength < Head.HeadLength || receivedLength > buffer.Length)
+            {
+                LogManager.Instance.Log(LogType.Warning,$"Invalid message length: receivedLength:{receivedLength} bufferLength:{buffer.Length} headLength:{Head.HeadLength}");
+                return;
+            }
+
+            var packet = new Packet();
+            unsafe
+            {
+                // 通过指针来获取头数据，以此获取出数据本身字节长度
+                fixed (byte* src = buffer) packet._head = *((Head*)src);
+            }
+
+            if (packet._head._length < 0 || packet._head._length > receivedLength - Head.HeadLength)
+            {
+                LogManager.Instance.Log(LogType.Warning,$"Invalid packet length: cmd:{packet._head._cmd} packetLength:{packet._head._length} receivedLength:{receivedLength}");
+                return;
+            }
+
             stream.Reset();
             stream.Write(buffer, Head.HeadLength, packet._head._length);
             stream.Seek(0, SeekOrigin.Begin);
