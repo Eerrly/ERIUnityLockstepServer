@@ -81,6 +81,7 @@ public abstract class ServerTransport
             if (receivedLength < Head.HeadLength || receivedLength > buffer.Length)
             {
                 LogManager.Instance.Log(LogType.Warning,$"Invalid message length: receivedLength:{receivedLength} bufferLength:{buffer.Length} headLength:{Head.HeadLength}");
+                onCatch?.Invoke();
                 return;
             }
 
@@ -94,6 +95,7 @@ public abstract class ServerTransport
             if (packet._head._length < 0 || packet._head._length > receivedLength - Head.HeadLength)
             {
                 LogManager.Instance.Log(LogType.Warning,$"Invalid packet length: cmd:{packet._head._cmd} packetLength:{packet._head._length} receivedLength:{receivedLength}");
+                onCatch?.Invoke();
                 return;
             }
 

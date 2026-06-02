@@ -376,7 +376,7 @@ public class NetworkManager : AManager<NetworkManager>
                     break;
                 }
             }
-        }, _tcpServerTransport.Shutdown, messageLength: read);
+        }, stream.Close, messageLength: read);
     }
 
     /// <summary>
