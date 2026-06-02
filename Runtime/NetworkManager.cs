@@ -166,7 +166,7 @@ public class NetworkManager : AManager<NetworkManager>
                     break;
                 }
             }
-        }, _kcpServerTransport.Shutdown);
+        }, () => _kcpServerTransport.Disconnect(connectionId));
     }
 
     /// <summary>
@@ -376,7 +376,7 @@ public class NetworkManager : AManager<NetworkManager>
                     break;
                 }
             }
-        }, _tcpServerTransport.Shutdown);
+        }, _tcpServerTransport.Shutdown, messageLength: read);
     }
 
     /// <summary>
