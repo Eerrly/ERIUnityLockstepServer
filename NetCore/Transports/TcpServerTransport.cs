@@ -29,9 +29,9 @@ public class TcpServerTransport : ServerTransport
     /// </summary>
     private readonly int _acceptBufferMaxLength;
     /// <summary>
-    /// 用于接受数据的字节数组
+    /// 单个TCP消息体最大字节长度
     /// </summary>
-    private readonly byte[] _acceptBuffer;
+    private readonly int _maxPacketBodyLength;
     
     /// <summary>
     /// 收到消息后回调
@@ -42,12 +42,12 @@ public class TcpServerTransport : ServerTransport
     /// </summary>
     public Action<NetworkStream, Packet> OnDataSent;
 
-    public TcpServerTransport(string address, ushort port, int acceptBufferMaxLength = 1024)
+    public TcpServerTransport(string address, ushort port, int acceptBufferMaxLength = 1024, int maxPacketBodyLength = 1024 * 1024)
     {
         this._address = address;
         this._port = port;
         this._acceptBufferMaxLength = acceptBufferMaxLength;
-        this._acceptBuffer = new byte[this._acceptBufferMaxLength];
+        this._maxPacketBodyLength = maxPacketBodyLength;
 
         _handleClientTasks = new List<Task>();
     }
@@ -129,11 +129,14 @@ public class TcpServerTransport : ServerTransport
         try
         {
             var stream = client.GetStream();
+            var acceptBuffer = new byte[_acceptBufferMaxLength];
+            using var packetBuffer = new MemoryStream();
             while (true)
             {
-                var read = await stream.ReadAsync(_acceptBuffer!, 0, _acceptBufferMaxLength);
+                var read = await stream.ReadAsync(acceptBuffer, 0, acceptBuffer.Length);
                 if (read == 0) break;
-                OnDataReceived?.Invoke(_acceptBuffer, read, stream);
+
+                if (!ProcessTcpBytes(acceptBuffer, read, packetBuffer, stream)) break;
             }
         }
         catch (Exception ex)
@@ -144,6 +147,50 @@ public class TcpServerTransport : ServerTransport
         {
             client.Close();
         }
+    }
+
+    /// <summary>
+    /// 处理TCP字节流并按消息头长度拆分出完整消息
+    /// </summary>
+    /// <param name="acceptBuffer">本次读取到的字节数据</param>
+    /// <param name="read">本次读取到的字节长度</param>
+    /// <param name="packetBuffer">当前客户端尚未处理完成的字节缓存</param>
+    /// <param name="stream">客户端连接流</param>
+    /// <returns>数据长度有效时返回true，否则返回false并由调用方关闭客户端连接</returns>
+    private bool ProcessTcpBytes(byte[] acceptBuffer, int read, MemoryStream packetBuffer, NetworkStream stream)
+    {
+        packetBuffer.Seek(0, SeekOrigin.End);
+        packetBuffer.Write(acceptBuffer, 0, read);
+
+        var buffer = packetBuffer.GetBuffer();
+        var bufferLength = (int)packetBuffer.Length;
+        var offset = 0;
+
+        while (bufferLength - offset >= Head.HeadLength)
+        {
+            var packetBodyLength = BitConverter.ToInt32(buffer, offset + 1);
+            if (packetBodyLength < 0 || packetBodyLength > _maxPacketBodyLength)
+            {
+                LogManager.Instance.Log(LogType.Warning,$"Invalid TCP packet length: packetLength:{packetBodyLength} maxPacketBodyLength:{_maxPacketBodyLength}");
+                return false;
+            }
+
+            var packetLength = Head.HeadLength + packetBodyLength;
+            if (bufferLength - offset < packetLength) break;
+
+            var packet = new byte[packetLength];
+            Array.Copy(buffer, offset, packet, 0, packetLength);
+            OnDataReceived?.Invoke(packet, packetLength, stream);
+            offset += packetLength;
+        }
+
+        if (offset <= 0) return true;
+
+        var remainingLength = bufferLength - offset;
+        if (remainingLength > 0) Array.Copy(buffer, offset, buffer, 0, remainingLength);
+        packetBuffer.SetLength(remainingLength);
+        packetBuffer.Seek(0, SeekOrigin.End);
+        return true;
     }
 
     /// <summary>
