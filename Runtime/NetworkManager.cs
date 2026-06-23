@@ -496,13 +496,7 @@ public class NetworkManager : AManager<NetworkManager>
             return;
         }
 
-        if (room.AuthoritativeFrame < 0)
-        {
-            SendBattleReconnectMessage(connectionId, pb.BattleErrorCode.BattleErrData, message.RoomId, 0, 0, "AuthoritativeFrameNotReady");
-            return;
-        }
-
-        var authoritativeFrameSnapshot = room.AuthoritativeFrame;
+        var authoritativeFrameSnapshot = GetLastCompletedFrame(room);
         var clampedLastReceivedFrame = Math.Min(message.LastReceivedFrame, (uint)Math.Max(0, authoritativeFrameSnapshot - 1));
         gameManager.UpdateGamerConnectionId(message.PlayerId, connectionId);
         gamer.BattleData.ConnectionState = BattleConnectionState.Reconnecting;
@@ -516,17 +510,22 @@ public class NetworkManager : AManager<NetworkManager>
             (uint)gamer.BattleData.Pos,
             string.Empty);
 
-        ReplayMissingFramesToGamer(room, gamer, authoritativeFrameSnapshot, clampedLastReceivedFrame);
-        gamer.BattleData.ConnectionState = BattleConnectionState.Online;
+        var replaySucceeded = ReplayMissingFramesToGamer(room, gamer, authoritativeFrameSnapshot, clampedLastReceivedFrame, connectionId);
+        if (replaySucceeded &&
+            gamer.BattleData.ConnectionId == connectionId &&
+            gamer.BattleData.ConnectionState == BattleConnectionState.Reconnecting)
+        {
+            gamer.BattleData.ConnectionState = BattleConnectionState.Online;
+        }
     }
 
     /// <summary>
     /// 顺序补发缺失帧
     /// </summary>
-    private void ReplayMissingFramesToGamer(RoomInfo room, GamerInfo gamer, int authoritativeFrameSnapshot, uint lastReceivedFrame)
+    private bool ReplayMissingFramesToGamer(RoomInfo room, GamerInfo gamer, int authoritativeFrameSnapshot, uint lastReceivedFrame, int reconnectConnectionId)
     {
         if (authoritativeFrameSnapshot < 1)
-            return;
+            return true;
 
         var replayTargetFrame = Math.Min(authoritativeFrameSnapshot, BattleSetting.MaxFrameCount - 1);
         var replayedLastFrame = lastReceivedFrame;
@@ -535,9 +534,15 @@ public class NetworkManager : AManager<NetworkManager>
             var startFrame = Math.Max(1, (int)replayedLastFrame + 1);
             for (var frame = startFrame; frame <= replayTargetFrame; frame++)
             {
+                if (gamer.BattleData.ConnectionId != reconnectConnectionId ||
+                    gamer.BattleData.ConnectionState != BattleConnectionState.Reconnecting)
+                {
+                    return false;
+                }
+
                 var datum = BuildBattleFrameBytes(room, frame);
                 SendBattleFrameMessage(
-                    gamer.BattleData.ConnectionId,
+                    reconnectConnectionId,
                     pb.BattleErrorCode.BattleErrBattleOk,
                     (uint)frame,
                     (uint)room.Gamers.Count,
@@ -547,10 +552,12 @@ public class NetworkManager : AManager<NetworkManager>
                 gamer.BattleData.LastReceivedFrame = replayedLastFrame;
             }
 
-            replayTargetFrame = Math.Min(room.AuthoritativeFrame, BattleSetting.MaxFrameCount - 1);
+            replayTargetFrame = Math.Min(GetLastCompletedFrame(room), BattleSetting.MaxFrameCount - 1);
             if (replayTargetFrame < 1)
                 break;
         }
+
+        return true;
     }
 
     /// <summary>
@@ -660,6 +667,14 @@ public class NetworkManager : AManager<NetworkManager>
     }
 
     /// <summary>
+    /// 获取当前房间最后一帧已完成并已广播的权威帧
+    /// </summary>
+    private static int GetLastCompletedFrame(RoomInfo room)
+    {
+        return Math.Max(0, room.AuthoritativeFrame - 1);
+    }
+
+    /// <summary>
     /// 发送战斗退出消息
     /// </summary>
     private void SendBattleExitMessage(int connectionId, pb.BattleErrorCode errorCode, uint roomId, uint operatorPlayerId, string reason)
@@ -705,12 +720,12 @@ public class NetworkManager : AManager<NetworkManager>
                     uint reconnectPlayerPos = 0;
                     var reconnectGamers = Array.Empty<uint>();
                     if (gameManager.TryGetReconnectRoom(gamer.LogicData.ID, out var reconnectRoom) &&
-                        reconnectRoom != null &&
-                        reconnectRoom.AuthoritativeFrame >= 0)
+                        reconnectRoom != null)
                     {
+                        var reconnectLastCompletedFrame = GetLastCompletedFrame(reconnectRoom);
                         canReconnect = true;
                         reconnectRoomId = reconnectRoom.RoomId;
-                        reconnectFrame = (uint)reconnectRoom.AuthoritativeFrame;
+                        reconnectFrame = (uint)reconnectLastCompletedFrame;
                         reconnectPlayerPos = (uint)gamer.BattleData.Pos;
                         reconnectGamers = reconnectRoom.Gamers.ToArray();
                     }
