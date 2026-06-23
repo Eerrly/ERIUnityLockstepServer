@@ -44,17 +44,23 @@ namespace pb {
             "U19CYXR0bGVFeGl0TXNnEg4KBnJvb21JZBgBIAEoDRIQCghwbGF5ZXJJZBgC",
             "IAEoDSJyChFTMkNfQmF0dGxlRXhpdE1zZxIjCgllcnJvckNvZGUYASABKA4y",
             "EC5CYXR0bGVFcnJvckNvZGUSDgoGcm9vbUlkGAIgASgNEhgKEG9wZXJhdG9y",
-            "UGxheWVySWQYAyABKA0SDgoGcmVhc29uGAQgASgJIk0KFlMyQ19CYXR0bGVF",
-            "eGNlcHRpb25Nc2cSIwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0dGxlRXJyb3JD",
-            "b2RlEg4KBnJlYXNvbhgCIAEoCSrzAQoLQmF0dGxlTXNnSUQSFAoQQkFUVExF",
-            "X01TR19CZWdpbhAAEhYKEkJBVFRMRV9NU0dfQ29ubmVjdBABEhgKFEJBVFRM",
-            "RV9NU0dfSGVhcnRiZWF0EAISFAoQQkFUVExFX01TR19SZWFkeRAKEhQKEEJB",
-            "VFRMRV9NU0dfU3RhcnQQFBIUChBCQVRUTEVfTVNHX0ZyYW1lEB4SFAoQQkFU",
-            "VExFX01TR19DaGVjaxAoEhUKEUJBVFRMRV9NU0dfUmVzdWx0EDISEwoPQkFU",
-            "VExFX01TR19FeGl0EDwSGAoUQkFUVExFX01TR19FeGNlcHRpb24QZCptCg9C",
-            "YXR0bGVFcnJvckNvZGUSGAoUQkFUVExFX0VSUl9CYXR0bGVfT2sQABIWChJC",
-            "QVRUTEVfRVJSX1RpbWVvdXQQARITCg9CQVRUTEVfRVJSX0RhdGEQAhITCg9C",
-            "QVRUTEVfRVJSX0RpZmYQA0IFqgICcGJiBnByb3RvMw=="));
+            "UGxheWVySWQYAyABKA0SDgoGcmVhc29uGAQgASgJIlUKFkMyU19CYXR0bGVS",
+            "ZWNvbm5lY3RNc2cSDgoGcm9vbUlkGAEgASgNEhAKCHBsYXllcklkGAIgASgN",
+            "EhkKEWxhc3RSZWNlaXZlZEZyYW1lGAMgASgNIowBChZTMkNfQmF0dGxlUmVj",
+            "b25uZWN0TXNnEiMKCWVycm9yQ29kZRgBIAEoDjIQLkJhdHRsZUVycm9yQ29k",
+            "ZRIOCgZyb29tSWQYAiABKA0SGgoSYXV0aG9yaXRhdGl2ZUZyYW1lGAMgASgN",
+            "EhEKCXBsYXllclBvcxgEIAEoDRIOCgZyZWFzb24YBSABKAkiTQoWUzJDX0Jh",
+            "dHRsZUV4Y2VwdGlvbk1zZxIjCgllcnJvckNvZGUYASABKA4yEC5CYXR0bGVF",
+            "cnJvckNvZGUSDgoGcmVhc29uGAIgASgJKo0CCgtCYXR0bGVNc2dJRBIUChBC",
+            "QVRUTEVfTVNHX0JlZ2luEAASFgoSQkFUVExFX01TR19Db25uZWN0EAESGAoU",
+            "QkFUVExFX01TR19IZWFydGJlYXQQAhIUChBCQVRUTEVfTVNHX1JlYWR5EAoS",
+            "FAoQQkFUVExFX01TR19TdGFydBAUEhQKEEJBVFRMRV9NU0dfRnJhbWUQHhIU",
+            "ChBCQVRUTEVfTVNHX0NoZWNrECgSFQoRQkFUVExFX01TR19SZXN1bHQQMhIT",
+            "Cg9CQVRUTEVfTVNHX0V4aXQQPBIYChRCQVRUTEVfTVNHX1JlY29ubmVjdBBG",
+            "EhgKFEJBVFRMRV9NU0dfRXhjZXB0aW9uEGQqbQoPQmF0dGxlRXJyb3JDb2Rl",
+            "EhgKFEJBVFRMRV9FUlJfQmF0dGxlX09rEAASFgoSQkFUVExFX0VSUl9UaW1l",
+            "b3V0EAESEwoPQkFUVExFX0VSUl9EYXRhEAISEwoPQkFUVExFX0VSUl9EaWZm",
+            "EANCBaoCAnBiYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::pb.BattleMsgID), typeof(global::pb.BattleErrorCode), }, new pbr::GeneratedClrTypeInfo[] {
@@ -72,6 +78,8 @@ namespace pb {
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_ResultMsg), global::pb.S2C_ResultMsg.Parser, new[]{ "ErrorCode", "Winner" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_BattleExitMsg), global::pb.C2S_BattleExitMsg.Parser, new[]{ "RoomId", "PlayerId" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_BattleExitMsg), global::pb.S2C_BattleExitMsg.Parser, new[]{ "ErrorCode", "RoomId", "OperatorPlayerId", "Reason" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_BattleReconnectMsg), global::pb.C2S_BattleReconnectMsg.Parser, new[]{ "RoomId", "PlayerId", "LastReceivedFrame" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_BattleReconnectMsg), global::pb.S2C_BattleReconnectMsg.Parser, new[]{ "ErrorCode", "RoomId", "AuthoritativeFrame", "PlayerPos", "Reason" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_BattleExceptionMsg), global::pb.S2C_BattleExceptionMsg.Parser, new[]{ "ErrorCode", "Reason" }, null, null, null)
           }));
     }
@@ -85,39 +93,43 @@ namespace pb {
   public enum BattleMsgID {
     [pbr::OriginalName("BATTLE_MSG_Begin")] BattleMsgBegin = 0,
     /// <summary>
-    ///连接
+    /// 连接
     /// </summary>
     [pbr::OriginalName("BATTLE_MSG_Connect")] BattleMsgConnect = 1,
     /// <summary>
-    ///心跳
+    /// 心跳
     /// </summary>
     [pbr::OriginalName("BATTLE_MSG_Heartbeat")] BattleMsgHeartbeat = 2,
     /// <summary>
-    ///准备
+    /// 准备
     /// </summary>
     [pbr::OriginalName("BATTLE_MSG_Ready")] BattleMsgReady = 10,
     /// <summary>
-    ///开始
+    /// 开始
     /// </summary>
     [pbr::OriginalName("BATTLE_MSG_Start")] BattleMsgStart = 20,
     /// <summary>
-    ///帧数据
+    /// 帧数据
     /// </summary>
     [pbr::OriginalName("BATTLE_MSG_Frame")] BattleMsgFrame = 30,
     /// <summary>
-    ///检测
+    /// 校验
     /// </summary>
     [pbr::OriginalName("BATTLE_MSG_Check")] BattleMsgCheck = 40,
     /// <summary>
-    ///结果
+    /// 结果
     /// </summary>
     [pbr::OriginalName("BATTLE_MSG_Result")] BattleMsgResult = 50,
     /// <summary>
-    ///退出战斗
+    /// 退出战斗
     /// </summary>
     [pbr::OriginalName("BATTLE_MSG_Exit")] BattleMsgExit = 60,
     /// <summary>
-    ///意外错误
+    /// 重连
+    /// </summary>
+    [pbr::OriginalName("BATTLE_MSG_Reconnect")] BattleMsgReconnect = 70,
+    /// <summary>
+    /// 异常错误
     /// </summary>
     [pbr::OriginalName("BATTLE_MSG_Exception")] BattleMsgException = 100,
   }
@@ -127,19 +139,19 @@ namespace pb {
   /// </summary>
   public enum BattleErrorCode {
     /// <summary>
-    ///OK
+    /// OK
     /// </summary>
     [pbr::OriginalName("BATTLE_ERR_Battle_Ok")] BattleErrBattleOk = 0,
     /// <summary>
-    ///超时
+    /// 超时
     /// </summary>
     [pbr::OriginalName("BATTLE_ERR_Timeout")] BattleErrTimeout = 1,
     /// <summary>
-    ///数据异常
+    /// 数据异常
     /// </summary>
     [pbr::OriginalName("BATTLE_ERR_Data")] BattleErrData = 2,
     /// <summary>
-    ///不同步
+    /// 不同步
     /// </summary>
     [pbr::OriginalName("BATTLE_ERR_Diff")] BattleErrDiff = 3,
   }
@@ -187,7 +199,7 @@ namespace pb {
     public const int PlayerIdFieldNumber = 1;
     private uint playerId_;
     /// <summary>
-    ///玩家ID
+    /// 玩家ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint PlayerId {
@@ -201,7 +213,7 @@ namespace pb {
     public const int SeasonIdFieldNumber = 2;
     private uint seasonId_;
     /// <summary>
-    ///战斗ID
+    /// 战斗ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint SeasonId {
@@ -340,7 +352,7 @@ namespace pb {
     public const int ErrorCodeFieldNumber = 1;
     private global::pb.BattleErrorCode errorCode_ = 0;
     /// <summary>
-    ///错误码
+    /// 错误码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::pb.BattleErrorCode ErrorCode {
@@ -464,7 +476,7 @@ namespace pb {
     public const int PlayerIdFieldNumber = 1;
     private uint playerId_;
     /// <summary>
-    ///玩家ID
+    /// 玩家ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint PlayerId {
@@ -478,7 +490,7 @@ namespace pb {
     public const int TimeStampFieldNumber = 2;
     private ulong timeStamp_;
     /// <summary>
-    ///事件戳
+    /// 时间戳
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public ulong TimeStamp {
@@ -618,7 +630,7 @@ namespace pb {
     public const int ErrorCodeFieldNumber = 1;
     private global::pb.BattleErrorCode errorCode_ = 0;
     /// <summary>
-    ///错误码
+    /// 错误码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::pb.BattleErrorCode ErrorCode {
@@ -632,7 +644,7 @@ namespace pb {
     public const int TimeStampFieldNumber = 2;
     private ulong timeStamp_;
     /// <summary>
-    ///事件戳
+    /// 时间戳
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public ulong TimeStamp {
@@ -772,7 +784,7 @@ namespace pb {
     public const int RoomIdFieldNumber = 1;
     private uint roomId_;
     /// <summary>
-    ///房间ID
+    /// 房间ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint RoomId {
@@ -786,7 +798,7 @@ namespace pb {
     public const int PlayerIdFieldNumber = 2;
     private uint playerId_;
     /// <summary>
-    ///玩家ID
+    /// 玩家ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint PlayerId {
@@ -927,7 +939,7 @@ namespace pb {
     public const int ErrorCodeFieldNumber = 1;
     private global::pb.BattleErrorCode errorCode_ = 0;
     /// <summary>
-    ///错误码
+    /// 错误码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::pb.BattleErrorCode ErrorCode {
@@ -941,7 +953,7 @@ namespace pb {
     public const int RoomIdFieldNumber = 2;
     private uint roomId_;
     /// <summary>
-    ///房间ID
+    /// 房间ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint RoomId {
@@ -957,7 +969,7 @@ namespace pb {
         = pb::FieldCodec.ForUInt32(26);
     private readonly pbc::RepeatedField<uint> status_ = new pbc::RepeatedField<uint>();
     /// <summary>
-    ///所有玩家准备情况
+    /// 所有玩家准备情况
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::RepeatedField<uint> Status {
@@ -1105,7 +1117,7 @@ namespace pb {
     public const int ErrorCodeFieldNumber = 1;
     private global::pb.BattleErrorCode errorCode_ = 0;
     /// <summary>
-    ///错误码
+    /// 错误码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::pb.BattleErrorCode ErrorCode {
@@ -1119,7 +1131,7 @@ namespace pb {
     public const int FrameFieldNumber = 2;
     private uint frame_;
     /// <summary>
-    ///帧号
+    /// 帧号
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint Frame {
@@ -1133,7 +1145,7 @@ namespace pb {
     public const int TimeStampFieldNumber = 3;
     private ulong timeStamp_;
     /// <summary>
-    ///时间戳
+    /// 时间戳
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public ulong TimeStamp {
@@ -1289,7 +1301,7 @@ namespace pb {
     public const int FrameFieldNumber = 1;
     private uint frame_;
     /// <summary>
-    ///帧号
+    /// 帧号
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint Frame {
@@ -1303,7 +1315,7 @@ namespace pb {
     public const int DatumFieldNumber = 2;
     private pb::ByteString datum_ = pb::ByteString.Empty;
     /// <summary>
-    ///帧数据
+    /// 帧数据
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pb::ByteString Datum {
@@ -1446,7 +1458,7 @@ namespace pb {
     public const int ErrorCodeFieldNumber = 1;
     private global::pb.BattleErrorCode errorCode_ = 0;
     /// <summary>
-    ///错误码
+    /// 错误码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::pb.BattleErrorCode ErrorCode {
@@ -1460,7 +1472,7 @@ namespace pb {
     public const int FrameFieldNumber = 2;
     private uint frame_;
     /// <summary>
-    ///帧号
+    /// 帧号
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint Frame {
@@ -1474,7 +1486,7 @@ namespace pb {
     public const int PlayerCountFieldNumber = 3;
     private uint playerCount_;
     /// <summary>
-    ///玩家数量
+    /// 玩家数量
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint PlayerCount {
@@ -1488,7 +1500,7 @@ namespace pb {
     public const int InputCountFieldNumber = 4;
     private uint inputCount_;
     /// <summary>
-    ///操作数量
+    /// 操作数量
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint InputCount {
@@ -1502,7 +1514,7 @@ namespace pb {
     public const int DatumFieldNumber = 5;
     private pb::ByteString datum_ = pb::ByteString.Empty;
     /// <summary>
-    ///玩家帧数据
+    /// 玩家帧数据
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pb::ByteString Datum {
@@ -1651,7 +1663,7 @@ namespace pb {
   }
 
   /// <summary>
-  /// 检测
+  /// 校验
   /// </summary>
   public sealed partial class C2S_CheckMsg : pb::IMessage<C2S_CheckMsg> {
     private static readonly pb::MessageParser<C2S_CheckMsg> _parser = new pb::MessageParser<C2S_CheckMsg>(() => new C2S_CheckMsg());
@@ -1691,7 +1703,7 @@ namespace pb {
     public const int FrameFieldNumber = 1;
     private int frame_;
     /// <summary>
-    ///帧号
+    /// 帧号
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Frame {
@@ -1705,7 +1717,7 @@ namespace pb {
     public const int PosFieldNumber = 2;
     private int pos_;
     /// <summary>
-    ///位置
+    /// 位置
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Pos {
@@ -1719,7 +1731,7 @@ namespace pb {
     public const int Md5FieldNumber = 3;
     private int md5_;
     /// <summary>
-    ///Md5
+    /// Md5
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Md5 {
@@ -1835,6 +1847,9 @@ namespace pb {
 
   }
 
+  /// <summary>
+  /// 校验
+  /// </summary>
   public sealed partial class S2C_CheckMsg : pb::IMessage<S2C_CheckMsg> {
     private static readonly pb::MessageParser<S2C_CheckMsg> _parser = new pb::MessageParser<S2C_CheckMsg>(() => new S2C_CheckMsg());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1872,7 +1887,7 @@ namespace pb {
     public const int ErrorCodeFieldNumber = 1;
     private global::pb.BattleErrorCode errorCode_ = 0;
     /// <summary>
-    ///错误码
+    /// 错误码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::pb.BattleErrorCode ErrorCode {
@@ -1886,7 +1901,7 @@ namespace pb {
     public const int FrameFieldNumber = 2;
     private int frame_;
     /// <summary>
-    ///帧号
+    /// 帧号
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Frame {
@@ -1986,6 +2001,9 @@ namespace pb {
 
   }
 
+  /// <summary>
+  /// 结果
+  /// </summary>
   public sealed partial class S2C_ResultMsg : pb::IMessage<S2C_ResultMsg> {
     private static readonly pb::MessageParser<S2C_ResultMsg> _parser = new pb::MessageParser<S2C_ResultMsg>(() => new S2C_ResultMsg());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2023,7 +2041,7 @@ namespace pb {
     public const int ErrorCodeFieldNumber = 1;
     private global::pb.BattleErrorCode errorCode_ = 0;
     /// <summary>
-    ///错误码
+    /// 错误码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::pb.BattleErrorCode ErrorCode {
@@ -2037,7 +2055,7 @@ namespace pb {
     public const int WinnerFieldNumber = 2;
     private uint winner_;
     /// <summary>
-    ///胜利者
+    /// 胜利者
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint Winner {
@@ -2490,6 +2508,414 @@ namespace pb {
   }
 
   /// <summary>
+  /// 重连
+  /// </summary>
+  public sealed partial class C2S_BattleReconnectMsg : pb::IMessage<C2S_BattleReconnectMsg> {
+    private static readonly pb::MessageParser<C2S_BattleReconnectMsg> _parser = new pb::MessageParser<C2S_BattleReconnectMsg>(() => new C2S_BattleReconnectMsg());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<C2S_BattleReconnectMsg> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::pb.BattleReflection.Descriptor.MessageTypes[14]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public C2S_BattleReconnectMsg() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public C2S_BattleReconnectMsg(C2S_BattleReconnectMsg other) : this() {
+      roomId_ = other.roomId_;
+      playerId_ = other.playerId_;
+      lastReceivedFrame_ = other.lastReceivedFrame_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public C2S_BattleReconnectMsg Clone() {
+      return new C2S_BattleReconnectMsg(this);
+    }
+
+    /// <summary>Field number for the "roomId" field.</summary>
+    public const int RoomIdFieldNumber = 1;
+    private uint roomId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint RoomId {
+      get { return roomId_; }
+      set {
+        roomId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "playerId" field.</summary>
+    public const int PlayerIdFieldNumber = 2;
+    private uint playerId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint PlayerId {
+      get { return playerId_; }
+      set {
+        playerId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "lastReceivedFrame" field.</summary>
+    public const int LastReceivedFrameFieldNumber = 3;
+    private uint lastReceivedFrame_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint LastReceivedFrame {
+      get { return lastReceivedFrame_; }
+      set {
+        lastReceivedFrame_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as C2S_BattleReconnectMsg);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(C2S_BattleReconnectMsg other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (RoomId != other.RoomId) return false;
+      if (PlayerId != other.PlayerId) return false;
+      if (LastReceivedFrame != other.LastReceivedFrame) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (RoomId != 0) hash ^= RoomId.GetHashCode();
+      if (PlayerId != 0) hash ^= PlayerId.GetHashCode();
+      if (LastReceivedFrame != 0) hash ^= LastReceivedFrame.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (RoomId != 0) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(RoomId);
+      }
+      if (PlayerId != 0) {
+        output.WriteRawTag(16);
+        output.WriteUInt32(PlayerId);
+      }
+      if (LastReceivedFrame != 0) {
+        output.WriteRawTag(24);
+        output.WriteUInt32(LastReceivedFrame);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (RoomId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(RoomId);
+      }
+      if (PlayerId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(PlayerId);
+      }
+      if (LastReceivedFrame != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(LastReceivedFrame);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(C2S_BattleReconnectMsg other) {
+      if (other == null) {
+        return;
+      }
+      if (other.RoomId != 0) {
+        RoomId = other.RoomId;
+      }
+      if (other.PlayerId != 0) {
+        PlayerId = other.PlayerId;
+      }
+      if (other.LastReceivedFrame != 0) {
+        LastReceivedFrame = other.LastReceivedFrame;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            RoomId = input.ReadUInt32();
+            break;
+          }
+          case 16: {
+            PlayerId = input.ReadUInt32();
+            break;
+          }
+          case 24: {
+            LastReceivedFrame = input.ReadUInt32();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  /// <summary>
+  /// 重连
+  /// </summary>
+  public sealed partial class S2C_BattleReconnectMsg : pb::IMessage<S2C_BattleReconnectMsg> {
+    private static readonly pb::MessageParser<S2C_BattleReconnectMsg> _parser = new pb::MessageParser<S2C_BattleReconnectMsg>(() => new S2C_BattleReconnectMsg());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<S2C_BattleReconnectMsg> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::pb.BattleReflection.Descriptor.MessageTypes[15]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public S2C_BattleReconnectMsg() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public S2C_BattleReconnectMsg(S2C_BattleReconnectMsg other) : this() {
+      errorCode_ = other.errorCode_;
+      roomId_ = other.roomId_;
+      authoritativeFrame_ = other.authoritativeFrame_;
+      playerPos_ = other.playerPos_;
+      reason_ = other.reason_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public S2C_BattleReconnectMsg Clone() {
+      return new S2C_BattleReconnectMsg(this);
+    }
+
+    /// <summary>Field number for the "errorCode" field.</summary>
+    public const int ErrorCodeFieldNumber = 1;
+    private global::pb.BattleErrorCode errorCode_ = 0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::pb.BattleErrorCode ErrorCode {
+      get { return errorCode_; }
+      set {
+        errorCode_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "roomId" field.</summary>
+    public const int RoomIdFieldNumber = 2;
+    private uint roomId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint RoomId {
+      get { return roomId_; }
+      set {
+        roomId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "authoritativeFrame" field.</summary>
+    public const int AuthoritativeFrameFieldNumber = 3;
+    private uint authoritativeFrame_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint AuthoritativeFrame {
+      get { return authoritativeFrame_; }
+      set {
+        authoritativeFrame_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "playerPos" field.</summary>
+    public const int PlayerPosFieldNumber = 4;
+    private uint playerPos_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint PlayerPos {
+      get { return playerPos_; }
+      set {
+        playerPos_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "reason" field.</summary>
+    public const int ReasonFieldNumber = 5;
+    private string reason_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Reason {
+      get { return reason_; }
+      set {
+        reason_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as S2C_BattleReconnectMsg);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(S2C_BattleReconnectMsg other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (ErrorCode != other.ErrorCode) return false;
+      if (RoomId != other.RoomId) return false;
+      if (AuthoritativeFrame != other.AuthoritativeFrame) return false;
+      if (PlayerPos != other.PlayerPos) return false;
+      if (Reason != other.Reason) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (ErrorCode != 0) hash ^= ErrorCode.GetHashCode();
+      if (RoomId != 0) hash ^= RoomId.GetHashCode();
+      if (AuthoritativeFrame != 0) hash ^= AuthoritativeFrame.GetHashCode();
+      if (PlayerPos != 0) hash ^= PlayerPos.GetHashCode();
+      if (Reason.Length != 0) hash ^= Reason.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (ErrorCode != 0) {
+        output.WriteRawTag(8);
+        output.WriteEnum((int) ErrorCode);
+      }
+      if (RoomId != 0) {
+        output.WriteRawTag(16);
+        output.WriteUInt32(RoomId);
+      }
+      if (AuthoritativeFrame != 0) {
+        output.WriteRawTag(24);
+        output.WriteUInt32(AuthoritativeFrame);
+      }
+      if (PlayerPos != 0) {
+        output.WriteRawTag(32);
+        output.WriteUInt32(PlayerPos);
+      }
+      if (Reason.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(Reason);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (ErrorCode != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) ErrorCode);
+      }
+      if (RoomId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(RoomId);
+      }
+      if (AuthoritativeFrame != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(AuthoritativeFrame);
+      }
+      if (PlayerPos != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(PlayerPos);
+      }
+      if (Reason.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Reason);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(S2C_BattleReconnectMsg other) {
+      if (other == null) {
+        return;
+      }
+      if (other.ErrorCode != 0) {
+        ErrorCode = other.ErrorCode;
+      }
+      if (other.RoomId != 0) {
+        RoomId = other.RoomId;
+      }
+      if (other.AuthoritativeFrame != 0) {
+        AuthoritativeFrame = other.AuthoritativeFrame;
+      }
+      if (other.PlayerPos != 0) {
+        PlayerPos = other.PlayerPos;
+      }
+      if (other.Reason.Length != 0) {
+        Reason = other.Reason;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            errorCode_ = (global::pb.BattleErrorCode) input.ReadEnum();
+            break;
+          }
+          case 16: {
+            RoomId = input.ReadUInt32();
+            break;
+          }
+          case 24: {
+            AuthoritativeFrame = input.ReadUInt32();
+            break;
+          }
+          case 32: {
+            PlayerPos = input.ReadUInt32();
+            break;
+          }
+          case 42: {
+            Reason = input.ReadString();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  /// <summary>
   /// 异常
   /// </summary>
   public sealed partial class S2C_BattleExceptionMsg : pb::IMessage<S2C_BattleExceptionMsg> {
@@ -2499,7 +2925,7 @@ namespace pb {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::pb.BattleReflection.Descriptor.MessageTypes[14]; }
+      get { return global::pb.BattleReflection.Descriptor.MessageTypes[16]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2529,7 +2955,7 @@ namespace pb {
     public const int ErrorCodeFieldNumber = 1;
     private global::pb.BattleErrorCode errorCode_ = 0;
     /// <summary>
-    ///错误码
+    /// 错误码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::pb.BattleErrorCode ErrorCode {
@@ -2543,7 +2969,7 @@ namespace pb {
     public const int ReasonFieldNumber = 2;
     private string reason_ = "";
     /// <summary>
-    ///原因
+    /// 原因
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string Reason {

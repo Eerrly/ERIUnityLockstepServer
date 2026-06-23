@@ -23,26 +23,29 @@ namespace pb {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChFQcm90by9sb2dpYy5wcm90byIxCgxDMlNfTG9naW5Nc2cSDwoHYWNjb3Vu",
-            "dBgBIAEoDBIQCghwYXNzd29yZBgCIAEoDCJECgxTMkNfTG9naW5Nc2cSIgoJ",
-            "ZXJyb3JDb2RlGAEgASgOMg8uTG9naWNFcnJvckNvZGUSEAoIcGxheWVySWQY",
-            "AiABKA0iJQoRQzJTX0NyZWF0ZVJvb21Nc2cSEAoIcGxheWVySWQYASABKA0i",
-            "RwoRUzJDX0NyZWF0ZVJvb21Nc2cSIgoJZXJyb3JDb2RlGAEgASgOMg8uTG9n",
-            "aWNFcnJvckNvZGUSDgoGcm9vbUlkGAIgASgNIjMKD0MyU19Kb2luUm9vbU1z",
-            "ZxIOCgZyb29tSWQYASABKA0SEAoIcGxheWVySWQYAiABKA0iUgoPUzJDX0pv",
-            "aW5Sb29tTXNnEiIKCWVycm9yQ29kZRgBIAEoDjIPLkxvZ2ljRXJyb3JDb2Rl",
-            "Eg4KBnJvb21JZBgCIAEoDRILCgNhbGwYAyADKA0iSwoVUzJDX0xvZ2ljRXhj",
-            "ZXB0aW9uTXNnEiIKCWVycm9yQ29kZRgBIAEoDjIPLkxvZ2ljRXJyb3JDb2Rl",
-            "Eg4KBnJlYXNvbhgCIAEoCSqBAQoKTG9naWNNc2dJRBITCg9MT0dJQ19NU0df",
-            "QmVnaW4QABITCg9MT0dJQ19NU0dfTG9naW4QARIYChRMT0dJQ19NU0dfQ3Jl",
-            "YXRlUm9vbRACEhYKEkxPR0lDX01TR19Kb2luUm9vbRADEhcKE0xPR0lDX01T",
-            "R19FeGNlcHRpb24QZCpmCg5Mb2dpY0Vycm9yQ29kZRIQCgxMT0dJQ19FUlJf",
-            "T2sQABIVChFMT0dJQ19FUlJfQWNjb3VudBABEhQKEExPR0lDX0VSUl9Ob1Jv",
-            "b20QAhIVChFMT0dJQ19FUlJfSGFzUm9vbRADQgWqAgJwYmIGcHJvdG8z"));
+            "dBgBIAEoDBIQCghwYXNzd29yZBgCIAEoDCLAAQoMUzJDX0xvZ2luTXNnEiIK",
+            "CWVycm9yQ29kZRgBIAEoDjIPLkxvZ2ljRXJyb3JDb2RlEhAKCHBsYXllcklk",
+            "GAIgASgNEhQKDGNhblJlY29ubmVjdBgDIAEoCBIXCg9yZWNvbm5lY3RSb29t",
+            "SWQYBCABKA0SFgoOcmVjb25uZWN0RnJhbWUYBSABKA0SFwoPcmVjb25uZWN0",
+            "R2FtZXJzGAYgAygNEhoKEnJlY29ubmVjdFBsYXllclBvcxgHIAEoDSIlChFD",
+            "MlNfQ3JlYXRlUm9vbU1zZxIQCghwbGF5ZXJJZBgBIAEoDSJHChFTMkNfQ3Jl",
+            "YXRlUm9vbU1zZxIiCgllcnJvckNvZGUYASABKA4yDy5Mb2dpY0Vycm9yQ29k",
+            "ZRIOCgZyb29tSWQYAiABKA0iMwoPQzJTX0pvaW5Sb29tTXNnEg4KBnJvb21J",
+            "ZBgBIAEoDRIQCghwbGF5ZXJJZBgCIAEoDSJSCg9TMkNfSm9pblJvb21Nc2cS",
+            "IgoJZXJyb3JDb2RlGAEgASgOMg8uTG9naWNFcnJvckNvZGUSDgoGcm9vbUlk",
+            "GAIgASgNEgsKA2FsbBgDIAMoDSJLChVTMkNfTG9naWNFeGNlcHRpb25Nc2cS",
+            "IgoJZXJyb3JDb2RlGAEgASgOMg8uTG9naWNFcnJvckNvZGUSDgoGcmVhc29u",
+            "GAIgASgJKoEBCgpMb2dpY01zZ0lEEhMKD0xPR0lDX01TR19CZWdpbhAAEhMK",
+            "D0xPR0lDX01TR19Mb2dpbhABEhgKFExPR0lDX01TR19DcmVhdGVSb29tEAIS",
+            "FgoSTE9HSUNfTVNHX0pvaW5Sb29tEAMSFwoTTE9HSUNfTVNHX0V4Y2VwdGlv",
+            "bhBkKmYKDkxvZ2ljRXJyb3JDb2RlEhAKDExPR0lDX0VSUl9PaxAAEhUKEUxP",
+            "R0lDX0VSUl9BY2NvdW50EAESFAoQTE9HSUNfRVJSX05vUm9vbRACEhUKEUxP",
+            "R0lDX0VSUl9IYXNSb29tEANCBaoCAnBiYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::pb.LogicMsgID), typeof(global::pb.LogicErrorCode), }, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_LoginMsg), global::pb.C2S_LoginMsg.Parser, new[]{ "Account", "Password" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_LoginMsg), global::pb.S2C_LoginMsg.Parser, new[]{ "ErrorCode", "PlayerId" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_LoginMsg), global::pb.S2C_LoginMsg.Parser, new[]{ "ErrorCode", "PlayerId", "CanReconnect", "ReconnectRoomId", "ReconnectFrame", "ReconnectGamers", "ReconnectPlayerPos" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_CreateRoomMsg), global::pb.C2S_CreateRoomMsg.Parser, new[]{ "PlayerId" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_CreateRoomMsg), global::pb.S2C_CreateRoomMsg.Parser, new[]{ "ErrorCode", "RoomId" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_JoinRoomMsg), global::pb.C2S_JoinRoomMsg.Parser, new[]{ "RoomId", "PlayerId" }, null, null, null),
@@ -60,19 +63,19 @@ namespace pb {
   public enum LogicMsgID {
     [pbr::OriginalName("LOGIC_MSG_Begin")] LogicMsgBegin = 0,
     /// <summary>
-    ///登录
+    /// 登录
     /// </summary>
     [pbr::OriginalName("LOGIC_MSG_Login")] LogicMsgLogin = 1,
     /// <summary>
-    ///创建房间
+    /// 创建房间
     /// </summary>
     [pbr::OriginalName("LOGIC_MSG_CreateRoom")] LogicMsgCreateRoom = 2,
     /// <summary>
-    ///进入房间
+    /// 进入房间
     /// </summary>
     [pbr::OriginalName("LOGIC_MSG_JoinRoom")] LogicMsgJoinRoom = 3,
     /// <summary>
-    ///意外错误
+    /// 异常错误
     /// </summary>
     [pbr::OriginalName("LOGIC_MSG_Exception")] LogicMsgException = 100,
   }
@@ -82,19 +85,19 @@ namespace pb {
   /// </summary>
   public enum LogicErrorCode {
     /// <summary>
-    ///OK
+    /// OK
     /// </summary>
     [pbr::OriginalName("LOGIC_ERR_Ok")] LogicErrOk = 0,
     /// <summary>
-    ///账户信息错误
+    /// 账号信息错误
     /// </summary>
     [pbr::OriginalName("LOGIC_ERR_Account")] LogicErrAccount = 1,
     /// <summary>
-    ///没有这个房间
+    /// 没有这个房间
     /// </summary>
     [pbr::OriginalName("LOGIC_ERR_NoRoom")] LogicErrNoRoom = 2,
     /// <summary>
-    ///已存在这个房间
+    /// 已存在这个房间
     /// </summary>
     [pbr::OriginalName("LOGIC_ERR_HasRoom")] LogicErrHasRoom = 3,
   }
@@ -142,7 +145,7 @@ namespace pb {
     public const int AccountFieldNumber = 1;
     private pb::ByteString account_ = pb::ByteString.Empty;
     /// <summary>
-    ///账号
+    /// 账号
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pb::ByteString Account {
@@ -156,7 +159,7 @@ namespace pb {
     public const int PasswordFieldNumber = 2;
     private pb::ByteString password_ = pb::ByteString.Empty;
     /// <summary>
-    ///密码
+    /// 密码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pb::ByteString Password {
@@ -285,6 +288,11 @@ namespace pb {
     public S2C_LoginMsg(S2C_LoginMsg other) : this() {
       errorCode_ = other.errorCode_;
       playerId_ = other.playerId_;
+      canReconnect_ = other.canReconnect_;
+      reconnectRoomId_ = other.reconnectRoomId_;
+      reconnectFrame_ = other.reconnectFrame_;
+      reconnectGamers_ = other.reconnectGamers_.Clone();
+      reconnectPlayerPos_ = other.reconnectPlayerPos_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -296,7 +304,7 @@ namespace pb {
     public const int ErrorCodeFieldNumber = 1;
     private global::pb.LogicErrorCode errorCode_ = 0;
     /// <summary>
-    ///错误码
+    /// 错误码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::pb.LogicErrorCode ErrorCode {
@@ -310,13 +318,82 @@ namespace pb {
     public const int PlayerIdFieldNumber = 2;
     private uint playerId_;
     /// <summary>
-    ///玩家ID
+    /// 玩家ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint PlayerId {
       get { return playerId_; }
       set {
         playerId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "canReconnect" field.</summary>
+    public const int CanReconnectFieldNumber = 3;
+    private bool canReconnect_;
+    /// <summary>
+    /// 是否可发起重连
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool CanReconnect {
+      get { return canReconnect_; }
+      set {
+        canReconnect_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "reconnectRoomId" field.</summary>
+    public const int ReconnectRoomIdFieldNumber = 4;
+    private uint reconnectRoomId_;
+    /// <summary>
+    /// 可重连房间ID
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint ReconnectRoomId {
+      get { return reconnectRoomId_; }
+      set {
+        reconnectRoomId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "reconnectFrame" field.</summary>
+    public const int ReconnectFrameFieldNumber = 5;
+    private uint reconnectFrame_;
+    /// <summary>
+    /// 当前权威帧
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint ReconnectFrame {
+      get { return reconnectFrame_; }
+      set {
+        reconnectFrame_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "reconnectGamers" field.</summary>
+    public const int ReconnectGamersFieldNumber = 6;
+    private static readonly pb::FieldCodec<uint> _repeated_reconnectGamers_codec
+        = pb::FieldCodec.ForUInt32(50);
+    private readonly pbc::RepeatedField<uint> reconnectGamers_ = new pbc::RepeatedField<uint>();
+    /// <summary>
+    /// 房间内玩家列表
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<uint> ReconnectGamers {
+      get { return reconnectGamers_; }
+    }
+
+    /// <summary>Field number for the "reconnectPlayerPos" field.</summary>
+    public const int ReconnectPlayerPosFieldNumber = 7;
+    private uint reconnectPlayerPos_;
+    /// <summary>
+    /// 当前玩家位置
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint ReconnectPlayerPos {
+      get { return reconnectPlayerPos_; }
+      set {
+        reconnectPlayerPos_ = value;
       }
     }
 
@@ -335,6 +412,11 @@ namespace pb {
       }
       if (ErrorCode != other.ErrorCode) return false;
       if (PlayerId != other.PlayerId) return false;
+      if (CanReconnect != other.CanReconnect) return false;
+      if (ReconnectRoomId != other.ReconnectRoomId) return false;
+      if (ReconnectFrame != other.ReconnectFrame) return false;
+      if(!reconnectGamers_.Equals(other.reconnectGamers_)) return false;
+      if (ReconnectPlayerPos != other.ReconnectPlayerPos) return false;
       return true;
     }
 
@@ -343,6 +425,11 @@ namespace pb {
       int hash = 1;
       if (ErrorCode != 0) hash ^= ErrorCode.GetHashCode();
       if (PlayerId != 0) hash ^= PlayerId.GetHashCode();
+      if (CanReconnect != false) hash ^= CanReconnect.GetHashCode();
+      if (ReconnectRoomId != 0) hash ^= ReconnectRoomId.GetHashCode();
+      if (ReconnectFrame != 0) hash ^= ReconnectFrame.GetHashCode();
+      hash ^= reconnectGamers_.GetHashCode();
+      if (ReconnectPlayerPos != 0) hash ^= ReconnectPlayerPos.GetHashCode();
       return hash;
     }
 
@@ -361,6 +448,23 @@ namespace pb {
         output.WriteRawTag(16);
         output.WriteUInt32(PlayerId);
       }
+      if (CanReconnect != false) {
+        output.WriteRawTag(24);
+        output.WriteBool(CanReconnect);
+      }
+      if (ReconnectRoomId != 0) {
+        output.WriteRawTag(32);
+        output.WriteUInt32(ReconnectRoomId);
+      }
+      if (ReconnectFrame != 0) {
+        output.WriteRawTag(40);
+        output.WriteUInt32(ReconnectFrame);
+      }
+      reconnectGamers_.WriteTo(output, _repeated_reconnectGamers_codec);
+      if (ReconnectPlayerPos != 0) {
+        output.WriteRawTag(56);
+        output.WriteUInt32(ReconnectPlayerPos);
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -371,6 +475,19 @@ namespace pb {
       }
       if (PlayerId != 0) {
         size += 1 + pb::CodedOutputStream.ComputeUInt32Size(PlayerId);
+      }
+      if (CanReconnect != false) {
+        size += 1 + 1;
+      }
+      if (ReconnectRoomId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(ReconnectRoomId);
+      }
+      if (ReconnectFrame != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(ReconnectFrame);
+      }
+      size += reconnectGamers_.CalculateSize(_repeated_reconnectGamers_codec);
+      if (ReconnectPlayerPos != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(ReconnectPlayerPos);
       }
       return size;
     }
@@ -385,6 +502,19 @@ namespace pb {
       }
       if (other.PlayerId != 0) {
         PlayerId = other.PlayerId;
+      }
+      if (other.CanReconnect != false) {
+        CanReconnect = other.CanReconnect;
+      }
+      if (other.ReconnectRoomId != 0) {
+        ReconnectRoomId = other.ReconnectRoomId;
+      }
+      if (other.ReconnectFrame != 0) {
+        ReconnectFrame = other.ReconnectFrame;
+      }
+      reconnectGamers_.Add(other.reconnectGamers_);
+      if (other.ReconnectPlayerPos != 0) {
+        ReconnectPlayerPos = other.ReconnectPlayerPos;
       }
     }
 
@@ -402,6 +532,27 @@ namespace pb {
           }
           case 16: {
             PlayerId = input.ReadUInt32();
+            break;
+          }
+          case 24: {
+            CanReconnect = input.ReadBool();
+            break;
+          }
+          case 32: {
+            ReconnectRoomId = input.ReadUInt32();
+            break;
+          }
+          case 40: {
+            ReconnectFrame = input.ReadUInt32();
+            break;
+          }
+          case 50:
+          case 48: {
+            reconnectGamers_.AddEntriesFrom(input, _repeated_reconnectGamers_codec);
+            break;
+          }
+          case 56: {
+            ReconnectPlayerPos = input.ReadUInt32();
             break;
           }
         }
@@ -449,7 +600,7 @@ namespace pb {
     public const int PlayerIdFieldNumber = 1;
     private uint playerId_;
     /// <summary>
-    ///玩家ID
+    /// 玩家ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint PlayerId {
@@ -573,7 +724,7 @@ namespace pb {
     public const int ErrorCodeFieldNumber = 1;
     private global::pb.LogicErrorCode errorCode_ = 0;
     /// <summary>
-    ///错误码
+    /// 错误码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::pb.LogicErrorCode ErrorCode {
@@ -587,7 +738,7 @@ namespace pb {
     public const int RoomIdFieldNumber = 2;
     private uint roomId_;
     /// <summary>
-    ///房间ID
+    /// 房间ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint RoomId {
@@ -727,7 +878,7 @@ namespace pb {
     public const int RoomIdFieldNumber = 1;
     private uint roomId_;
     /// <summary>
-    ///房间ID
+    /// 房间ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint RoomId {
@@ -741,7 +892,7 @@ namespace pb {
     public const int PlayerIdFieldNumber = 2;
     private uint playerId_;
     /// <summary>
-    ///玩家ID
+    /// 玩家ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint PlayerId {
@@ -882,7 +1033,7 @@ namespace pb {
     public const int ErrorCodeFieldNumber = 1;
     private global::pb.LogicErrorCode errorCode_ = 0;
     /// <summary>
-    ///错误码
+    /// 错误码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::pb.LogicErrorCode ErrorCode {
@@ -896,7 +1047,7 @@ namespace pb {
     public const int RoomIdFieldNumber = 2;
     private uint roomId_;
     /// <summary>
-    ///房间ID
+    /// 房间ID
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint RoomId {
@@ -912,7 +1063,7 @@ namespace pb {
         = pb::FieldCodec.ForUInt32(26);
     private readonly pbc::RepeatedField<uint> all_ = new pbc::RepeatedField<uint>();
     /// <summary>
-    ///所有玩家
+    /// 所有玩家
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::RepeatedField<uint> All {
@@ -1059,7 +1210,7 @@ namespace pb {
     public const int ErrorCodeFieldNumber = 1;
     private global::pb.LogicErrorCode errorCode_ = 0;
     /// <summary>
-    ///错误码
+    /// 错误码
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::pb.LogicErrorCode ErrorCode {
@@ -1073,7 +1224,7 @@ namespace pb {
     public const int ReasonFieldNumber = 2;
     private string reason_ = "";
     /// <summary>
-    ///原因
+    /// 原因
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string Reason {

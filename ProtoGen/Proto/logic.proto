@@ -4,61 +4,66 @@ option csharp_namespace = "pb";
 
 // 消息ID
 enum LogicMsgID {
-    LOGIC_MSG_Begin       = 0;
+    LOGIC_MSG_Begin = 0;
 
-    LOGIC_MSG_Login       = 1;       //登录
-    LOGIC_MSG_CreateRoom  = 2;       //创建房间
-    LOGIC_MSG_JoinRoom    = 3;       //进入房间
-    
-    LOGIC_MSG_Exception   = 100;      //意外错误
+    LOGIC_MSG_Login = 1;       // 登录
+    LOGIC_MSG_CreateRoom = 2;  // 创建房间
+    LOGIC_MSG_JoinRoom = 3;    // 进入房间
+
+    LOGIC_MSG_Exception = 100; // 异常错误
 }
 
 // 错误码
 enum LogicErrorCode {
-    LOGIC_ERR_Ok           = 0;       //OK
-    LOGIC_ERR_Account      = 1;       //账户信息错误
-    LOGIC_ERR_NoRoom       = 2;       //没有这个房间
-    LOGIC_ERR_HasRoom      = 3;       //已存在这个房间
+    LOGIC_ERR_Ok = 0;      // OK
+    LOGIC_ERR_Account = 1; // 账号信息错误
+    LOGIC_ERR_NoRoom = 2;  // 没有这个房间
+    LOGIC_ERR_HasRoom = 3; // 已存在这个房间
 }
 
 // 登录
 message C2S_LoginMsg {
-    bytes account   = 1;    //账号
-    bytes password  = 2;    //密码
+    bytes account = 1;  // 账号
+    bytes password = 2; // 密码
 }
 
 // 登录
 message S2C_LoginMsg {
-    LogicErrorCode errorCode    = 1;    //错误码
-    uint32 playerId             = 2;    //玩家ID
+    LogicErrorCode errorCode = 1;          // 错误码
+    uint32 playerId = 2;                   // 玩家ID
+    bool canReconnect = 3;                 // 是否可发起重连
+    uint32 reconnectRoomId = 4;            // 可重连房间ID
+    uint32 reconnectFrame = 5;             // 当前权威帧
+    repeated uint32 reconnectGamers = 6;   // 房间内玩家列表
+    uint32 reconnectPlayerPos = 7;         // 当前玩家位置
 }
 
 // 创建房间
 message C2S_CreateRoomMsg {
-    uint32 playerId    = 1;    //玩家ID
+    uint32 playerId = 1; // 玩家ID
 }
 
 // 创建房间
 message S2C_CreateRoomMsg {
-    LogicErrorCode errorCode     = 1;    //错误码
-    uint32 roomId           = 2;    //房间ID
+    LogicErrorCode errorCode = 1; // 错误码
+    uint32 roomId = 2;            // 房间ID
 }
 
 // 加入房间
 message C2S_JoinRoomMsg {
-    uint32 roomId       = 1;    //房间ID
-    uint32 playerId     = 2;    //玩家ID
+    uint32 roomId = 1;   // 房间ID
+    uint32 playerId = 2; // 玩家ID
 }
 
 // 加入房间
 message S2C_JoinRoomMsg {
-    LogicErrorCode errorCode    = 1;    //错误码
-    uint32 roomId               = 2;    //房间ID
-    repeated uint32 all         = 3;    //所有玩家
+    LogicErrorCode errorCode = 1; // 错误码
+    uint32 roomId = 2;            // 房间ID
+    repeated uint32 all = 3;      // 所有玩家
 }
 
 // 异常
 message S2C_LogicExceptionMsg {
-    LogicErrorCode errorCode    = 1;    //错误码
-    string reason               = 2;    //原因
+    LogicErrorCode errorCode = 1; // 错误码
+    string reason = 2;            // 原因
 }
