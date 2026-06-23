@@ -172,6 +172,12 @@ public class GameManager : AManager<GameManager>
         if (!_gamerInfoDic.TryGetValue(playerId, out var gamer))
             return false;
 
+        if (gamer.BattleData.ConnectionState != BattleConnectionState.Disconnected)
+            return false;
+
+        if (gamer.BattleData.ConnectionId >= 0)
+            return false;
+
         if (gamer.LogicData.RoomId == 0)
             return false;
 

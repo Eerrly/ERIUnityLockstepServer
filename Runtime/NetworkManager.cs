@@ -194,16 +194,21 @@ public class NetworkManager : AManager<NetworkManager>
                         break;
                     }
 
-                    var gamer = gameManager.GetGamerByPos(pos);
-                    LogManager.Instance.Log(LogType.Info, $"BattleMsgFrame -> connectionId:{connectionId} gameId:{gamer.LogicData.ID} clientFrame:{c2SMessage.Frame} data:{dataFrame} serverFrame:{room.AuthoritativeFrame}");
+                    if (pos != connectionGamer.BattleData.Pos)
+                    {
+                        LogManager.Instance.Log(LogType.Warning, $"BattleMsgFrame ignored because pos does not match connection gamer -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} expectedPos:{connectionGamer.BattleData.Pos} actualPos:{pos} frame:{c2SMessage.Frame}");
+                        break;
+                    }
+
+                    LogManager.Instance.Log(LogType.Info, $"BattleMsgFrame -> connectionId:{connectionId} gameId:{connectionGamer.LogicData.ID} clientFrame:{c2SMessage.Frame} data:{dataFrame} serverFrame:{room.AuthoritativeFrame}");
                     if (!room.IsBattleRunning || room.IsBattleExiting)
                     {
                         LogManager.Instance.Log(LogType.Warning, $"BattleMsgFrame ignored before state write because battle is not running or exiting -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} frame:{c2SMessage.Frame}");
                         break;
                     }
 
-                    room.InputCounts[c2SMessage.Frame] |= (byte)(1 << pos);
-                    gamer.BattleData.Frames[c2SMessage.Frame] = dataFrame;
+                    room.InputCounts[c2SMessage.Frame] |= (byte)(1 << connectionGamer.BattleData.Pos);
+                    connectionGamer.BattleData.Frames[c2SMessage.Frame] = dataFrame;
                     break;
                 }
                 case (byte)pb.BattleMsgID.BattleMsgCheck:
@@ -498,8 +503,10 @@ public class NetworkManager : AManager<NetworkManager>
         }
 
         var authoritativeFrameSnapshot = room.AuthoritativeFrame;
+        var clampedLastReceivedFrame = Math.Min(message.LastReceivedFrame, (uint)Math.Max(0, authoritativeFrameSnapshot - 1));
         gameManager.UpdateGamerConnectionId(message.PlayerId, connectionId);
-        gamer.BattleData.LastReceivedFrame = message.LastReceivedFrame;
+        gamer.BattleData.ConnectionState = BattleConnectionState.Reconnecting;
+        gamer.BattleData.LastReceivedFrame = clampedLastReceivedFrame;
 
         SendBattleReconnectMessage(
             connectionId,
@@ -509,7 +516,8 @@ public class NetworkManager : AManager<NetworkManager>
             (uint)gamer.BattleData.Pos,
             string.Empty);
 
-        ReplayMissingFramesToGamer(room, gamer, authoritativeFrameSnapshot, message.LastReceivedFrame);
+        ReplayMissingFramesToGamer(room, gamer, authoritativeFrameSnapshot, clampedLastReceivedFrame);
+        gamer.BattleData.ConnectionState = BattleConnectionState.Online;
     }
 
     /// <summary>
@@ -517,21 +525,31 @@ public class NetworkManager : AManager<NetworkManager>
     /// </summary>
     private void ReplayMissingFramesToGamer(RoomInfo room, GamerInfo gamer, int authoritativeFrameSnapshot, uint lastReceivedFrame)
     {
-        if (authoritativeFrameSnapshot <= 1)
+        if (authoritativeFrameSnapshot < 1)
             return;
 
-        var startFrame = Math.Max(1, (int)lastReceivedFrame + 1);
-        for (var frame = startFrame; frame < authoritativeFrameSnapshot; frame++)
+        var replayTargetFrame = Math.Min(authoritativeFrameSnapshot, BattleSetting.MaxFrameCount - 1);
+        var replayedLastFrame = lastReceivedFrame;
+        while (replayedLastFrame < replayTargetFrame)
         {
-            var datum = BuildBattleFrameBytes(room, frame);
-            SendBattleFrameMessage(
-                gamer.BattleData.ConnectionId,
-                pb.BattleErrorCode.BattleErrBattleOk,
-                (uint)frame,
-                (uint)room.Gamers.Count,
-                room.InputCounts[frame],
-                datum);
-            gamer.BattleData.LastReceivedFrame = (uint)frame;
+            var startFrame = Math.Max(1, (int)replayedLastFrame + 1);
+            for (var frame = startFrame; frame <= replayTargetFrame; frame++)
+            {
+                var datum = BuildBattleFrameBytes(room, frame);
+                SendBattleFrameMessage(
+                    gamer.BattleData.ConnectionId,
+                    pb.BattleErrorCode.BattleErrBattleOk,
+                    (uint)frame,
+                    (uint)room.Gamers.Count,
+                    room.InputCounts[frame],
+                    datum);
+                replayedLastFrame = (uint)frame;
+                gamer.BattleData.LastReceivedFrame = replayedLastFrame;
+            }
+
+            replayTargetFrame = Math.Min(room.AuthoritativeFrame, BattleSetting.MaxFrameCount - 1);
+            if (replayTargetFrame < 1)
+                break;
         }
     }
 

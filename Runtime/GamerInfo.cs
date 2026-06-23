@@ -17,6 +17,7 @@ public enum BattleConnectionState
     None = 0,
     Online = 1,
     Disconnected = 2,
+    Reconnecting = 3,
 }
 
 public class BattleData
