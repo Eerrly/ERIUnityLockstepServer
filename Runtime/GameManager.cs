@@ -84,7 +84,7 @@ public class GameManager : AManager<GameManager>
     public void UpdateGamerConnectionId(uint playerId, int connectionId)
     {
         var gamer = _gamerInfoDic[playerId];
-        if (gamer.BattleData.ConnectionId >= 0)
+        if (gamer.BattleData.ConnectionId != BattleData.InvalidConnectionId)
             _gamerInfoByConnectionId.Remove(gamer.BattleData.ConnectionId);
 
         gamer.BattleData.ConnectionId = connectionId;
@@ -140,10 +140,10 @@ public class GameManager : AManager<GameManager>
         if (!_gamerInfoDic.TryGetValue(playerId, out var gamer))
             return;
 
-        if (gamer.BattleData.ConnectionId >= 0)
+        if (gamer.BattleData.ConnectionId != BattleData.InvalidConnectionId)
             _gamerInfoByConnectionId.Remove(gamer.BattleData.ConnectionId);
 
-        gamer.BattleData.ConnectionId = -1;
+        gamer.BattleData.ConnectionId = BattleData.InvalidConnectionId;
         if (gamer.BattleData.ConnectionState == BattleConnectionState.Online)
             gamer.BattleData.ConnectionState = BattleConnectionState.None;
     }
@@ -156,10 +156,10 @@ public class GameManager : AManager<GameManager>
         if (!_gamerInfoDic.TryGetValue(playerId, out var gamer))
             return;
 
-        if (gamer.BattleData.ConnectionId >= 0)
+        if (gamer.BattleData.ConnectionId != BattleData.InvalidConnectionId)
             _gamerInfoByConnectionId.Remove(gamer.BattleData.ConnectionId);
 
-        gamer.BattleData.ConnectionId = -1;
+        gamer.BattleData.ConnectionId = BattleData.InvalidConnectionId;
         gamer.BattleData.ConnectionState = BattleConnectionState.Disconnected;
     }
 
@@ -175,7 +175,7 @@ public class GameManager : AManager<GameManager>
         if (gamer.BattleData.ConnectionState != BattleConnectionState.Disconnected)
             return false;
 
-        if (gamer.BattleData.ConnectionId >= 0)
+        if (gamer.BattleData.ConnectionId != BattleData.InvalidConnectionId)
             return false;
 
         if (gamer.LogicData.RoomId == 0)

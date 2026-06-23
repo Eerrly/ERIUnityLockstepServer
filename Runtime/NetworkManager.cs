@@ -1,4 +1,5 @@
 using System.Net.Sockets;
+using System.Diagnostics;
 using Google.Protobuf;
 
 /// <summary>
@@ -9,6 +10,10 @@ public class NetworkManager : AManager<NetworkManager>
     private const string BattleExitReasonPlayerExit = "PlayerExit";
     private const string BattleExitReasonDisconnected = "Disconnected";
     private const string BattleExitReasonServerError = "ServerError";
+    private const string BattleReconnectReasonCatchUpRoundComplete = "CatchUpRoundComplete";
+    private const string BattleReconnectReasonReconnectComplete = "ReconnectComplete";
+    private const int ReconnectOnlineToleranceFrames = 5;
+    private const int ReconnectCatchUpBatchFrameCount = 300;
 
     /// <summary>
     /// KCP 服务端对象
@@ -200,15 +205,29 @@ public class NetworkManager : AManager<NetworkManager>
                         break;
                     }
 
-                    LogManager.Instance.Log(LogType.Info, $"BattleMsgFrame -> connectionId:{connectionId} gameId:{connectionGamer.LogicData.ID} clientFrame:{c2SMessage.Frame} data:{dataFrame} serverFrame:{room.AuthoritativeFrame}");
+                    var targetFrame = (int)c2SMessage.Frame;
+                    var currentServerFrame = room.AuthoritativeFrame;
+                    if (targetFrame < currentServerFrame)
+                    {
+                        targetFrame = currentServerFrame;
+                        LogManager.Instance.Log(LogType.Warning, $"BattleMsgFrame late input retargeted -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} clientFrame:{c2SMessage.Frame} targetFrame:{targetFrame} serverFrame:{currentServerFrame} data:{dataFrame}");
+                    }
+
+                    LogManager.Instance.Log(LogType.Info, $"BattleMsgFrame -> connectionId:{connectionId} gameId:{connectionGamer.LogicData.ID} clientFrame:{c2SMessage.Frame} targetFrame:{targetFrame} data:{dataFrame} serverFrame:{currentServerFrame}");
                     if (!room.IsBattleRunning || room.IsBattleExiting)
                     {
                         LogManager.Instance.Log(LogType.Warning, $"BattleMsgFrame ignored before state write because battle is not running or exiting -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} frame:{c2SMessage.Frame}");
                         break;
                     }
 
-                    room.InputCounts[c2SMessage.Frame] |= (byte)(1 << connectionGamer.BattleData.Pos);
-                    connectionGamer.BattleData.Frames[c2SMessage.Frame] = dataFrame;
+                    if (targetFrame >= BattleSetting.MaxFrameCount)
+                    {
+                        LogManager.Instance.Log(LogType.Warning, $"BattleMsgFrame ignored because target frame is invalid -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} clientFrame:{c2SMessage.Frame} targetFrame:{targetFrame}");
+                        break;
+                    }
+
+                    room.InputCounts[targetFrame] |= (byte)(1 << connectionGamer.BattleData.Pos);
+                    connectionGamer.BattleData.Frames[targetFrame] = dataFrame;
                     break;
                 }
                 case (byte)pb.BattleMsgID.BattleMsgCheck:
@@ -353,7 +372,7 @@ public class NetworkManager : AManager<NetworkManager>
     /// </summary>
     private void SendBattleConnectMessage(int connectionId, pb.BattleErrorCode errorCode)
     {
-        if (!KcpActive || connectionId < 0)
+        if (!KcpActive || connectionId == BattleData.InvalidConnectionId)
             return;
 
         var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_ConnectMsg>();
@@ -366,7 +385,7 @@ public class NetworkManager : AManager<NetworkManager>
     /// </summary>
     private void SendBattleReadyMessage(int connectionId, pb.BattleErrorCode errorCode, uint roomId, List<uint> readies)
     {
-        if (!KcpActive || connectionId < 0)
+        if (!KcpActive || connectionId == BattleData.InvalidConnectionId)
             return;
 
         var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_ReadyMsg>();
@@ -382,7 +401,7 @@ public class NetworkManager : AManager<NetworkManager>
     /// </summary>
     private void SendBattleStartMessage(int connectionId, pb.BattleErrorCode errorCode, uint frame, ulong timestamp)
     {
-        if (!KcpActive || connectionId < 0)
+        if (!KcpActive || connectionId == BattleData.InvalidConnectionId)
             return;
 
         var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_StartMsg>();
@@ -397,7 +416,7 @@ public class NetworkManager : AManager<NetworkManager>
     /// </summary>
     private void SendBattleHeartbeatMessage(int connectionId, pb.BattleErrorCode errorCode, ulong timestamp)
     {
-        if (!KcpActive || connectionId < 0)
+        if (!KcpActive || connectionId == BattleData.InvalidConnectionId)
             return;
 
         var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_HeartbeatMsg>();
@@ -411,7 +430,7 @@ public class NetworkManager : AManager<NetworkManager>
     /// </summary>
     private void SendBattleReconnectMessage(int connectionId, pb.BattleErrorCode errorCode, uint roomId, uint authoritativeFrame, uint playerPos, string reason)
     {
-        if (!KcpActive || connectionId < 0)
+        if (!KcpActive || connectionId == BattleData.InvalidConnectionId)
             return;
 
         var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_BattleReconnectMsg>();
@@ -420,15 +439,15 @@ public class NetworkManager : AManager<NetworkManager>
         s2CMessage.AuthoritativeFrame = authoritativeFrame;
         s2CMessage.PlayerPos = playerPos;
         s2CMessage.Reason = reason;
-        _kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgReconnect, s2CMessage, connectionId);
+        _kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgReconnect, s2CMessage, connectionId, kcp2k.KcpChannel.Reliable);
     }
 
     /// <summary>
     /// 发送帧消息
     /// </summary>
-    private void SendBattleFrameMessage(int connectionId, pb.BattleErrorCode errorCode, uint frame, uint playerCount, uint inputCount, byte[] datum)
+    private void SendBattleFrameMessage(int connectionId, pb.BattleErrorCode errorCode, uint frame, uint playerCount, uint inputCount, byte[] datum, kcp2k.KcpChannel channel = kcp2k.KcpChannel.Unreliable)
     {
-        if (!KcpActive || connectionId < 0)
+        if (!KcpActive || connectionId == BattleData.InvalidConnectionId)
             return;
 
         var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_FrameMsg>(true);
@@ -437,7 +456,7 @@ public class NetworkManager : AManager<NetworkManager>
         s2CMessage.PlayerCount = playerCount;
         s2CMessage.InputCount = inputCount;
         s2CMessage.Datum = ByteString.CopyFrom(datum);
-        _kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgFrame, s2CMessage, connectionId);
+        _kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgFrame, s2CMessage, connectionId, channel);
     }
 
     /// <summary>
@@ -445,7 +464,7 @@ public class NetworkManager : AManager<NetworkManager>
     /// </summary>
     private void SendBattleCheckMessage(int connectionId, pb.BattleErrorCode errorCode, int frame)
     {
-        if (!KcpActive || connectionId < 0)
+        if (!KcpActive || connectionId == BattleData.InvalidConnectionId)
             return;
 
         var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_CheckMsg>();
@@ -463,6 +482,34 @@ public class NetworkManager : AManager<NetworkManager>
         if (!gameManager.TryGetGamerById(message.PlayerId, out var gamer) || gamer == null)
         {
             SendBattleReconnectMessage(connectionId, pb.BattleErrorCode.BattleErrData, message.RoomId, 0, 0, "PlayerNotFound");
+            return;
+        }
+
+        if (gamer.BattleData.ConnectionState == BattleConnectionState.Reconnecting &&
+            gamer.BattleData.ConnectionId == connectionId)
+        {
+            if (!gameManager.TryGetRoom(message.RoomId, out var ackRoom) || ackRoom == null)
+            {
+                SendBattleReconnectMessage(connectionId, pb.BattleErrorCode.BattleErrData, message.RoomId, 0, 0, "RoomNotFound");
+                return;
+            }
+
+            if (gamer.LogicData.RoomId != message.RoomId || ackRoom.RoomId != message.RoomId)
+            {
+                SendBattleReconnectMessage(connectionId, pb.BattleErrorCode.BattleErrData, message.RoomId, 0, 0, "RoomMismatch");
+                return;
+            }
+
+            if (!ackRoom.Gamers.Contains(message.PlayerId) ||
+                !ackRoom.IsBattleRunning ||
+                ackRoom.IsBattleExiting ||
+                gamer.BattleData.Pos < 0)
+            {
+                SendBattleReconnectMessage(connectionId, pb.BattleErrorCode.BattleErrData, message.RoomId, 0, 0, "ReconnectAckInvalid");
+                return;
+            }
+
+            HandleBattleReconnectAckMessage(ackRoom, gamer, message, connectionId);
             return;
         }
 
@@ -510,13 +557,66 @@ public class NetworkManager : AManager<NetworkManager>
             (uint)gamer.BattleData.Pos,
             string.Empty);
 
-        var replaySucceeded = ReplayMissingFramesToGamer(room, gamer, authoritativeFrameSnapshot, clampedLastReceivedFrame, connectionId);
+        SendReconnectCatchUpRound(
+            room,
+            gamer,
+            authoritativeFrameSnapshot,
+            clampedLastReceivedFrame,
+            connectionId,
+            BattleReconnectReasonCatchUpRoundComplete);
+    }
+
+    private void HandleBattleReconnectAckMessage(RoomInfo room, GamerInfo gamer, pb.C2S_BattleReconnectMsg message, int connectionId)
+    {
+        var currentCompletedFrame = GetLastCompletedFrame(room);
+        var ackedFrame = Math.Min(message.LastReceivedFrame, (uint)Math.Max(0, currentCompletedFrame));
+        gamer.BattleData.LastReceivedFrame = ackedFrame;
+
+        var gap = currentCompletedFrame - (int)ackedFrame;
+        var completeReason = gap <= ReconnectOnlineToleranceFrames
+            ? BattleReconnectReasonReconnectComplete
+            : BattleReconnectReasonCatchUpRoundComplete;
+
+        LogManager.Instance.Log(LogType.Info, $"BattleReconnectAck -> roomId:{room.RoomId} playerId:{message.PlayerId} ackedFrame:{ackedFrame} currentCompleted:{currentCompletedFrame} gap:{gap} reason:{completeReason}");
+        var replaySucceeded = SendReconnectCatchUpRound(
+            room,
+            gamer,
+            currentCompletedFrame,
+            ackedFrame,
+            connectionId,
+            completeReason);
+
         if (replaySucceeded &&
+            completeReason == BattleReconnectReasonReconnectComplete &&
             gamer.BattleData.ConnectionId == connectionId &&
             gamer.BattleData.ConnectionState == BattleConnectionState.Reconnecting)
         {
             gamer.BattleData.ConnectionState = BattleConnectionState.Online;
+            LogManager.Instance.Log(LogType.Info, $"BattleReconnectOnline -> roomId:{room.RoomId} playerId:{message.PlayerId} lastReceived:{gamer.BattleData.LastReceivedFrame} currentCompleted:{GetLastCompletedFrame(room)} serverFrame:{room.AuthoritativeFrame}");
         }
+    }
+
+    private bool SendReconnectCatchUpRound(RoomInfo room, GamerInfo gamer, int authoritativeFrameSnapshot, uint lastReceivedFrame, int connectionId, string completeReason)
+    {
+        LogManager.Instance.Log(LogType.Info, $"BattleReconnectCatchUpStart -> roomId:{room.RoomId} playerId:{gamer.LogicData.ID} snapshot:{authoritativeFrameSnapshot} lastReceived:{lastReceivedFrame} currentCompleted:{GetLastCompletedFrame(room)} serverFrame:{room.AuthoritativeFrame} reason:{completeReason}");
+        var replaySucceeded = ReplayMissingFramesToGamer(room, gamer, authoritativeFrameSnapshot, lastReceivedFrame, connectionId);
+        if (!replaySucceeded ||
+            gamer.BattleData.ConnectionId != connectionId ||
+            gamer.BattleData.ConnectionState != BattleConnectionState.Reconnecting)
+        {
+            return false;
+        }
+
+        LogManager.Instance.Log(LogType.Info, $"BattleReconnectCatchUpComplete -> roomId:{room.RoomId} playerId:{gamer.LogicData.ID} lastReceived:{gamer.BattleData.LastReceivedFrame} currentCompleted:{GetLastCompletedFrame(room)} serverFrame:{room.AuthoritativeFrame} reason:{completeReason}");
+        SendBattleReconnectMessage(
+            connectionId,
+            pb.BattleErrorCode.BattleErrBattleOk,
+            room.RoomId,
+            gamer.BattleData.LastReceivedFrame,
+            (uint)gamer.BattleData.Pos,
+            completeReason);
+
+        return true;
     }
 
     /// <summary>
@@ -527,35 +627,36 @@ public class NetworkManager : AManager<NetworkManager>
         if (authoritativeFrameSnapshot < 0)
             return true;
 
-        var replayTargetFrame = Math.Min(authoritativeFrameSnapshot, BattleSetting.MaxFrameCount - 1);
         var replayedLastFrame = lastReceivedFrame == 0 ? -1 : (int)lastReceivedFrame;
-        while (replayedLastFrame < replayTargetFrame)
-        {
-            var startFrame = Math.Max(0, replayedLastFrame + 1);
-            for (var frame = startFrame; frame <= replayTargetFrame; frame++)
-            {
-                if (gamer.BattleData.ConnectionId != reconnectConnectionId ||
-                    gamer.BattleData.ConnectionState != BattleConnectionState.Reconnecting)
-                {
-                    return false;
-                }
+        var replayTargetFrame = Math.Min(Math.Max(authoritativeFrameSnapshot, GetLastCompletedFrame(room)), BattleSetting.MaxFrameCount - 1);
+        if (replayTargetFrame < 0 || replayedLastFrame >= replayTargetFrame)
+            return true;
 
-                var datum = BuildBattleFrameBytes(room, frame);
-                SendBattleFrameMessage(
-                    reconnectConnectionId,
-                    pb.BattleErrorCode.BattleErrBattleOk,
-                    (uint)frame,
-                    (uint)room.Gamers.Count,
-                    room.InputCounts[frame],
-                    datum);
-                replayedLastFrame = frame;
-                gamer.BattleData.LastReceivedFrame = (uint)replayedLastFrame;
+        var startFrame = Math.Max(0, replayedLastFrame + 1);
+        var endFrame = Math.Min(replayTargetFrame, startFrame + ReconnectCatchUpBatchFrameCount - 1);
+        for (var frame = startFrame; frame <= endFrame; frame++)
+        {
+            if (gamer.BattleData.ConnectionId != reconnectConnectionId ||
+                gamer.BattleData.ConnectionState != BattleConnectionState.Reconnecting)
+            {
+                return false;
             }
 
-            replayTargetFrame = Math.Min(GetLastCompletedFrame(room), BattleSetting.MaxFrameCount - 1);
-            if (replayTargetFrame < 0)
-                break;
+            var datum = BuildBattleFrameBytes(room, frame);
+            SendBattleFrameMessage(
+                reconnectConnectionId,
+                pb.BattleErrorCode.BattleErrBattleOk,
+                (uint)frame,
+                (uint)room.Gamers.Count,
+                room.InputCounts[frame],
+                datum,
+                kcp2k.KcpChannel.Reliable);
+            replayedLastFrame = frame;
+            gamer.BattleData.LastReceivedFrame = (uint)replayedLastFrame;
         }
+
+        if (endFrame < replayTargetFrame)
+            LogManager.Instance.Log(LogType.Info, $"BattleReconnectCatchUpBatch -> roomId:{room.RoomId} playerId:{gamer.LogicData.ID} start:{startFrame} end:{endFrame} target:{replayTargetFrame}");
 
         return true;
     }
@@ -622,7 +723,7 @@ public class NetworkManager : AManager<NetworkManager>
             {
                 var gamer = gameManager.GetGamerById(playerId);
                 var targetConnectionId = gamer.BattleData.ConnectionId;
-                if (targetConnectionId < 0)
+                if (targetConnectionId == BattleData.InvalidConnectionId)
                     continue;
 
                 if (excludedConnectionId.HasValue && targetConnectionId == excludedConnectionId.Value)
@@ -679,7 +780,7 @@ public class NetworkManager : AManager<NetworkManager>
     /// </summary>
     private void SendBattleExitMessage(int connectionId, pb.BattleErrorCode errorCode, uint roomId, uint operatorPlayerId, string reason)
     {
-        if (!KcpActive || connectionId < 0)
+        if (!KcpActive || connectionId == BattleData.InvalidConnectionId)
             return;
 
         var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_BattleExitMsg>();
@@ -879,8 +980,11 @@ public class NetworkManager : AManager<NetworkManager>
         {
             try
             {
+                var stopwatch = Stopwatch.StartNew();
+                var nextTick = stopwatch.ElapsedMilliseconds;
                 while (!cancellationToken.IsCancellationRequested)
                 {
+                    nextTick += BattleSetting.BattleInterval;
                     try
                     {
                         ThrowIfBattleExitRequested(room, cancellationToken);
@@ -898,7 +1002,8 @@ public class NetworkManager : AManager<NetworkManager>
                             {
                                 ThrowIfBattleExitRequested(room, cancellationToken);
                                 var gamer = gameManager.GetGamerById(room.Gamers[i]);
-                                if (gamer.BattleData.ConnectionState != BattleConnectionState.Disconnected)
+                                if (gamer.BattleData.ConnectionState != BattleConnectionState.Disconnected &&
+                                    gamer.BattleData.ConnectionState != BattleConnectionState.Reconnecting)
                                     continue;
 
                                 var pos = gamer.BattleData.Pos;
@@ -947,7 +1052,17 @@ public class NetworkManager : AManager<NetworkManager>
 
                     try
                     {
-                        await Task.Delay(BattleSetting.BattleInterval, cancellationToken);
+                        var delay = nextTick - stopwatch.ElapsedMilliseconds;
+                        if (delay > 0)
+                        {
+                            await Task.Delay((int)delay, cancellationToken);
+                        }
+                        else
+                        {
+                            if (-delay > BattleSetting.BattleInterval)
+                                nextTick = stopwatch.ElapsedMilliseconds;
+                            await Task.Yield();
+                        }
                     }
                     catch (OperationCanceledException)
                     {
@@ -1000,7 +1115,7 @@ public class NetworkManager : AManager<NetworkManager>
         if (gamer.BattleData.ConnectionState != BattleConnectionState.Online)
             return false;
 
-        if (gamer.BattleData.ConnectionId < 0)
+        if (gamer.BattleData.ConnectionId == BattleData.InvalidConnectionId)
             return false;
 
         return gamer.BattleData.LastReceivedFrame + 1 >= room.AuthoritativeFrame;

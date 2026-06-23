@@ -22,6 +22,8 @@ public enum BattleConnectionState
 
 public class BattleData
 {
+    public const int InvalidConnectionId = int.MinValue;
+
     public int Pos;
 
     /// <summary>
@@ -58,7 +60,7 @@ public class GamerInfo
         BattleData = new BattleData()
         {
             Pos = -1,
-            ConnectionId = -1,
+            ConnectionId = BattleData.InvalidConnectionId,
             ConnectionState = BattleConnectionState.None,
             LastReceivedFrame = 0,
             Frames = new byte[BattleSetting.MaxFrameCount],

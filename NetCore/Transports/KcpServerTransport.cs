@@ -12,6 +12,8 @@ public struct PacketInfo
     /// </summary>
     public int ConnectionId;
 
+    public KcpChannel Channel;
+
     /// <summary>
     /// 消息包
     /// </summary>
@@ -23,6 +25,8 @@ public struct PacketInfo
 /// </summary>
 public class KcpServerTransport : ServerTransport
 {
+    private const int MaxPacketsPerTick = 256;
+
     /// <summary>
     /// KCP服务器对象
     /// </summary>
@@ -131,30 +135,33 @@ public class KcpServerTransport : ServerTransport
     /// </summary>
     private void UpdatePacketInfosSent()
     {
-        if (!_packetInfos.TryDequeue(out var packetInfo)) 
-            return;
-        
-        var buffer = BufferPool.GetBuffer(packetInfo.Packet._head._length + Head.HeadLength);
-        try
+        for (var sentCount = 0; sentCount < MaxPacketsPerTick; sentCount++)
         {
-            unsafe
-            {
-                fixed (byte* src = buffer) *((Head*)src) = packetInfo.Packet._head;
-            }
-            Array.Copy(packetInfo.Packet._data, 0, buffer, Head.HeadLength, packetInfo.Packet._head._length);
-            _server.Send(packetInfo.ConnectionId, new ArraySegment<byte>(buffer), KcpChannel.Unreliable);
+            if (!_packetInfos.TryDequeue(out var packetInfo))
+                return;
 
-            LogManager.Instance.Log(LogType.Info,$"KcpSend -> connectionId:{packetInfo.ConnectionId} MsgID:{Enum.GetName(typeof(pb.BattleMsgID), packetInfo.Packet._head._cmd)} dataSize:{packetInfo.Packet._head._length}");
-            OnDataSent?.Invoke(packetInfo.ConnectionId, packetInfo.Packet);
-        }
-        catch(Exception ex)
-        {
-            LogManager.Instance.Log(LogType.Exception,$"{ex.Message}\n{ex.StackTrace}");
-            Shutdown();
-        }
-        finally
-        {
-            BufferPool.ReleaseBuff(buffer);
+            var buffer = BufferPool.GetBuffer(packetInfo.Packet._head._length + Head.HeadLength);
+            try
+            {
+                unsafe
+                {
+                    fixed (byte* src = buffer) *((Head*)src) = packetInfo.Packet._head;
+                }
+                Array.Copy(packetInfo.Packet._data, 0, buffer, Head.HeadLength, packetInfo.Packet._head._length);
+                _server.Send(packetInfo.ConnectionId, new ArraySegment<byte>(buffer), packetInfo.Channel);
+
+                LogManager.Instance.Log(LogType.Info,$"KcpSend -> connectionId:{packetInfo.ConnectionId} MsgID:{Enum.GetName(typeof(pb.BattleMsgID), packetInfo.Packet._head._cmd)} dataSize:{packetInfo.Packet._head._length} Channel:{Enum.GetName(typeof(KcpChannel), packetInfo.Channel)}");
+                OnDataSent?.Invoke(packetInfo.ConnectionId, packetInfo.Packet);
+            }
+            catch(Exception ex)
+            {
+                LogManager.Instance.Log(LogType.Exception,$"{ex.Message}\n{ex.StackTrace}");
+                Shutdown();
+            }
+            finally
+            {
+                BufferPool.ReleaseBuff(buffer);
+            }
         }
     }
 
@@ -165,9 +172,14 @@ public class KcpServerTransport : ServerTransport
     /// <param name="param">额外参数</param>
     public override void Send(Packet packet, object param)
     {
+        Send(packet, param, KcpChannel.Unreliable);
+    }
+
+    public void Send(Packet packet, object param, KcpChannel channel)
+    {
         try
         {
-            _packetInfos.Enqueue(new PacketInfo(){ ConnectionId = (int)param, Packet = packet });
+            _packetInfos.Enqueue(new PacketInfo(){ ConnectionId = (int)param, Channel = channel, Packet = packet });
         }
         catch (Exception ex)
         {
@@ -182,13 +194,13 @@ public class KcpServerTransport : ServerTransport
     /// <param name="message">消息对象</param>
     /// <param name="connectionId">客户端KCP连接ID</param>
     /// <typeparam name="T">消息类型</typeparam>
-    public void SendMessage<T>(pb.BattleMsgID battleMsgId, T message, int connectionId) where T : IMessage
+    public void SendMessage<T>(pb.BattleMsgID battleMsgId, T message, int connectionId, KcpChannel channel = KcpChannel.Unreliable) where T : IMessage
     {
         if (!Active()) return;
         var head = new Head(){ _cmd = (byte)battleMsgId, _length = message.CalculateSize() };
         var packet = new Packet(){ _data = message.ToByteArray(), _head = head };
         MsgPoolManager.Instance.Release(message);
-        Send(packet, connectionId);
+        Send(packet, connectionId, channel);
     }
 
     /// <summary>
