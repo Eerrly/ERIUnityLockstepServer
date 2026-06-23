@@ -524,14 +524,14 @@ public class NetworkManager : AManager<NetworkManager>
     /// </summary>
     private bool ReplayMissingFramesToGamer(RoomInfo room, GamerInfo gamer, int authoritativeFrameSnapshot, uint lastReceivedFrame, int reconnectConnectionId)
     {
-        if (authoritativeFrameSnapshot < 1)
+        if (authoritativeFrameSnapshot < 0)
             return true;
 
         var replayTargetFrame = Math.Min(authoritativeFrameSnapshot, BattleSetting.MaxFrameCount - 1);
-        var replayedLastFrame = lastReceivedFrame;
+        var replayedLastFrame = lastReceivedFrame == 0 ? -1 : (int)lastReceivedFrame;
         while (replayedLastFrame < replayTargetFrame)
         {
-            var startFrame = Math.Max(1, (int)replayedLastFrame + 1);
+            var startFrame = Math.Max(0, replayedLastFrame + 1);
             for (var frame = startFrame; frame <= replayTargetFrame; frame++)
             {
                 if (gamer.BattleData.ConnectionId != reconnectConnectionId ||
@@ -548,12 +548,12 @@ public class NetworkManager : AManager<NetworkManager>
                     (uint)room.Gamers.Count,
                     room.InputCounts[frame],
                     datum);
-                replayedLastFrame = (uint)frame;
-                gamer.BattleData.LastReceivedFrame = replayedLastFrame;
+                replayedLastFrame = frame;
+                gamer.BattleData.LastReceivedFrame = (uint)replayedLastFrame;
             }
 
             replayTargetFrame = Math.Min(GetLastCompletedFrame(room), BattleSetting.MaxFrameCount - 1);
-            if (replayTargetFrame < 1)
+            if (replayTargetFrame < 0)
                 break;
         }
 
