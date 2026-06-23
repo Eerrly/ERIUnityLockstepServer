@@ -14,6 +14,7 @@ enum BattleMsgID {
     BATTLE_MSG_Frame       = 30;       //帧数据
     BATTLE_MSG_Check       = 40;       //检测
     BATTLE_MSG_Result      = 50;       //结果
+    BATTLE_MSG_Exit        = 60;       //退出战斗
     
     BATTLE_MSG_Exception   = 100;      //意外错误
 }
@@ -99,6 +100,20 @@ message S2C_CheckMsg {
 message S2C_ResultMsg {
     BattleErrorCode errorCode    = 1;    //错误码
     uint32 winner                = 2;    //胜利者
+}
+
+// 退出战斗
+message C2S_BattleExitMsg {
+    uint32 roomId = 1;
+    uint32 playerId = 2;
+}
+
+// 退出战斗
+message S2C_BattleExitMsg {
+    BattleErrorCode errorCode = 1;
+    uint32 roomId = 2;
+    uint32 operatorPlayerId = 3;
+    string reason = 4;
 }
 
 // 异常

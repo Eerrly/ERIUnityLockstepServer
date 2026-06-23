@@ -40,17 +40,21 @@ namespace pb {
             "cmFtZRgBIAEoBRILCgNwb3MYAiABKAUSCwoDbWQ1GAMgASgFIkIKDFMyQ19D",
             "aGVja01zZxIjCgllcnJvckNvZGUYASABKA4yEC5CYXR0bGVFcnJvckNvZGUS",
             "DQoFZnJhbWUYAiABKAUiRAoNUzJDX1Jlc3VsdE1zZxIjCgllcnJvckNvZGUY",
-            "ASABKA4yEC5CYXR0bGVFcnJvckNvZGUSDgoGd2lubmVyGAIgASgNIk0KFlMy",
-            "Q19CYXR0bGVFeGNlcHRpb25Nc2cSIwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0",
-            "dGxlRXJyb3JDb2RlEg4KBnJlYXNvbhgCIAEoCSreAQoLQmF0dGxlTXNnSUQS",
-            "FAoQQkFUVExFX01TR19CZWdpbhAAEhYKEkJBVFRMRV9NU0dfQ29ubmVjdBAB",
-            "EhgKFEJBVFRMRV9NU0dfSGVhcnRiZWF0EAISFAoQQkFUVExFX01TR19SZWFk",
-            "eRAKEhQKEEJBVFRMRV9NU0dfU3RhcnQQFBIUChBCQVRUTEVfTVNHX0ZyYW1l",
-            "EB4SFAoQQkFUVExFX01TR19DaGVjaxAoEhUKEUJBVFRMRV9NU0dfUmVzdWx0",
-            "EDISGAoUQkFUVExFX01TR19FeGNlcHRpb24QZCptCg9CYXR0bGVFcnJvckNv",
-            "ZGUSGAoUQkFUVExFX0VSUl9CYXR0bGVfT2sQABIWChJCQVRUTEVfRVJSX1Rp",
-            "bWVvdXQQARITCg9CQVRUTEVfRVJSX0RhdGEQAhITCg9CQVRUTEVfRVJSX0Rp",
-            "ZmYQA0IFqgICcGJiBnByb3RvMw=="));
+            "ASABKA4yEC5CYXR0bGVFcnJvckNvZGUSDgoGd2lubmVyGAIgASgNIjUKEUMy",
+            "U19CYXR0bGVFeGl0TXNnEg4KBnJvb21JZBgBIAEoDRIQCghwbGF5ZXJJZBgC",
+            "IAEoDSJyChFTMkNfQmF0dGxlRXhpdE1zZxIjCgllcnJvckNvZGUYASABKA4y",
+            "EC5CYXR0bGVFcnJvckNvZGUSDgoGcm9vbUlkGAIgASgNEhgKEG9wZXJhdG9y",
+            "UGxheWVySWQYAyABKA0SDgoGcmVhc29uGAQgASgJIk0KFlMyQ19CYXR0bGVF",
+            "eGNlcHRpb25Nc2cSIwoJZXJyb3JDb2RlGAEgASgOMhAuQmF0dGxlRXJyb3JD",
+            "b2RlEg4KBnJlYXNvbhgCIAEoCSrzAQoLQmF0dGxlTXNnSUQSFAoQQkFUVExF",
+            "X01TR19CZWdpbhAAEhYKEkJBVFRMRV9NU0dfQ29ubmVjdBABEhgKFEJBVFRM",
+            "RV9NU0dfSGVhcnRiZWF0EAISFAoQQkFUVExFX01TR19SZWFkeRAKEhQKEEJB",
+            "VFRMRV9NU0dfU3RhcnQQFBIUChBCQVRUTEVfTVNHX0ZyYW1lEB4SFAoQQkFU",
+            "VExFX01TR19DaGVjaxAoEhUKEUJBVFRMRV9NU0dfUmVzdWx0EDISEwoPQkFU",
+            "VExFX01TR19FeGl0EDwSGAoUQkFUVExFX01TR19FeGNlcHRpb24QZCptCg9C",
+            "YXR0bGVFcnJvckNvZGUSGAoUQkFUVExFX0VSUl9CYXR0bGVfT2sQABIWChJC",
+            "QVRUTEVfRVJSX1RpbWVvdXQQARITCg9CQVRUTEVfRVJSX0RhdGEQAhITCg9C",
+            "QVRUTEVfRVJSX0RpZmYQA0IFqgICcGJiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::pb.BattleMsgID), typeof(global::pb.BattleErrorCode), }, new pbr::GeneratedClrTypeInfo[] {
@@ -66,6 +70,8 @@ namespace pb {
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_CheckMsg), global::pb.C2S_CheckMsg.Parser, new[]{ "Frame", "Pos", "Md5" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_CheckMsg), global::pb.S2C_CheckMsg.Parser, new[]{ "ErrorCode", "Frame" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_ResultMsg), global::pb.S2C_ResultMsg.Parser, new[]{ "ErrorCode", "Winner" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::pb.C2S_BattleExitMsg), global::pb.C2S_BattleExitMsg.Parser, new[]{ "RoomId", "PlayerId" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_BattleExitMsg), global::pb.S2C_BattleExitMsg.Parser, new[]{ "ErrorCode", "RoomId", "OperatorPlayerId", "Reason" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::pb.S2C_BattleExceptionMsg), global::pb.S2C_BattleExceptionMsg.Parser, new[]{ "ErrorCode", "Reason" }, null, null, null)
           }));
     }
@@ -106,6 +112,10 @@ namespace pb {
     ///结果
     /// </summary>
     [pbr::OriginalName("BATTLE_MSG_Result")] BattleMsgResult = 50,
+    /// <summary>
+    ///退出战斗
+    /// </summary>
+    [pbr::OriginalName("BATTLE_MSG_Exit")] BattleMsgExit = 60,
     /// <summary>
     ///意外错误
     /// </summary>
@@ -2128,6 +2138,358 @@ namespace pb {
   }
 
   /// <summary>
+  /// 退出战斗
+  /// </summary>
+  public sealed partial class C2S_BattleExitMsg : pb::IMessage<C2S_BattleExitMsg> {
+    private static readonly pb::MessageParser<C2S_BattleExitMsg> _parser = new pb::MessageParser<C2S_BattleExitMsg>(() => new C2S_BattleExitMsg());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<C2S_BattleExitMsg> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::pb.BattleReflection.Descriptor.MessageTypes[12]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public C2S_BattleExitMsg() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public C2S_BattleExitMsg(C2S_BattleExitMsg other) : this() {
+      roomId_ = other.roomId_;
+      playerId_ = other.playerId_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public C2S_BattleExitMsg Clone() {
+      return new C2S_BattleExitMsg(this);
+    }
+
+    /// <summary>Field number for the "roomId" field.</summary>
+    public const int RoomIdFieldNumber = 1;
+    private uint roomId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint RoomId {
+      get { return roomId_; }
+      set {
+        roomId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "playerId" field.</summary>
+    public const int PlayerIdFieldNumber = 2;
+    private uint playerId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint PlayerId {
+      get { return playerId_; }
+      set {
+        playerId_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as C2S_BattleExitMsg);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(C2S_BattleExitMsg other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (RoomId != other.RoomId) return false;
+      if (PlayerId != other.PlayerId) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (RoomId != 0) hash ^= RoomId.GetHashCode();
+      if (PlayerId != 0) hash ^= PlayerId.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (RoomId != 0) {
+        output.WriteRawTag(8);
+        output.WriteUInt32(RoomId);
+      }
+      if (PlayerId != 0) {
+        output.WriteRawTag(16);
+        output.WriteUInt32(PlayerId);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (RoomId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(RoomId);
+      }
+      if (PlayerId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(PlayerId);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(C2S_BattleExitMsg other) {
+      if (other == null) {
+        return;
+      }
+      if (other.RoomId != 0) {
+        RoomId = other.RoomId;
+      }
+      if (other.PlayerId != 0) {
+        PlayerId = other.PlayerId;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            RoomId = input.ReadUInt32();
+            break;
+          }
+          case 16: {
+            PlayerId = input.ReadUInt32();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  /// <summary>
+  /// 退出战斗
+  /// </summary>
+  public sealed partial class S2C_BattleExitMsg : pb::IMessage<S2C_BattleExitMsg> {
+    private static readonly pb::MessageParser<S2C_BattleExitMsg> _parser = new pb::MessageParser<S2C_BattleExitMsg>(() => new S2C_BattleExitMsg());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<S2C_BattleExitMsg> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::pb.BattleReflection.Descriptor.MessageTypes[13]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public S2C_BattleExitMsg() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public S2C_BattleExitMsg(S2C_BattleExitMsg other) : this() {
+      errorCode_ = other.errorCode_;
+      roomId_ = other.roomId_;
+      operatorPlayerId_ = other.operatorPlayerId_;
+      reason_ = other.reason_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public S2C_BattleExitMsg Clone() {
+      return new S2C_BattleExitMsg(this);
+    }
+
+    /// <summary>Field number for the "errorCode" field.</summary>
+    public const int ErrorCodeFieldNumber = 1;
+    private global::pb.BattleErrorCode errorCode_ = 0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::pb.BattleErrorCode ErrorCode {
+      get { return errorCode_; }
+      set {
+        errorCode_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "roomId" field.</summary>
+    public const int RoomIdFieldNumber = 2;
+    private uint roomId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint RoomId {
+      get { return roomId_; }
+      set {
+        roomId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "operatorPlayerId" field.</summary>
+    public const int OperatorPlayerIdFieldNumber = 3;
+    private uint operatorPlayerId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint OperatorPlayerId {
+      get { return operatorPlayerId_; }
+      set {
+        operatorPlayerId_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "reason" field.</summary>
+    public const int ReasonFieldNumber = 4;
+    private string reason_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Reason {
+      get { return reason_; }
+      set {
+        reason_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as S2C_BattleExitMsg);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(S2C_BattleExitMsg other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (ErrorCode != other.ErrorCode) return false;
+      if (RoomId != other.RoomId) return false;
+      if (OperatorPlayerId != other.OperatorPlayerId) return false;
+      if (Reason != other.Reason) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (ErrorCode != 0) hash ^= ErrorCode.GetHashCode();
+      if (RoomId != 0) hash ^= RoomId.GetHashCode();
+      if (OperatorPlayerId != 0) hash ^= OperatorPlayerId.GetHashCode();
+      if (Reason.Length != 0) hash ^= Reason.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (ErrorCode != 0) {
+        output.WriteRawTag(8);
+        output.WriteEnum((int) ErrorCode);
+      }
+      if (RoomId != 0) {
+        output.WriteRawTag(16);
+        output.WriteUInt32(RoomId);
+      }
+      if (OperatorPlayerId != 0) {
+        output.WriteRawTag(24);
+        output.WriteUInt32(OperatorPlayerId);
+      }
+      if (Reason.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(Reason);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (ErrorCode != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) ErrorCode);
+      }
+      if (RoomId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(RoomId);
+      }
+      if (OperatorPlayerId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(OperatorPlayerId);
+      }
+      if (Reason.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Reason);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(S2C_BattleExitMsg other) {
+      if (other == null) {
+        return;
+      }
+      if (other.ErrorCode != 0) {
+        ErrorCode = other.ErrorCode;
+      }
+      if (other.RoomId != 0) {
+        RoomId = other.RoomId;
+      }
+      if (other.OperatorPlayerId != 0) {
+        OperatorPlayerId = other.OperatorPlayerId;
+      }
+      if (other.Reason.Length != 0) {
+        Reason = other.Reason;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            errorCode_ = (global::pb.BattleErrorCode) input.ReadEnum();
+            break;
+          }
+          case 16: {
+            RoomId = input.ReadUInt32();
+            break;
+          }
+          case 24: {
+            OperatorPlayerId = input.ReadUInt32();
+            break;
+          }
+          case 34: {
+            Reason = input.ReadString();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  /// <summary>
   /// 异常
   /// </summary>
   public sealed partial class S2C_BattleExceptionMsg : pb::IMessage<S2C_BattleExceptionMsg> {
@@ -2137,7 +2499,7 @@ namespace pb {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::pb.BattleReflection.Descriptor.MessageTypes[12]; }
+      get { return global::pb.BattleReflection.Descriptor.MessageTypes[14]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

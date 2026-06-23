@@ -29,6 +29,12 @@ public class LogManager : AManager<LogManager>
         _logFilePath = (string)objs[0];
         _logBuffer = new StringBuilder();
         _isRunning = true;
+        var logDirectory = Path.GetDirectoryName(_logFilePath);
+        if (!string.IsNullOrEmpty(logDirectory))
+        {
+            Directory.CreateDirectory(logDirectory);
+        }
+
         File.WriteAllText(_logFilePath, "");
         _loggingThread = new Thread(new ThreadStart(WriteLogsToFile))
         {

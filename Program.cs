@@ -2,7 +2,7 @@
 GameManager.Instance.Initialize();
 MsgPoolManager.Instance.Initialize();
 NetworkManager.Instance.Initialize();
-LogManager.Instance.Initialize("E:\\GitProjects\\ERIUnitySimpleServer\\server_log.txt");
+LogManager.Instance.Initialize(Path.Combine(Environment.CurrentDirectory, "server_log.txt"));
 
 NetworkManager.Instance.TcpStart();
 

@@ -6,6 +6,10 @@ using Google.Protobuf;
 /// </summary>
 public class NetworkManager : AManager<NetworkManager>
 {
+    private const string BattleExitReasonPlayerExit = "PlayerExit";
+    private const string BattleExitReasonDisconnected = "Disconnected";
+    private const string BattleExitReasonServerError = "ServerError";
+
     /// <summary>
     /// KCP服务器对象
     /// </summary>
@@ -104,6 +108,12 @@ public class NetworkManager : AManager<NetworkManager>
                     LogManager.Instance.Log(LogType.Info,$"BattleMsgReady -> roomId:{c2SMessage.RoomId} playerId:{c2SMessage.PlayerId}");
 
                     var room = gameManager.GetRoom(c2SMessage.RoomId);
+                    if (room.IsBattleRunning || room.IsBattleExiting)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgReady ignored because battle is running or exiting -> roomId:{room.RoomId} playerId:{c2SMessage.PlayerId}");
+                        break;
+                    }
+
                     if (!room.Readies.Contains(c2SMessage.PlayerId)) room.Readies.Add(c2SMessage.PlayerId);
                     foreach (var playerId in room.Readies)
                     {
@@ -112,7 +122,7 @@ public class NetworkManager : AManager<NetworkManager>
                         SendBattleReadyMessage(gamer.BattleData.ConnectionId, pb.BattleErrorCode.BattleErrBattleOk, room.RoomId, room.Readies);
                     }
                     // 人数满了开启战斗
-                    if (room.Readies.Count != GameSetting.RoomMaxPlayerCount) break;
+                    if (room.Readies.Count != GameSetting.RoomMaxPlayerCount || room.IsBattleRunning || room.IsBattleExiting) break;
                     
                     OnServerBattleStart(room);
                     break;
@@ -128,14 +138,54 @@ public class NetworkManager : AManager<NetworkManager>
                 case (byte)pb.BattleMsgID.BattleMsgFrame:
                 {
                     var c2SMessage = pb.C2S_FrameMsg.Parser.ParseFrom(_memoryStream);
-                    
+
+                    if (!gameManager.TryGetGamerByConnectionId(connectionId, out var connectionGamer) || connectionGamer == null)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgFrame ignored because connection gamer not found -> connectionId:{connectionId} frame:{c2SMessage.Frame}");
+                        break;
+                    }
+
+                    if (!gameManager.TryGetRoom(connectionGamer.LogicData.RoomId, out var room) || room == null)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgFrame ignored because room not found -> connectionId:{connectionId} roomId:{connectionGamer.LogicData.RoomId} frame:{c2SMessage.Frame}");
+                        break;
+                    }
+
+                    if (!room.IsBattleRunning || room.IsBattleExiting)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgFrame ignored because battle is not running or exiting -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} frame:{c2SMessage.Frame}");
+                        break;
+                    }
+
+                    if (c2SMessage.Frame >= (uint)BattleSetting.MaxFrameCount)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgFrame ignored because frame is invalid -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} frame:{c2SMessage.Frame}");
+                        break;
+                    }
+
+                    if (c2SMessage.Datum.Length == 0)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgFrame ignored because datum is empty -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} frame:{c2SMessage.Frame}");
+                        break;
+                    }
+
                     // 直接访问字节数组并位运算提取战斗POS，byteString通过索引可以get，但没办法set
                     var dataFrame = c2SMessage.Datum[0];
                     var pos = (byte)(dataFrame & 0x01);
-                    
+
+                    if (pos >= GameSetting.RoomMaxPlayerCount)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgFrame ignored because pos is invalid -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} pos:{pos} frame:{c2SMessage.Frame}");
+                        break;
+                    }
+
                     var gamer = gameManager.GetGamerByPos(pos);
-                    var room = gameManager.GetRoom(gamer.LogicData.RoomId);
                     LogManager.Instance.Log(LogType.Info,$"BattleMsgFrame -> connectionId:{connectionId} gameId:{gamer.LogicData.ID} clientFrame:{c2SMessage.Frame} data:{dataFrame} serverFrame:{room.AuthoritativeFrame}");
+                    if (!room.IsBattleRunning || room.IsBattleExiting)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgFrame ignored before state write because battle is not running or exiting -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} frame:{c2SMessage.Frame}");
+                        break;
+                    }
                     
                     // 使用位运算更新房间的输入计数 [0 0] 2bit，索引分别代表玩家0玩家1，0:未操作 1:操作
                     room.InputCounts[c2SMessage.Frame] |= (byte)(1 << pos);
@@ -146,9 +196,44 @@ public class NetworkManager : AManager<NetworkManager>
                 {
                     var c2SMessage = pb.C2S_CheckMsg.Parser.ParseFrom(_memoryStream);
                     LogManager.Instance.Log(LogType.Info,$"BattleMsgCheck -> frame:{c2SMessage.Frame} pos:{c2SMessage.Pos} md5:{c2SMessage.Md5}");
-                    
+
+                    if (!gameManager.TryGetGamerByConnectionId(connectionId, out var connectionGamer) || connectionGamer == null)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgCheck ignored because connection gamer not found -> connectionId:{connectionId} frame:{c2SMessage.Frame}");
+                        break;
+                    }
+
+                    if (!gameManager.TryGetRoom(connectionGamer.LogicData.RoomId, out var room) || room == null)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgCheck ignored because room not found -> connectionId:{connectionId} roomId:{connectionGamer.LogicData.RoomId} frame:{c2SMessage.Frame}");
+                        break;
+                    }
+
+                    if (!room.IsBattleRunning || room.IsBattleExiting)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgCheck ignored because battle is not running or exiting -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} frame:{c2SMessage.Frame}");
+                        break;
+                    }
+
+                    if (c2SMessage.Frame < 0 || c2SMessage.Frame >= BattleSetting.MaxFrameCount)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgCheck ignored because frame is invalid -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} frame:{c2SMessage.Frame}");
+                        break;
+                    }
+
+                    if (c2SMessage.Pos < 0 || c2SMessage.Pos >= GameSetting.RoomMaxPlayerCount)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgCheck ignored because pos is invalid -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} pos:{c2SMessage.Pos} frame:{c2SMessage.Frame}");
+                        break;
+                    }
+
                     var gamer = gameManager.GetGamerByPos(c2SMessage.Pos);
-                    var room = gameManager.GetRoom(gamer.LogicData.RoomId);
+                    if (!room.IsBattleRunning || room.IsBattleExiting)
+                    {
+                        LogManager.Instance.Log(LogType.Warning,$"BattleMsgCheck ignored before state write because battle is not running or exiting -> roomId:{room.RoomId} playerId:{connectionGamer.LogicData.ID} frame:{c2SMessage.Frame}");
+                        break;
+                    }
+
                     if (!room.BattleCheckMap.ContainsKey(c2SMessage.Frame))
                         room.BattleCheckMap[c2SMessage.Frame] = new List<int>(GameSetting.RoomMaxPlayerCount);
                     room.BattleCheckMap[c2SMessage.Frame].Add(c2SMessage.Md5);
@@ -165,6 +250,14 @@ public class NetworkManager : AManager<NetworkManager>
                     }
                     break;
                 }
+                case (byte)pb.BattleMsgID.BattleMsgExit:
+                {
+                    var c2SMessage = pb.C2S_BattleExitMsg.Parser.ParseFrom(_memoryStream);
+                    LogManager.Instance.Log(LogType.Info,$"BattleMsgExit -> roomId:{c2SMessage.RoomId} playerId:{c2SMessage.PlayerId}");
+
+                    HandleBattleExitMessage(connectionId, c2SMessage);
+                    break;
+                }
             }
         }, _kcpServerTransport.Shutdown);
     }
@@ -176,8 +269,29 @@ public class NetworkManager : AManager<NetworkManager>
     private void OnKcpDisconnected(int connectionId)
     {
         LogManager.Instance.Log(LogType.Error,$"OnKcpDisconnected connectionId: {connectionId}");
-        var gamer = GameManager.Instance.GetGamerByConnectionId(connectionId);
-        var room = GameManager.Instance.GetRoom(gamer.LogicData.RoomId);
+        var gameManager = GameManager.Instance;
+        if (!gameManager.TryGetGamerByConnectionId(connectionId, out var gamer) || gamer == null)
+        {
+            LogManager.Instance.Log(LogType.Warning,$"OnKcpDisconnected gamer not found connectionId: {connectionId}");
+            return;
+        }
+
+        if (!gameManager.TryGetRoom(gamer.LogicData.RoomId, out var room) || room == null)
+        {
+            LogManager.Instance.Log(LogType.Warning,$"OnKcpDisconnected room not found roomId: {gamer.LogicData.RoomId} playerId:{gamer.LogicData.ID}");
+            return;
+        }
+
+        var shouldBroadcastExit =
+            room.Gamers.Contains(gamer.LogicData.ID) &&
+            (room.IsBattleRunning || room.IsBattleExiting || room.Readies.Count > 0);
+        if (shouldBroadcastExit)
+        {
+            LogManager.Instance.Log(LogType.Info,$"OnKcpDisconnected triggers room-wide battle exit -> roomId:{room.RoomId} playerId:{gamer.LogicData.ID} disconnectedConnectionId:{connectionId}");
+            BroadcastRoomBattleExitToAllGamers(room, pb.BattleErrorCode.BattleErrTimeout, gamer.LogicData.ID, BattleExitReasonDisconnected, connectionId);
+            return;
+        }
+
         room.Readies.Remove(gamer.LogicData.ID);
     }
 
@@ -311,6 +425,141 @@ public class NetworkManager : AManager<NetworkManager>
     }
 
     /// <summary>
+    /// 处理客户端主动退出战斗
+    /// </summary>
+    /// <param name="connectionId">客户端KCP连接ID</param>
+    /// <param name="message">客户端退出消息</param>
+    private void HandleBattleExitMessage(int connectionId, pb.C2S_BattleExitMsg message)
+    {
+        var gameManager = GameManager.Instance;
+        if (!gameManager.TryGetGamerByConnectionId(connectionId, out var connectionGamer) || connectionGamer == null)
+        {
+            SendBattleExitMessage(connectionId, pb.BattleErrorCode.BattleErrData, message.RoomId, message.PlayerId, "ConnectionPlayerNotFound");
+            return;
+        }
+
+        if (connectionGamer.LogicData.ID != message.PlayerId || connectionGamer.LogicData.RoomId != message.RoomId)
+        {
+            LogManager.Instance.Log(LogType.Warning,$"BattleMsgExit rejected because connection does not match player -> connectionId:{connectionId} connectionPlayerId:{connectionGamer.LogicData.ID} messagePlayerId:{message.PlayerId} connectionRoomId:{connectionGamer.LogicData.RoomId} messageRoomId:{message.RoomId}");
+            SendBattleExitMessage(connectionId, pb.BattleErrorCode.BattleErrData, message.RoomId, message.PlayerId, "ConnectionPlayerMismatch");
+            return;
+        }
+
+        if (!gameManager.TryGetRoom(message.RoomId, out var room) || room == null)
+        {
+            SendBattleExitMessage(connectionId, pb.BattleErrorCode.BattleErrData, message.RoomId, message.PlayerId, "RoomNotFound");
+            return;
+        }
+
+        if (!room.Gamers.Contains(message.PlayerId))
+        {
+            SendBattleExitMessage(connectionId, pb.BattleErrorCode.BattleErrData, message.RoomId, message.PlayerId, "PlayerNotInRoom");
+            return;
+        }
+
+        BroadcastRoomBattleExitToAllGamers(room, pb.BattleErrorCode.BattleErrBattleOk, message.PlayerId, BattleExitReasonPlayerExit);
+    }
+
+    /// <summary>
+    /// 按房间全员语义广播战斗退出，发送阶段允许跳过不可达连接
+    /// </summary>
+    /// <param name="room">房间对象</param>
+    /// <param name="errorCode">错误码</param>
+    /// <param name="operatorPlayerId">触发退出的玩家ID</param>
+    /// <param name="reason">退出原因</param>
+    /// <param name="excludedConnectionId">需要跳过的KCP连接ID</param>
+    private void BroadcastRoomBattleExitToAllGamers(RoomInfo room, pb.BattleErrorCode errorCode, uint operatorPlayerId, string reason, int? excludedConnectionId = null)
+    {
+        if (!TryBeginBattleExit(room))
+            return;
+
+        var gameManager = GameManager.Instance;
+        var playerIds = room.Gamers.ToArray();
+        var shouldResetImmediately = room.BattleTask == null;
+        LogManager.Instance.Log(LogType.Info,$"BroadcastRoomBattleExitToAllGamers -> roomId:{room.RoomId} operatorPlayerId:{operatorPlayerId} reason:{reason} gamerCount:{playerIds.Length} skippedConnectionId:{(excludedConnectionId.HasValue ? excludedConnectionId.Value.ToString() : "None")}");
+
+        try
+        {
+            try
+            {
+                if (!room.BattleCancellationTokenSource.IsCancellationRequested)
+                    room.BattleCancellationTokenSource.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+
+            foreach (var playerId in playerIds)
+            {
+                var gamer = gameManager.GetGamerById(playerId);
+                var targetConnectionId = gamer.BattleData.ConnectionId;
+                if (excludedConnectionId.HasValue && targetConnectionId == excludedConnectionId.Value)
+                {
+                    LogManager.Instance.Log(LogType.Info,$"BroadcastRoomBattleExitToAllGamers skip unreachable connection -> roomId:{room.RoomId} playerId:{playerId} connectionId:{targetConnectionId}");
+                    continue;
+                }
+
+                SendBattleExitMessage(targetConnectionId, errorCode, room.RoomId, operatorPlayerId, reason);
+            }
+        }
+        finally
+        {
+            if (shouldResetImmediately)
+                gameManager.ResetRoomBattleState(room.RoomId);
+        }
+    }
+
+    /// <summary>
+    /// 尝试进入战斗退出流程，防止重复广播
+    /// </summary>
+    /// <param name="room">房间对象</param>
+    /// <returns>是否可以开始退出流程</returns>
+    private bool TryBeginBattleExit(RoomInfo room)
+    {
+        lock (room)
+        {
+            if (room.IsBattleExiting || (!room.IsBattleRunning && room.Gamers.Count == 0))
+                return false;
+
+            room.IsBattleExiting = true;
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// 检查战斗退出请求，避免帧流程中途继续写状态或发送数据
+    /// </summary>
+    /// <param name="room">房间对象</param>
+    /// <param name="cancellationToken">战斗取消令牌</param>
+    private static void ThrowIfBattleExitRequested(RoomInfo room, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (room.IsBattleExiting)
+            throw new OperationCanceledException(cancellationToken);
+    }
+
+    /// <summary>
+    /// 发送战斗退出消息
+    /// </summary>
+    /// <param name="connectionId">客户端KCP连接ID</param>
+    /// <param name="errorCode">错误码</param>
+    /// <param name="roomId">房间ID</param>
+    /// <param name="operatorPlayerId">触发退出的玩家ID</param>
+    /// <param name="reason">退出原因</param>
+    private void SendBattleExitMessage(int connectionId, pb.BattleErrorCode errorCode, uint roomId, uint operatorPlayerId, string reason)
+    {
+        if (!KcpActive)
+            return;
+
+        var s2CMessage = MsgPoolManager.Instance.Require<pb.S2C_BattleExitMsg>();
+        s2CMessage.ErrorCode = errorCode;
+        s2CMessage.RoomId = roomId;
+        s2CMessage.OperatorPlayerId = operatorPlayerId;
+        s2CMessage.Reason = reason;
+        _kcpServerTransport.SendMessage(pb.BattleMsgID.BattleMsgExit, s2CMessage, connectionId);
+    }
+
+    /// <summary>
     /// 收到客户端TCP消息时的回调处理函数
     /// </summary>
     /// <param name="data">字节数据数组</param>
@@ -441,46 +690,101 @@ public class NetworkManager : AManager<NetworkManager>
     private void OnServerBattleStart(RoomInfo room)
     {
         var gameManager = GameManager.Instance;
-        room.BattleStopwatch.Start();
+        if (room.IsBattleRunning)
+            return;
+
+        room.IsBattleRunning = true;
+        room.IsBattleExiting = false;
+        try
+        {
+            if (room.BattleCancellationTokenSource.IsCancellationRequested)
+            {
+                room.BattleCancellationTokenSource.Dispose();
+                room.BattleCancellationTokenSource = new CancellationTokenSource();
+            }
+        }
+        catch (ObjectDisposedException)
+        {
+            room.BattleCancellationTokenSource = new CancellationTokenSource();
+        }
+
+        var cancellationToken = room.BattleCancellationTokenSource.Token;
+        room.BattleStopwatch.Restart();
+        room.BattleTask = Task.CompletedTask;
         for (var i = 0; i < room.Gamers.Count; i++)
         {
             var gamer = gameManager.GetGamerById(room.Gamers[i]);
             SendBattleStartMessage(gamer.BattleData.ConnectionId, pb.BattleErrorCode.BattleErrBattleOk, (uint)room.AuthoritativeFrame, (ulong)room.BattleStopwatch.ElapsedMilliseconds);
         }
         var byteArray = new byte[room.Gamers.Count];
-        Task.Run(async () =>{
-            while (true) {
-                try
-                {
-                    if (room.AuthoritativeFrame >= 0)
+        room.BattleTask = Task.Run(async () =>{
+            try
+            {
+                while (!cancellationToken.IsCancellationRequested) {
+                    try
                     {
-                        // 第0帧，强行将玩家标记为已操作，必要！目的是为了让客户端那边有第0帧的操作，这样子玩家可能因为前面几帧还卡着也能当作没动来看待
-                        if (room.AuthoritativeFrame == 0) room.InputCounts[(uint)room.AuthoritativeFrame] = 0x3;
-                        // 赋值操作数据，默认为0
-                        for (var i = 0; i < room.Gamers.Count; i++)
+                        ThrowIfBattleExitRequested(room, cancellationToken);
+                        if (room.AuthoritativeFrame >= 0)
                         {
-                            var gamer = gameManager.GetGamerById(room.Gamers[i]);
-                            byteArray[gamer.BattleData.Pos] = (byte)((gamer.BattleData.Frames[room.AuthoritativeFrame] & ~0x01) | (byte)gamer.BattleData.Pos);
+                            if (room.AuthoritativeFrame >= BattleSetting.MaxFrameCount)
+                                throw new Exception($"AuthoritativeFrame: {room.AuthoritativeFrame} >= MaxFrameCount: {BattleSetting.MaxFrameCount}");
+
+                            // 第0帧，强行将玩家标记为已操作，必要！目的是为了让客户端那边有第0帧的操作，这样子玩家可能因为前面几帧还卡着也能当作没动来看待
+                            ThrowIfBattleExitRequested(room, cancellationToken);
+                            if (room.AuthoritativeFrame == 0)
+                            {
+                                room.InputCounts[(uint)room.AuthoritativeFrame] = 0x3;
+                            }
+
+                            // 赋值操作数据，默认为0
+                            ThrowIfBattleExitRequested(room, cancellationToken);
+                            for (var i = 0; i < room.Gamers.Count; i++)
+                            {
+                                ThrowIfBattleExitRequested(room, cancellationToken);
+                                var gamer = gameManager.GetGamerById(room.Gamers[i]);
+                                byteArray[gamer.BattleData.Pos] = (byte)((gamer.BattleData.Frames[room.AuthoritativeFrame] & ~0x01) | (byte)gamer.BattleData.Pos);
+                            }
+                            // 将所有玩家的操作数据，广播给每一个准备了的客户端
+                            ThrowIfBattleExitRequested(room, cancellationToken);
+                            for (var i = 0; i < room.Gamers.Count; i++)
+                            {
+                                ThrowIfBattleExitRequested(room, cancellationToken);
+                                var gamer = gameManager.GetGamerById(room.Gamers[i]);
+                                if (!room.Readies.Contains(gamer.LogicData.ID))
+                                    continue;
+                                ThrowIfBattleExitRequested(room, cancellationToken);
+                                SendBattleFrameMessage(gamer.BattleData.ConnectionId, pb.BattleErrorCode.BattleErrBattleOk, (uint)room.AuthoritativeFrame, (uint)room.Gamers.Count, room.InputCounts[(uint)room.AuthoritativeFrame], byteArray);
+                            }
                         }
-                        // 将所有玩家的操作数据，广播给每一个准备了的客户端
-                        for (var i = 0; i < room.Gamers.Count; i++)
-                        {
-                            var gamer = gameManager.GetGamerById(room.Gamers[i]);
-                            if (!room.Readies.Contains(gamer.LogicData.ID)) 
-                                continue;
-                            SendBattleFrameMessage(gamer.BattleData.ConnectionId, pb.BattleErrorCode.BattleErrBattleOk, (uint)room.AuthoritativeFrame, (uint)room.Gamers.Count, room.InputCounts[(uint)room.AuthoritativeFrame], byteArray);
-                        }
+                        ThrowIfBattleExitRequested(room, cancellationToken);
+                        room.AuthoritativeFrame ++;
+                        // 当达到最大帧时，停止轮询
+                        if (room.AuthoritativeFrame >= BattleSetting.MaxFrameCount)
+                            throw new Exception($"AuthoritativeFrame: {room.AuthoritativeFrame} >= MaxFrameCount: {BattleSetting.MaxFrameCount}");
                     }
-                    room.AuthoritativeFrame ++;
-                    // 当达到最大帧时，停止轮询
-                    if (room.AuthoritativeFrame >= BattleSetting.MaxFrameCount)
-                        throw new Exception($"AuthoritativeFrame: {room.AuthoritativeFrame} >= MaxFrameCount: {BattleSetting.MaxFrameCount}");
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogManager.Instance.Log(LogType.Exception, $"OnServerBattleStart BattleServerUpdate Exception ->\n{ex.Message}\n{ex.StackTrace}");
+                        BroadcastRoomBattleExitToAllGamers(room, pb.BattleErrorCode.BattleErrData, 0, BattleExitReasonServerError);
+                        break;
+                    }
+                    try
+                    {
+                        await Task.Delay(BattleSetting.BattleInterval, cancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    LogManager.Instance.Log(LogType.Exception, $"OnServerBattleStart BattleServerUpdate Exception ->\n{ex.Message}\n{ex.StackTrace}");
-                }
-                await Task.Delay(BattleSetting.BattleInterval);
+            }
+            finally
+            {
+                gameManager.ResetRoomBattleState(room.RoomId);
             }
         });
     }

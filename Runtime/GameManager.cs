@@ -118,6 +118,17 @@ public class GameManager : AManager<GameManager>
     }
 
     /// <summary>
+    /// 尝试通过KCP连接ID获取玩家对象
+    /// </summary>
+    /// <param name="connectionId">KCP连接ID</param>
+    /// <param name="gamer">玩家对象</param>
+    /// <returns>是否找到玩家对象</returns>
+    public bool TryGetGamerByConnectionId(int connectionId, out GamerInfo? gamer)
+    {
+        return _gamerInfoByConnectionId.TryGetValue(connectionId, out gamer);
+    }
+
+    /// <summary>
     /// 创建房间对象
     /// </summary>
     /// <returns>房间对象</returns>
@@ -136,6 +147,31 @@ public class GameManager : AManager<GameManager>
     public RoomInfo GetRoom(uint roomId)
     {
         return _roomInfoDic[roomId];
+    }
+
+    /// <summary>
+    /// 尝试获取房间对象
+    /// </summary>
+    /// <param name="roomId">房间ID</param>
+    /// <param name="room">房间对象</param>
+    /// <returns>是否找到房间对象</returns>
+    public bool TryGetRoom(uint roomId, out RoomInfo? room)
+    {
+        return _roomInfoDic.TryGetValue(roomId, out room);
+    }
+
+    /// <summary>
+    /// 重置房间战斗状态
+    /// </summary>
+    /// <param name="roomId">房间ID</param>
+    /// <returns>是否找到并重置房间</returns>
+    public bool ResetRoomBattleState(uint roomId)
+    {
+        if (!_roomInfoDic.TryGetValue(roomId, out var room))
+            return false;
+
+        room.ResetBattleState();
+        return true;
     }
     
 }

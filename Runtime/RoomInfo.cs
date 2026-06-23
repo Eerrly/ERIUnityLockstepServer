@@ -31,6 +31,22 @@ public class RoomInfo
     /// 计时器
     /// </summary>
     public Stopwatch BattleStopwatch;
+    /// <summary>
+    /// 战斗是否正在运行
+    /// </summary>
+    public bool IsBattleRunning;
+    /// <summary>
+    /// 战斗是否正在退出流程中
+    /// </summary>
+    public bool IsBattleExiting;
+    /// <summary>
+    /// 战斗轮询取消源
+    /// </summary>
+    public CancellationTokenSource BattleCancellationTokenSource;
+    /// <summary>
+    /// 当前战斗轮询任务
+    /// </summary>
+    public Task? BattleTask;
 
     /// <summary>
     /// 某一帧玩家的MD5校验值数组
@@ -45,5 +61,33 @@ public class RoomInfo
         InputCounts = new byte[BattleSetting.MaxFrameCount];
         BattleCheckMap = new Dictionary<int, List<int>>();
         BattleStopwatch = new Stopwatch();
+        BattleCancellationTokenSource = new CancellationTokenSource();
+    }
+
+    /// <summary>
+    /// 重置单局战斗状态，保留房间玩家列表用于后续重新准备
+    /// </summary>
+    public void ResetBattleState()
+    {
+        try
+        {
+            if (!BattleCancellationTokenSource.IsCancellationRequested)
+                BattleCancellationTokenSource.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+
+        BattleCancellationTokenSource.Dispose();
+
+        AuthoritativeFrame = -1;
+        Readies.Clear();
+        Array.Clear(InputCounts, 0, InputCounts.Length);
+        BattleCheckMap.Clear();
+        BattleStopwatch.Reset();
+        IsBattleRunning = false;
+        IsBattleExiting = false;
+        BattleCancellationTokenSource = new CancellationTokenSource();
+        BattleTask = null;
     }
 }
